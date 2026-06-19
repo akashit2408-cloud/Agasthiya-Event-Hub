@@ -4,16 +4,16 @@ import { ChevronLeft, Calendar } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { demoEvents, formatEventDate } from "@/lib/demo-data";
+import { formatEventDate } from "@/lib/demo-data";
 
 export default function CalendarPage() {
   const router = useRouter();
-  const [events, setEvents] = useState<any[]>(demoEvents);
+  const [events, setEvents] = useState<any[]>([]);
 
   useEffect(() => {
     async function fetchEvents() {
       const { data, error } = await supabase.from("event_list").select("*").order("event_date").order("event_time");
-      if (!error && data && data.length > 0) setEvents(data);
+      if (!error && data) setEvents(data);
     }
     fetchEvents().catch((err) => console.error("Error fetching calendar:", err));
   }, []);

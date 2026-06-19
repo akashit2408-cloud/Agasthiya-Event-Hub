@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
-import { demoRentals, formatShortDate } from "@/lib/demo-data";
+import { formatShortDate } from "@/lib/demo-data";
 
 const tabs = ["All", "Available", "Rented", "Maintenance"];
 
@@ -22,14 +22,10 @@ export default function RentalsPage() {
         const { data, error } = await supabase.from('rentals').select('*').order('category').order('name');
         if (error) throw error;
         
-        if (data && data.length > 0) {
-          setRentals(data);
-        } else {
-          setRentals(demoRentals);
-        }
+        setRentals(data || []);
       } catch (err) {
-        console.error("Error fetching from Supabase (falling back to demo data):", err);
-        setRentals(demoRentals);
+        console.error("Error fetching from Supabase:", err);
+        setRentals([]);
       } finally {
         setLoading(false);
       }

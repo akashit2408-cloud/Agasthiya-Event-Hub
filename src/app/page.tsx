@@ -4,7 +4,7 @@ import { Bell, Calendar, Users, Truck, Layers, Plus } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { demoEvents, formatEventDate } from "@/lib/demo-data";
+import { formatEventDate } from "@/lib/demo-data";
 
 export default function Dashboard() {
   const [summary, setSummary] = useState<any>({
@@ -16,7 +16,7 @@ export default function Dashboard() {
     available_vehicles: 0,
     total_vehicles: 0,
   });
-  const [events, setEvents] = useState<any[]>(demoEvents);
+  const [events, setEvents] = useState<any[]>([]);
 
   useEffect(() => {
     async function fetchDashboard() {

@@ -5,13 +5,13 @@ import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
-import { demoEvents, formatEventDate } from "@/lib/demo-data";
+import { formatEventDate } from "@/lib/demo-data";
 
 const tabs = ["All", "Today", "Upcoming", "Completed"];
 
 export default function EventsPage() {
   const [activeTab, setActiveTab] = useState("All");
-  const [events, setEvents] = useState<any[]>(demoEvents);
+  const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -19,10 +19,10 @@ export default function EventsPage() {
       try {
         const { data, error } = await supabase.from("event_list").select("*").order("event_date").order("event_time");
         if (error) throw error;
-        setEvents(data && data.length > 0 ? data : demoEvents);
+        setEvents(data || []);
       } catch (err) {
         console.error("Error fetching events:", err);
-        setEvents(demoEvents);
+        setEvents([]);
       } finally {
         setLoading(false);
       }

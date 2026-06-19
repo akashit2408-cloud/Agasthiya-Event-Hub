@@ -5,11 +5,10 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
-import { demoVehicles } from "@/lib/demo-data";
 
 export default function VehiclesPage() {
   const router = useRouter();
-  const [vehicles, setVehicles] = useState<any[]>(demoVehicles);
+  const [vehicles, setVehicles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -17,10 +16,10 @@ export default function VehiclesPage() {
       try {
         const { data, error } = await supabase.from("vehicles").select("*").order("name");
         if (error) throw error;
-        setVehicles(data && data.length > 0 ? data : demoVehicles);
+        setVehicles(data || []);
       } catch (err) {
         console.error("Error fetching vehicles:", err);
-        setVehicles(demoVehicles);
+        setVehicles([]);
       } finally {
         setLoading(false);
       }

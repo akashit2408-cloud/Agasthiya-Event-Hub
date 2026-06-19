@@ -5,13 +5,12 @@ import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
-import { demoStaff } from "@/lib/demo-data";
 
 const tabs = ["All (20)", "Available (12)", "Assigned (8)", "Leave (0)"];
 
 export default function StaffPage() {
   const [activeTab, setActiveTab] = useState("All (20)");
-  const [staff, setStaff] = useState<any[]>(demoStaff);
+  const [staff, setStaff] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -19,10 +18,10 @@ export default function StaffPage() {
       try {
         const { data, error } = await supabase.from("staff").select("*").order("role").order("name");
         if (error) throw error;
-        setStaff(data && data.length > 0 ? data : demoStaff);
+        setStaff(data || []);
       } catch (err) {
         console.error("Error fetching staff:", err);
-        setStaff(demoStaff);
+        setStaff([]);
       } finally {
         setLoading(false);
       }

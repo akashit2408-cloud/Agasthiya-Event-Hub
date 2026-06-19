@@ -5,18 +5,18 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
-import { demoEvents, demoStaff, formatEventDate } from "@/lib/demo-data";
+import { formatEventDate } from "@/lib/demo-data";
 
 export default function EventDetailsPage() {
   const router = useRouter();
   const params = useParams<{ id: string }>();
-  const [event, setEvent] = useState<any>(demoEvents[0]);
-  const [staff, setStaff] = useState<any[]>(demoStaff.slice(0, 5));
+  const [event, setEvent] = useState<any>(null);
+  const [staff, setStaff] = useState<any[]>([]);
 
   useEffect(() => {
     async function fetchEvent() {
       const eventId = params.id;
-      if (!eventId || eventId.startsWith("demo-")) return;
+      if (!eventId) return;
 
       const { data: eventData, error } = await supabase.from("event_list").select("*").eq("id", eventId).single();
       if (!error && eventData) setEvent(eventData);
@@ -26,6 +26,14 @@ export default function EventDetailsPage() {
     }
     fetchEvent().catch((err) => console.error("Error fetching event detail:", err));
   }, [params.id]);
+
+  if (!event) {
+    return (
+      <div className="flex flex-col min-h-screen bg-white items-center justify-center">
+        <p className="text-sm font-medium text-gray-500 animate-pulse">Loading event...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-white pb-10">

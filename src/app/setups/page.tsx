@@ -4,11 +4,10 @@ import { Search, Filter, Layers, CheckCircle2, Clock, AlertCircle } from "lucide
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
-import { demoSetups } from "@/lib/demo-data";
 
 export default function SetupsPage() {
   const [activeTab, setActiveTab] = useState("All");
-  const [setups, setSetups] = useState<any[]>(demoSetups);
+  const [setups, setSetups] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -16,10 +15,10 @@ export default function SetupsPage() {
       try {
         const { data, error } = await supabase.from("setups").select("*").order("name");
         if (error) throw error;
-        setSetups(data && data.length > 0 ? data : demoSetups);
+        setSetups(data || []);
       } catch (err) {
         console.error("Error fetching setups:", err);
-        setSetups(demoSetups);
+        setSetups([]);
       } finally {
         setLoading(false);
       }
