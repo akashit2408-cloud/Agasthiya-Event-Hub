@@ -103,12 +103,15 @@ export default function CreateStaffPage() {
     try {
       const { error } = await supabase.from('staff').insert([{
         name: formData.name,
-        phone: formData.phone,
+        mobile: formData.phone,
         role: formData.role,
         status: formData.status
       }]);
       
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase Error Details:", error);
+        throw error;
+      }
       
       router.push('/staff');
     } catch (error) {

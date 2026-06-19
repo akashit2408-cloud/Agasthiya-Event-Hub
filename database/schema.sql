@@ -268,7 +268,7 @@ end $$;
 do $$ declare
   table_name text;
 begin
-  foreach table_name in array array['customers', 'events', 'event_staff', 'rentals']
+  foreach table_name in array array['customers', 'events', 'event_staff', 'rentals', 'staff']
   loop
     execute format('drop policy if exists anon_insert_dev on %I', table_name);
     execute format('create policy anon_insert_dev on %I for insert to anon with check (true)', table_name);
