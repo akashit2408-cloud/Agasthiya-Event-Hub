@@ -94,7 +94,7 @@ export default function EventDetailsPage() {
               <div className="flex -space-x-3">
                 {staff.map((member, index) => (
                   <div key={member.id || index} className="w-10 h-10 rounded-full border-4 border-white bg-gray-200 overflow-hidden shadow-sm">
-                    <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${member.name}`} alt={member.name} />
+                    <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=random&font-size=0.35&rounded=true&bold=true`} alt={member.name} className="w-full h-full object-cover" />
                   </div>
                 ))}
               </div>

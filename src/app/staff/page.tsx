@@ -100,7 +100,7 @@ function StaffCard({ name, role, status }: any) {
     <div className="bg-card p-3 rounded-[1.5rem] border border-gray-50 flex items-center justify-between">
       <div className="flex items-center gap-3">
         <div className="w-12 h-12 rounded-2xl bg-gray-100 overflow-hidden shadow-sm border border-white">
-           <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`} alt={name} />
+           <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&font-size=0.35&rounded=true&bold=true`} alt={name} className="w-full h-full object-cover" />
         </div>
         <div>
           <h4 className="font-bold text-gray-900 text-sm">{name}</h4>
