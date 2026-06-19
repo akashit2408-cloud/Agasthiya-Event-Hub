@@ -37,21 +37,21 @@ export default function MorePage() {
 
       <div className="p-5 space-y-6">
         <Section label="Management">
-          <MenuItem icon={<Truck className="text-orange-500" />} label="Vehicles" />
-          <MenuItem icon={<Layers className="text-purple-500" />} label="Rentals" />
-          <MenuItem icon={<Calendar className="text-blue-500" />} label="Calendar View" />
-          <MenuItem icon={<CreditCard className="text-green-500" />} label="Payments & Revenue" />
+          <MenuItem icon={<Truck className="text-orange-500" />} label="Vehicles" href="/setups" />
+          <MenuItem icon={<Layers className="text-purple-500" />} label="Rentals" href="/setups" />
+          <MenuItem icon={<Calendar className="text-blue-500" />} label="Calendar View" href="/events" />
+          <MenuItem icon={<CreditCard className="text-green-500" />} label="Payments & Revenue" href="/" />
         </Section>
 
         <Section label="Communication">
-          <MenuItem icon={<MessageSquare className="text-green-600" />} label="WhatsApp Templates" />
-          <MenuItem icon={<FileText className="text-gray-500" />} label="Reports" />
+          <MenuItem icon={<MessageSquare className="text-green-600" />} label="WhatsApp Templates" href="/" />
+          <MenuItem icon={<FileText className="text-gray-500" />} label="Reports" href="/" />
         </Section>
 
         <Section label="System">
-          <MenuItem icon={<Shield className="text-blue-600" />} label="Role Management" />
-          <MenuItem icon={<Database className="text-purple-600" />} label="Backup & Restore" />
-          <MenuItem icon={<Settings className="text-gray-400" />} label="Settings" />
+          <MenuItem icon={<Shield className="text-blue-600" />} label="Role Management" href="/staff" />
+          <MenuItem icon={<Database className="text-purple-600" />} label="Backup & Restore" href="/" />
+          <MenuItem icon={<Settings className="text-gray-400" />} label="Settings" href="/" />
         </Section>
 
         <button 
@@ -77,9 +77,9 @@ function Section({ label, children }: any) {
   );
 }
 
-function MenuItem({ icon, label }: any) {
+function MenuItem({ icon, label, href }: any) {
   return (
-    <button className="w-full p-4 flex items-center justify-between border-b border-gray-50 last:border-none active:bg-gray-50 transition-colors">
+    <Link href={href || "#"} className="w-full p-4 flex items-center justify-between border-b border-gray-50 last:border-none active:bg-gray-50 transition-colors">
        <div className="flex items-center gap-4">
           <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center border border-gray-50">
              {icon}
@@ -87,6 +87,6 @@ function MenuItem({ icon, label }: any) {
           <span className="text-sm font-bold text-gray-700">{label}</span>
        </div>
        <ChevronRight size={18} className="text-gray-300" />
-    </button>
+    </Link>
   );
 }
