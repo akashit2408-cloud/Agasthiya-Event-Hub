@@ -6,17 +6,9 @@ import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import { demoRentals, formatShortDate } from "@/lib/demo-data";
 
 const tabs = ["All", "Available", "Rented", "Maintenance"];
-
-const demoRentals = [
-  { name: "JBL SRX828SP Subwoofer", category: "Audio", status: "Available", condition: "Good" },
-  { name: "Pioneer CDJ-3000", category: "DJ Gear", status: "Rented", condition: "Excellent", dueDate: "21 Jun" },
-  { name: "Sharpy Beam Moving Head", category: "Lighting", status: "Maintenance", condition: "Needs Repair" },
-  { name: "Yamaha QL5 Digital Console", category: "Audio", status: "Available", condition: "Excellent" },
-  { name: "Smoke Machine 1500W", category: "Effects", status: "Rented", condition: "Good", dueDate: "20 Jun" },
-  { name: "Truss 2m Aluminum", category: "Staging", status: "Available", condition: "Fair" },
-];
 
 export default function RentalsPage() {
   const router = useRouter();
@@ -27,7 +19,7 @@ export default function RentalsPage() {
   useEffect(() => {
     async function fetchRentals() {
       try {
-        const { data, error } = await supabase.from('rentals').select('*');
+        const { data, error } = await supabase.from('rentals').select('*').order('category').order('name');
         if (error) throw error;
         
         if (data && data.length > 0) {
@@ -111,7 +103,7 @@ export default function RentalsPage() {
   );
 }
 
-function RentalCard({ name, category, status, condition, dueDate }: any) {
+function RentalCard({ name, category, status, condition, dueDate, due_date }: any) {
   const statusStyles: any = {
     Available: "bg-green-100 text-success",
     Rented: "bg-blue-100 text-primary",
@@ -140,10 +132,10 @@ function RentalCard({ name, category, status, condition, dueDate }: any) {
             <CheckCircle2 size={12} className="text-gray-400" />
             <span className="text-[10px] font-medium text-gray-500">Condition: <span className="font-bold text-gray-700">{condition}</span></span>
          </div>
-         {status === 'Rented' && dueDate && (
+         {status === 'Rented' && (dueDate || due_date) && (
             <div className="flex items-center gap-1.5">
                <Clock size={12} className="text-gray-400" />
-               <span className="text-[10px] font-bold text-primary">Due: {dueDate}</span>
+               <span className="text-[10px] font-bold text-primary">Due: {dueDate || formatShortDate(due_date)}</span>
             </div>
          )}
          {status === 'Maintenance' && (

@@ -1,10 +1,32 @@
 "use client";
 
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Truck } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
+import { supabase } from "@/lib/supabase";
+import { demoVehicles } from "@/lib/demo-data";
 
 export default function VehiclesPage() {
   const router = useRouter();
+  const [vehicles, setVehicles] = useState<any[]>(demoVehicles);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchVehicles() {
+      try {
+        const { data, error } = await supabase.from("vehicles").select("*").order("name");
+        if (error) throw error;
+        setVehicles(data && data.length > 0 ? data : demoVehicles);
+      } catch (err) {
+        console.error("Error fetching vehicles:", err);
+        setVehicles(demoVehicles);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchVehicles();
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
@@ -15,9 +37,39 @@ export default function VehiclesPage() {
         <h1 className="text-lg font-bold text-gray-900">Vehicles</h1>
         <div className="w-10"></div>
       </div>
-      <div className="p-5 flex flex-col items-center justify-center flex-1">
-        <p className="text-gray-500 font-medium">Vehicles management coming soon.</p>
+      <div className="p-5 space-y-4">
+        {loading ? (
+          <p className="py-10 text-center text-sm font-medium text-gray-500">Loading vehicles...</p>
+        ) : (
+          vehicles.map((vehicle, index) => <VehicleCard key={vehicle.id || index} {...vehicle} />)
+        )}
       </div>
+    </div>
+  );
+}
+
+function VehicleCard({ name, registration_number, status }: any) {
+  const statusStyles: any = {
+    Available: "bg-green-100 text-success",
+    Booked: "bg-red-100 text-danger",
+    Rented: "bg-blue-100 text-primary",
+    Maintenance: "bg-orange-100 text-warning",
+  };
+
+  return (
+    <div className="bg-card p-4 rounded-3xl border border-gray-50 flex items-center justify-between">
+      <div className="flex items-center gap-4">
+        <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm border border-gray-50">
+          <Truck className="text-primary" size={24} />
+        </div>
+        <div>
+          <h4 className="font-bold text-gray-900 text-sm">{name}</h4>
+          <p className="text-[11px] text-gray-500 font-bold uppercase mt-0.5">{registration_number || "No registration"}</p>
+        </div>
+      </div>
+      <span className={cn("px-2.5 py-1 text-[9px] font-black rounded-full uppercase", statusStyles[status] || "bg-gray-100 text-gray-500")}>
+        {status}
+      </span>
     </div>
   );
 }

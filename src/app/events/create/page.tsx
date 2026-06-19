@@ -1,177 +1,192 @@
 "use client";
 
-import { ChevronLeft, Calendar, MapPin, Phone, User, Link as LinkIcon, Clock, ChevronDown } from "lucide-react";
+import { ChevronLeft, Calendar, MapPin, Phone, User, Link as LinkIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 
 export default function CreateEventPage() {
   const router = useRouter();
-  const [step, setStep] = useState(1);
+  const [setups, setSetups] = useState<any[]>([]);
+  const [vehicles, setVehicles] = useState<any[]>([]);
+  const [staff, setStaff] = useState<any[]>([]);
+  const [selectedStaff, setSelectedStaff] = useState<string[]>([]);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    async function fetchResources() {
+      const [{ data: setupRows }, { data: vehicleRows }, { data: staffRows }] = await Promise.all([
+        supabase.from("setups").select("*").order("name"),
+        supabase.from("vehicles").select("*").order("name"),
+        supabase.from("staff").select("*").order("role").order("name"),
+      ]);
+      setSetups(setupRows || []);
+      setVehicles(vehicleRows || []);
+      setStaff(staffRows || []);
+    }
+    fetchResources().catch((err) => console.error("Error loading event resources:", err));
+  }, []);
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSaving(true);
+
+    const form = new FormData(event.currentTarget);
+    const mobile = String(form.get("mobile") || "");
+    const customerName = String(form.get("customer_name") || "");
+
+    let customerId: string | null = null;
+    const { data: existingCustomer } = await supabase.from("customers").select("id").eq("mobile", mobile).maybeSingle();
+
+    if (existingCustomer) {
+      customerId = existingCustomer.id;
+    } else {
+      const { data: newCustomer, error: customerError } = await supabase
+        .from("customers")
+        .insert({
+          name: customerName,
+          mobile,
+          address: String(form.get("location") || ""),
+        })
+        .select("id")
+        .single();
+
+      if (customerError) {
+        setSaving(false);
+        alert(customerError.message);
+        return;
+      }
+      customerId = newCustomer.id;
+    }
+
+    const { data: newEvent, error: eventError } = await supabase
+      .from("events")
+      .insert({
+        customer_id: customerId,
+        title: String(form.get("title") || `${form.get("event_type")} Event`),
+        event_type: String(form.get("event_type") || "Event"),
+        location: String(form.get("location") || ""),
+        map_link: String(form.get("map_link") || "") || null,
+        event_date: String(form.get("event_date") || ""),
+        event_time: String(form.get("event_time") || "17:00"),
+        setup_id: String(form.get("setup_id") || "") || null,
+        vehicle_id: String(form.get("vehicle_id") || "") || null,
+        total_amount: Number(form.get("total_amount") || 0),
+        status: "Planned",
+      })
+      .select("id")
+      .single();
+
+    if (eventError) {
+      setSaving(false);
+      alert(eventError.message);
+      return;
+    }
+
+    if (selectedStaff.length > 0) {
+      await supabase.from("event_staff").insert(selectedStaff.map((staffId) => ({ event_id: newEvent.id, staff_id: staffId })));
+    }
+
+    setSaving(false);
+    router.push("/events");
+  }
+
+  function toggleStaff(staffId: string) {
+    setSelectedStaff((current) => current.includes(staffId) ? current.filter((id) => id !== staffId) : [...current, staffId]);
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
-      {/* Header */}
       <div className="p-5 flex items-center justify-between border-b border-gray-50">
-        <button onClick={() => step === 1 ? router.back() : setStep(1)} className="p-2 -ml-2">
+        <button onClick={() => router.back()} className="p-2 -ml-2">
           <ChevronLeft size={24} className="text-gray-900" />
         </button>
-        <h1 className="text-lg font-bold text-gray-900">{step === 1 ? "Create Event" : "Plan Resources"}</h1>
-        <div className="w-10"></div>
+        <h1 className="text-lg font-bold text-gray-900">Create Event</h1>
+        <div className="w-10" />
       </div>
 
-      {step === 1 ? (
-        <div className="p-5 space-y-6">
-          <div className="space-y-4">
-            <h2 className="text-sm font-bold text-primary uppercase tracking-wider">Event Details</h2>
-            
-            <InputField label="Customer Name" icon={<User size={18}/>} placeholder="Enter customer name" />
-            <InputField label="Mobile Number" icon={<Phone size={18}/>} placeholder="Enter mobile number" />
-            
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-500 ml-1">Event Type</label>
-              <div className="relative">
-                <select className="w-full bg-gray-50 border-none rounded-2xl py-4 pl-4 pr-10 text-sm font-medium appearance-none outline-none">
-                  <option>Select event type</option>
-                  <option>Wedding</option>
-                  <option>Birthday</option>
-                </select>
-                <ChevronDown size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-              </div>
-            </div>
+      <form onSubmit={handleSubmit} className="p-5 space-y-5">
+        <InputField name="customer_name" label="Customer Name" icon={<User size={18} />} placeholder="Enter customer name" required />
+        <InputField name="mobile" label="Mobile Number" icon={<Phone size={18} />} placeholder="Enter mobile number" required />
+        <InputField name="title" label="Event Title" icon={<Calendar size={18} />} placeholder="Wedding Event" required />
+        <SelectField name="event_type" label="Event Type" options={["Wedding", "Birthday", "Corporate", "Rental", "Other"]} />
+        <InputField name="location" label="Location" icon={<MapPin size={18} />} placeholder="Enter location" required />
+        <InputField name="map_link" label="Google Map Link" icon={<LinkIcon size={18} />} placeholder="Paste google map link" />
 
-            <InputField label="Location" icon={<MapPin size={18}/>} placeholder="Enter location" />
-            <InputField label="Google Map Link" icon={<LinkIcon size={18}/>} placeholder="Paste google map link" />
-
-            <div className="grid grid-cols-2 gap-4">
-               <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-gray-500 ml-1">Date</label>
-                  <div className="relative">
-                    <input type="date" defaultValue="2026-06-19" className="w-full bg-gray-50 border-none rounded-2xl py-4 px-4 text-xs font-medium outline-none" />
-                  </div>
-               </div>
-               <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-gray-500 ml-1">Time</label>
-                  <div className="relative">
-                    <input type="time" defaultValue="17:00" className="w-full bg-gray-50 border-none rounded-2xl py-4 px-4 text-xs font-medium outline-none" />
-                  </div>
-               </div>
-            </div>
-          </div>
-
-          <div className="space-y-4 pt-4">
-             <h2 className="text-sm font-bold text-primary uppercase tracking-wider">Setup & Resources</h2>
-             <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-500 ml-1">Setup Required</label>
-                <div className="relative">
-                  <select className="w-full bg-gray-50 border-none rounded-2xl py-4 px-4 text-sm font-medium outline-none">
-                    <option>Select setup</option>
-                  </select>
-                </div>
-             </div>
-             <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-500 ml-1">Vehicle Required</label>
-                <div className="relative">
-                  <select className="w-full bg-gray-50 border-none rounded-2xl py-4 px-4 text-sm font-medium outline-none">
-                    <option>Select option</option>
-                  </select>
-                </div>
-             </div>
-          </div>
-
-          <button 
-            onClick={() => setStep(2)}
-            className="w-full py-4 bg-primary text-white rounded-2xl font-bold mt-4 shadow-lg active:scale-95 transition-transform"
-          >
-            Next: Plan Resources →
-          </button>
+        <div className="grid grid-cols-2 gap-4">
+          <InputField name="event_date" label="Date" type="date" icon={<Calendar size={18} />} required />
+          <InputField name="event_time" label="Time" type="time" icon={<Calendar size={18} />} defaultValue="17:00" required />
         </div>
-      ) : (
-        <div className="p-5 space-y-6">
-           <div className="grid grid-cols-2 gap-4">
-              <ResourceSelector label="Setup" value="Honeycomb Setup" status="Available" />
-              <ResourceSelector label="Vehicle" value="Vehicle 2" status="Available" />
-           </div>
 
-           <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                 <h2 className="text-sm font-bold text-gray-900">Staff Required</h2>
-                 <div className="flex items-center gap-4 bg-gray-50 rounded-xl px-3 py-1.5">
-                    <button className="text-primary font-bold text-xl">-</button>
-                    <span className="font-bold text-sm w-4 text-center">5</span>
-                    <button className="text-primary font-bold text-xl">+</button>
-                 </div>
+        <SelectRows name="setup_id" label="Setup Required" rows={setups} emptyLabel="No setup" />
+        <SelectRows name="vehicle_id" label="Vehicle Required" rows={vehicles} emptyLabel="No vehicle" />
+        <InputField name="total_amount" label="Total Amount" type="number" icon={<Calendar size={18} />} placeholder="0" />
+
+        <div className="space-y-3">
+          <h2 className="text-sm font-bold text-primary uppercase tracking-wider">Select Staff ({selectedStaff.length})</h2>
+          {staff.map((member) => (
+            <button
+              type="button"
+              key={member.id}
+              onClick={() => toggleStaff(member.id)}
+              className="w-full flex items-center justify-between p-3 bg-card border border-gray-50 rounded-2xl"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden">
+                  <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${member.name}`} alt={member.name} />
+                </div>
+                <div className="text-left">
+                  <p className="text-xs font-bold text-gray-900">{member.name}</p>
+                  <p className="text-[10px] text-gray-400 font-medium">{member.role}</p>
+                </div>
               </div>
-
-              <div className="space-y-3">
-                 <h3 className="text-xs font-bold text-primary uppercase">Select Staff (5)</h3>
-                 <p className="text-[10px] text-gray-400 font-bold uppercase">Available Staff</p>
-                 
-                 <div className="space-y-2">
-                    <StaffSelectItem name="Ravi Kumar" role="DJ Operator" selected={true} />
-                    <StaffSelectItem name="Mani Shankar" role="Sound Engineer" selected={true} />
-                    <StaffSelectItem name="Arjun Prakash" role="Light Operator" selected={true} />
-                    <StaffSelectItem name="Suresh Babu" role="Helper" selected={true} />
-                    <StaffSelectItem name="Vicky" role="Helper" selected={true} />
-                 </div>
+              <div className={cn("w-5 h-5 rounded flex items-center justify-center transition-colors", selectedStaff.includes(member.id) ? "bg-primary" : "border-2 border-gray-200")}>
+                {selectedStaff.includes(member.id) && <div className="w-2 h-2 bg-white rounded-sm" />}
               </div>
-           </div>
-
-           <button 
-            className="w-full py-4 bg-primary text-white rounded-2xl font-bold mt-4 shadow-lg active:scale-95 transition-transform"
-            onClick={() => router.push('/events')}
-          >
-            Confirm Event
-          </button>
+            </button>
+          ))}
         </div>
-      )}
+
+        <button disabled={saving} className="w-full py-4 bg-primary text-white rounded-2xl font-bold mt-4 shadow-lg active:scale-95 transition-transform disabled:opacity-60">
+          {saving ? "Saving..." : "Confirm Event"}
+        </button>
+      </form>
     </div>
   );
 }
 
-function InputField({ label, icon, placeholder }: any) {
+function InputField({ label, icon, ...props }: any) {
   return (
-    <div className="space-y-1.5">
-      <label className="text-xs font-bold text-gray-500 ml-1">{label}</label>
+    <label className="block space-y-1.5">
+      <span className="text-xs font-bold text-gray-500 ml-1">{label}</span>
       <div className="relative">
-        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-          {icon}
-        </div>
-        <input 
-          type="text" 
-          placeholder={placeholder} 
-          className="w-full bg-gray-50 border-none rounded-2xl py-4 pl-12 pr-4 text-sm font-medium outline-none focus:ring-2 focus:ring-primary/10 transition-all"
-        />
+        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">{icon}</div>
+        <input {...props} className="w-full bg-gray-50 border-none rounded-2xl py-4 pl-12 pr-4 text-sm font-medium outline-none focus:ring-2 focus:ring-primary/10 transition-all" />
       </div>
-    </div>
+    </label>
   );
 }
 
-function ResourceSelector({ label, value, status }: any) {
+function SelectField({ label, name, options }: any) {
   return (
-    <div className="bg-gray-50 p-3 rounded-2xl border border-gray-100">
-       <p className="text-[10px] font-bold text-primary uppercase mb-1">{label}</p>
-       <p className="text-xs font-bold text-gray-900 mb-1">{value}</p>
-       <span className="text-[9px] font-bold text-success bg-green-100 px-2 py-0.5 rounded-full">{status}</span>
-    </div>
+    <label className="block space-y-1.5">
+      <span className="text-xs font-bold text-gray-500 ml-1">{label}</span>
+      <select name={name} className="w-full bg-gray-50 border-none rounded-2xl py-4 px-4 text-sm font-medium outline-none">
+        {options.map((option: string) => <option key={option}>{option}</option>)}
+      </select>
+    </label>
   );
 }
 
-function StaffSelectItem({ name, role, selected }: any) {
+function SelectRows({ label, name, rows, emptyLabel }: any) {
   return (
-    <div className="flex items-center justify-between p-3 bg-card border border-gray-50 rounded-2xl">
-       <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden">
-             <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`} alt={name} />
-          </div>
-          <div>
-             <p className="text-xs font-bold text-gray-900">{name}</p>
-             <p className="text-[10px] text-gray-400 font-medium">{role}</p>
-          </div>
-       </div>
-       <div className={cn("w-5 h-5 rounded flex items-center justify-center transition-colors", selected ? "bg-primary" : "border-2 border-gray-200")}>
-          {selected && <div className="w-2 h-2 bg-white rounded-sm"></div>}
-       </div>
-    </div>
+    <label className="block space-y-1.5">
+      <span className="text-xs font-bold text-gray-500 ml-1">{label}</span>
+      <select name={name} className="w-full bg-gray-50 border-none rounded-2xl py-4 px-4 text-sm font-medium outline-none">
+        <option value="">{emptyLabel}</option>
+        {rows.map((row: any) => <option key={row.id} value={row.id}>{row.name}</option>)}
+      </select>
+    </label>
   );
 }

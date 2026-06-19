@@ -1,13 +1,41 @@
 "use client";
 
 import { Search, Filter, Phone, MessageSquare, ChevronRight } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/lib/supabase";
+import { demoStaff } from "@/lib/demo-data";
 
 const tabs = ["All (20)", "Available (12)", "Assigned (8)", "Leave (0)"];
 
 export default function StaffPage() {
   const [activeTab, setActiveTab] = useState("All (20)");
+  const [staff, setStaff] = useState<any[]>(demoStaff);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchStaff() {
+      try {
+        const { data, error } = await supabase.from("staff").select("*").order("role").order("name");
+        if (error) throw error;
+        setStaff(data && data.length > 0 ? data : demoStaff);
+      } catch (err) {
+        console.error("Error fetching staff:", err);
+        setStaff(demoStaff);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchStaff();
+  }, []);
+
+  const filteredStaff = staff.filter((member) => {
+    if (activeTab.startsWith("All")) return true;
+    if (activeTab.startsWith("Available")) return member.status === "Available";
+    if (activeTab.startsWith("Assigned")) return member.status === "Assigned";
+    if (activeTab.startsWith("Leave")) return member.status === "Leave";
+    return true;
+  });
 
   return (
     <div className="flex flex-col min-h-screen bg-white pb-20">
@@ -46,13 +74,11 @@ export default function StaffPage() {
       </div>
 
       <div className="px-5 space-y-3">
-        <StaffCard name="Ravi Kumar" role="DJ Operator" status="Available" />
-        <StaffCard name="Mani Shankar" role="Sound Engineer" status="Assigned" />
-        <StaffCard name="Arjun Prakash" role="Light Operator" status="Available" />
-        <StaffCard name="Suresh Babu" role="Helper" status="Assigned" />
-        <StaffCard name="Vicky" role="Helper" status="Available" />
-        <StaffCard name="Kumar" role="Driver" status="Available" />
-        <StaffCard name="Prakash" role="Sound Engineer" status="Leave" />
+        {loading ? (
+          <p className="py-10 text-center text-sm font-medium text-gray-500">Loading staff...</p>
+        ) : (
+          filteredStaff.map((member, index) => <StaffCard key={member.id || index} {...member} />)
+        )}
       </div>
       
       {/* FAB for adding employee */}

@@ -1,11 +1,33 @@
 "use client";
 
 import { Search, Filter, Layers, CheckCircle2, Clock, AlertCircle } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/lib/supabase";
+import { demoSetups } from "@/lib/demo-data";
 
 export default function SetupsPage() {
   const [activeTab, setActiveTab] = useState("All");
+  const [setups, setSetups] = useState<any[]>(demoSetups);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchSetups() {
+      try {
+        const { data, error } = await supabase.from("setups").select("*").order("name");
+        if (error) throw error;
+        setSetups(data && data.length > 0 ? data : demoSetups);
+      } catch (err) {
+        console.error("Error fetching setups:", err);
+        setSetups(demoSetups);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchSetups();
+  }, []);
+
+  const filteredSetups = activeTab === "All" ? setups : setups.filter((setup) => setup.status === activeTab);
 
   return (
     <div className="flex flex-col min-h-screen bg-white pb-20">
@@ -20,17 +42,30 @@ export default function SetupsPage() {
             className="w-full bg-gray-50 border-none rounded-2xl py-3.5 pl-12 pr-4 text-sm font-medium outline-none"
           />
         </div>
+
+        <div className="flex gap-4 overflow-x-auto no-scrollbar border-b border-gray-100">
+          {["All", "Available", "Booked", "Maintenance"].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={cn(
+                "pb-3 text-xs font-bold whitespace-nowrap transition-all relative",
+                activeTab === tab ? "text-primary" : "text-gray-400"
+              )}
+            >
+              {tab}
+              {activeTab === tab && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-primary rounded-full" />}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="px-5 space-y-4">
-        <SetupCard name="Basic Setup" quantity={2} status="Available" />
-        <SetupCard name="Honeycomb Setup" quantity={2} status="Booked" />
-        <SetupCard name="Premium Setup" quantity={1} status="Maintenance" />
-        <SetupCard name="LED Dance Floor Setup" quantity={1} status="Available" />
-        <SetupCard name="Line Array Setup" quantity={1} status="Available" />
-        <SetupCard name="Outdoor Setup" quantity={1} status="Available" />
-        <SetupCard name="Wedding Setup" quantity={1} status="Available" />
-        <SetupCard name="Festival Setup" quantity={1} status="Available" />
+        {loading ? (
+          <p className="py-10 text-center text-sm font-medium text-gray-500">Loading setups...</p>
+        ) : (
+          filteredSetups.map((setup, index) => <SetupCard key={setup.id || index} {...setup} />)
+        )}
       </div>
     </div>
   );
