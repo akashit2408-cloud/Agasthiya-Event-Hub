@@ -1,25 +1,49 @@
 "use client";
 
-import { Search, Filter, Box, Plus, ChevronLeft, Wrench, CheckCircle2, Clock } from "lucide-react";
-import { useState } from "react";
+import { Search, Filter, Box, Plus, ChevronLeft, Wrench, CheckCircle2, Clock, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { supabase } from "@/lib/supabase";
 
 const tabs = ["All", "Available", "Rented", "Maintenance"];
+
+const demoRentals = [
+  { name: "JBL SRX828SP Subwoofer", category: "Audio", status: "Available", condition: "Good" },
+  { name: "Pioneer CDJ-3000", category: "DJ Gear", status: "Rented", condition: "Excellent", dueDate: "21 Jun" },
+  { name: "Sharpy Beam Moving Head", category: "Lighting", status: "Maintenance", condition: "Needs Repair" },
+  { name: "Yamaha QL5 Digital Console", category: "Audio", status: "Available", condition: "Excellent" },
+  { name: "Smoke Machine 1500W", category: "Effects", status: "Rented", condition: "Good", dueDate: "20 Jun" },
+  { name: "Truss 2m Aluminum", category: "Staging", status: "Available", condition: "Fair" },
+];
 
 export default function RentalsPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("All");
+  const [rentals, setRentals] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const allRentals = [
-    { name: "JBL SRX828SP Subwoofer", category: "Audio", status: "Available", condition: "Good" },
-    { name: "Pioneer CDJ-3000", category: "DJ Gear", status: "Rented", condition: "Excellent", dueDate: "21 Jun" },
-    { name: "Sharpy Beam Moving Head", category: "Lighting", status: "Maintenance", condition: "Needs Repair" },
-    { name: "Yamaha QL5 Digital Console", category: "Audio", status: "Available", condition: "Excellent" },
-    { name: "Smoke Machine 1500W", category: "Effects", status: "Rented", condition: "Good", dueDate: "20 Jun" },
-    { name: "Truss 2m Aluminum", category: "Staging", status: "Available", condition: "Fair" },
-  ];
+  useEffect(() => {
+    async function fetchRentals() {
+      try {
+        const { data, error } = await supabase.from('rentals').select('*');
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+          setRentals(data);
+        } else {
+          setRentals(demoRentals);
+        }
+      } catch (err) {
+        console.error("Error fetching from Supabase (falling back to demo data):", err);
+        setRentals(demoRentals);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchRentals();
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen bg-white pb-20">
@@ -65,11 +89,18 @@ export default function RentalsPage() {
 
       {/* List */}
       <div className="p-5 space-y-4 overflow-y-auto">
-        {allRentals
-          .filter(rental => activeTab === "All" || rental.status === activeTab)
-          .map((rental, idx) => (
-             <RentalCard key={idx} {...rental} />
-          ))}
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-10">
+            <Loader2 className="animate-spin text-primary mb-2" size={32} />
+            <p className="text-sm font-medium text-gray-500">Connecting to Database...</p>
+          </div>
+        ) : (
+          rentals
+            .filter(rental => activeTab === "All" || rental.status === activeTab)
+            .map((rental, idx) => (
+               <RentalCard key={rental.id || idx} {...rental} />
+            ))
+        )}
       </div>
 
       {/* Floating Action Button */}
