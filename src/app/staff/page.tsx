@@ -6,10 +6,8 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 
-const tabs = ["All (20)", "Available (12)", "Assigned (8)", "Leave (0)"];
-
 export default function StaffPage() {
-  const [activeTab, setActiveTab] = useState("All (20)");
+  const [activeTab, setActiveTab] = useState("All");
   const [staff, setStaff] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -29,12 +27,23 @@ export default function StaffPage() {
     fetchStaff();
   }, []);
 
+  const counts = {
+    All: staff.length,
+    Available: staff.filter(s => s.status === "Available").length,
+    Assigned: staff.filter(s => s.status === "Assigned").length,
+    Leave: staff.filter(s => s.status === "Leave").length,
+  };
+
+  const tabs = [
+    { id: "All", label: `All (${counts.All})` },
+    { id: "Available", label: `Available (${counts.Available})` },
+    { id: "Assigned", label: `Assigned (${counts.Assigned})` },
+    { id: "Leave", label: `Leave (${counts.Leave})` },
+  ];
+
   const filteredStaff = staff.filter((member) => {
-    if (activeTab.startsWith("All")) return true;
-    if (activeTab.startsWith("Available")) return member.status === "Available";
-    if (activeTab.startsWith("Assigned")) return member.status === "Assigned";
-    if (activeTab.startsWith("Leave")) return member.status === "Leave";
-    return true;
+    if (activeTab === "All") return true;
+    return member.status === activeTab;
   });
 
   return (
@@ -57,15 +66,15 @@ export default function StaffPage() {
         <div className="flex overflow-x-auto gap-4 no-scrollbar border-b border-gray-100">
           {tabs.map((tab) => (
             <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
               className={cn(
                 "pb-3 text-xs font-bold whitespace-nowrap transition-all relative",
-                activeTab === tab ? "text-primary" : "text-gray-400"
+                activeTab === tab.id ? "text-primary" : "text-gray-400"
               )}
             >
-              {tab}
-              {activeTab === tab && (
+              {tab.label}
+              {activeTab === tab.id && (
                 <div className="absolute bottom-0 left-0 w-full h-0.5 bg-primary rounded-full"></div>
               )}
             </button>
