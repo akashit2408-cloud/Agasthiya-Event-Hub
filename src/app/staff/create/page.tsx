@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, useRef } from "react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import { supabase } from "@/lib/supabase";
 
 interface FormData {
   name: string;
@@ -100,15 +101,14 @@ export default function CreateStaffPage() {
     setIsSubmitting(true);
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const { error } = await supabase.from('staff').insert([{
+        name: formData.name,
+        phone: formData.phone,
+        role: formData.role,
+        status: formData.status
+      }]);
       
-      // TODO: Replace with actual API call
-      // const response = await fetch('/api/staff', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(formData)
-      // });
+      if (error) throw error;
       
       router.push('/staff');
     } catch (error) {
