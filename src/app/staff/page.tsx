@@ -1,9 +1,10 @@
 "use client";
 
-import { Search, Filter, Phone, MessageSquare, ChevronRight } from "lucide-react";
+import { Search, Filter, Phone, MessageSquare, ChevronRight, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
+import Link from "next/link";
 import { demoStaff } from "@/lib/demo-data";
 
 const tabs = ["All (20)", "Available (12)", "Assigned (8)", "Leave (0)"];
@@ -82,9 +83,9 @@ export default function StaffPage() {
       </div>
       
       {/* FAB for adding employee */}
-      <button className="fixed bottom-24 right-6 w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center shadow-xl active:scale-95 transition-transform">
-        <span className="text-2xl font-bold">+</span>
-      </button>
+      <Link href="/staff/create" className="fixed bottom-24 right-6 w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center shadow-xl active:scale-95 transition-transform z-10">
+        <Plus size={28} />
+      </Link>
     </div>
   );
 }
