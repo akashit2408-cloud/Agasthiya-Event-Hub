@@ -1,9 +1,9 @@
 import type { Metadata, Viewport } from "next";
-import { Outfit } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import MobileLayout from "@/components/layout/MobileLayout";
 
-const outfit = Outfit({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "DJ Eventer Chennai ERP",
@@ -25,7 +25,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${outfit.className} antialiased bg-gray-50`}>
+      <body className={`${inter.className} antialiased bg-gray-50`}>
         <MobileLayout>{children}</MobileLayout>
       </body>
     </html>
