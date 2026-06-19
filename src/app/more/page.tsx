@@ -37,21 +37,21 @@ export default function MorePage() {
 
       <div className="p-5 space-y-6">
         <Section label="Management">
-          <MenuItem icon={<Truck className="text-orange-500" />} label="Vehicles" href="/setups" />
-          <MenuItem icon={<Layers className="text-purple-500" />} label="Rentals" href="/setups" />
-          <MenuItem icon={<Calendar className="text-blue-500" />} label="Calendar View" href="/events" />
-          <MenuItem icon={<CreditCard className="text-green-500" />} label="Payments & Revenue" href="/" />
+          <MenuItem icon={<Truck className="text-orange-500" />} label="Vehicles" href="/vehicles" />
+          <MenuItem icon={<Layers className="text-purple-500" />} label="Rentals" href="/rentals" />
+          <MenuItem icon={<Calendar className="text-blue-500" />} label="Calendar View" href="/calendar" />
+          <MenuItem icon={<CreditCard className="text-green-500" />} label="Payments & Revenue" href="/payments" />
         </Section>
 
         <Section label="Communication">
-          <MenuItem icon={<MessageSquare className="text-green-600" />} label="WhatsApp Templates" href="/" />
-          <MenuItem icon={<FileText className="text-gray-500" />} label="Reports" href="/" />
+          <MenuItem icon={<MessageSquare className="text-green-600" />} label="WhatsApp Templates" href="/whatsapp" />
+          <MenuItem icon={<FileText className="text-gray-500" />} label="Reports" href="/reports" />
         </Section>
 
         <Section label="System">
-          <MenuItem icon={<Shield className="text-blue-600" />} label="Role Management" href="/staff" />
-          <MenuItem icon={<Database className="text-purple-600" />} label="Backup & Restore" href="/" />
-          <MenuItem icon={<Settings className="text-gray-400" />} label="Settings" href="/" />
+          <MenuItem icon={<Shield className="text-blue-600" />} label="Role Management" href="/roles" />
+          <MenuItem icon={<Database className="text-purple-600" />} label="Backup & Restore" href="/backup" />
+          <MenuItem icon={<Settings className="text-gray-400" />} label="Settings" href="/settings" />
         </Section>
 
         <button 
