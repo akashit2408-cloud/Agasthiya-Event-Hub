@@ -107,10 +107,10 @@ export default function Dashboard() {
       <div className="space-y-4">
          <h3 className="text-lg font-bold text-gray-900">Quick Tools</h3>
          <div className="grid grid-cols-4 gap-4">
-            <Link href="/setups"><ToolIcon icon={<Truck size={20} />} label="Rentals" color="bg-orange-100 text-orange-600" /></Link>
-            <Link href="/events"><ToolIcon icon={<Calendar size={20} />} label="Calendar" color="bg-blue-100 text-blue-600" /></Link>
-            <Link href="/"><ToolIcon icon={<Bell size={20} />} label="Alerts" color="bg-red-100 text-red-600" /></Link>
-            <Link href="/"><ToolIcon icon={<Layers size={20} />} label="Reports" color="bg-green-100 text-green-600" /></Link>
+            <Link href="/rentals"><ToolIcon icon={<Truck size={20} />} label="Rentals" color="bg-orange-100 text-orange-600" /></Link>
+            <Link href="/calendar"><ToolIcon icon={<Calendar size={20} />} label="Calendar" color="bg-blue-100 text-blue-600" /></Link>
+            <Link href="/alerts"><ToolIcon icon={<Bell size={20} />} label="Alerts" color="bg-red-100 text-red-600" /></Link>
+            <Link href="/reports"><ToolIcon icon={<Layers size={20} />} label="Reports" color="bg-green-100 text-green-600" /></Link>
          </div>
       </div>
     </div>
