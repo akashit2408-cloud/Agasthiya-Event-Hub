@@ -4,12 +4,22 @@ import { Search, Filter, Box, Plus, ChevronLeft, Wrench, CheckCircle2, Clock } f
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const tabs = ["All", "Available", "Rented", "Maintenance"];
 
 export default function RentalsPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("All");
+
+  const allRentals = [
+    { name: "JBL SRX828SP Subwoofer", category: "Audio", status: "Available", condition: "Good" },
+    { name: "Pioneer CDJ-3000", category: "DJ Gear", status: "Rented", condition: "Excellent", dueDate: "21 Jun" },
+    { name: "Sharpy Beam Moving Head", category: "Lighting", status: "Maintenance", condition: "Needs Repair" },
+    { name: "Yamaha QL5 Digital Console", category: "Audio", status: "Available", condition: "Excellent" },
+    { name: "Smoke Machine 1500W", category: "Effects", status: "Rented", condition: "Good", dueDate: "20 Jun" },
+    { name: "Truss 2m Aluminum", category: "Staging", status: "Available", condition: "Fair" },
+  ];
 
   return (
     <div className="flex flex-col min-h-screen bg-white pb-20">
@@ -55,18 +65,17 @@ export default function RentalsPage() {
 
       {/* List */}
       <div className="p-5 space-y-4 overflow-y-auto">
-        <RentalCard name="JBL SRX828SP Subwoofer" category="Audio" status="Available" condition="Good" />
-        <RentalCard name="Pioneer CDJ-3000" category="DJ Gear" status="Rented" condition="Excellent" dueDate="21 Jun" />
-        <RentalCard name="Sharpy Beam Moving Head" category="Lighting" status="Maintenance" condition="Needs Repair" />
-        <RentalCard name="Yamaha QL5 Digital Console" category="Audio" status="Available" condition="Excellent" />
-        <RentalCard name="Smoke Machine 1500W" category="Effects" status="Rented" condition="Good" dueDate="20 Jun" />
-        <RentalCard name="Truss 2m Aluminum" category="Staging" status="Available" condition="Fair" />
+        {allRentals
+          .filter(rental => activeTab === "All" || rental.status === activeTab)
+          .map((rental, idx) => (
+             <RentalCard key={idx} {...rental} />
+          ))}
       </div>
 
       {/* Floating Action Button */}
-      <button className="fixed bottom-24 right-6 w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center shadow-xl active:scale-95 transition-transform z-10">
+      <Link href="/rentals/create" className="fixed bottom-24 right-6 w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center shadow-xl active:scale-95 transition-transform z-10">
         <Plus size={28} />
-      </button>
+      </Link>
     </div>
   );
 }
