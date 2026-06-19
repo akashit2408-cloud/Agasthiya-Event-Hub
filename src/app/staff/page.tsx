@@ -98,7 +98,7 @@ export default function StaffPage() {
   );
 }
 
-function StaffCard({ name, role, status, avatar_seed }: any) {
+function StaffCard({ name, role, status, avatar_seed, mobile }: any) {
   const statusStyles: any = {
     Available: "text-success bg-green-100",
     Assigned: "text-orange-600 bg-orange-100",
@@ -125,9 +125,15 @@ function StaffCard({ name, role, status, avatar_seed }: any) {
         <span className={cn("px-2 py-0.5 text-[8px] font-black rounded-full uppercase", statusStyles[status])}>
           {status}
         </span>
-        <button className="p-2 bg-white rounded-xl shadow-sm border border-gray-50">
-           <Phone size={14} className="text-gray-400" />
-        </button>
+        {mobile ? (
+          <a href={`tel:${mobile}`} className="p-2 bg-white rounded-xl shadow-sm border border-gray-50 active:scale-95 transition-transform">
+             <Phone size={14} className="text-gray-900" />
+          </a>
+        ) : (
+          <button disabled className="p-2 bg-gray-50 rounded-xl shadow-none border border-gray-50 opacity-50 cursor-not-allowed">
+             <Phone size={14} className="text-gray-400" />
+          </button>
+        )}
       </div>
     </div>
   );
