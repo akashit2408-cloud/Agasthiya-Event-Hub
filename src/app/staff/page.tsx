@@ -89,18 +89,22 @@ export default function StaffPage() {
   );
 }
 
-function StaffCard({ name, role, status }: any) {
+function StaffCard({ name, role, status, avatar_seed }: any) {
   const statusStyles: any = {
     Available: "text-success bg-green-100",
     Assigned: "text-orange-600 bg-orange-100",
     Leave: "text-danger bg-red-100",
   };
 
+  const imageSrc = avatar_seed && avatar_seed.startsWith('data:image/') 
+    ? avatar_seed 
+    : `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&font-size=0.35&rounded=true&bold=true`;
+
   return (
     <div className="bg-card p-3 rounded-[1.5rem] border border-gray-50 flex items-center justify-between">
       <div className="flex items-center gap-3">
         <div className="w-12 h-12 rounded-2xl bg-gray-100 overflow-hidden shadow-sm border border-white">
-           <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&font-size=0.35&rounded=true&bold=true`} alt={name} className="w-full h-full object-cover" />
+           <img src={imageSrc} alt={name} className="w-full h-full object-cover" />
         </div>
         <div>
           <h4 className="font-bold text-gray-900 text-sm">{name}</h4>

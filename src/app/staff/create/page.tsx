@@ -105,7 +105,8 @@ export default function CreateStaffPage() {
         name: formData.name,
         mobile: formData.phone,
         role: formData.role,
-        status: formData.status
+        status: formData.status,
+        avatar_seed: formData.profileImage || null
       }]);
       
       if (error) {
