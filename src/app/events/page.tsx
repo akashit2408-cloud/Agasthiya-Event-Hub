@@ -17,9 +17,33 @@ export default function EventsPage() {
   useEffect(() => {
     async function fetchEvents() {
       try {
-        const { data, error } = await supabase.from("event_list").select("*").order("event_date").order("event_time");
+        const { data, error } = await supabase
+          .from("events")
+          .select(`
+            id, title, event_type, location, map_link, event_date, event_time, status,
+            customers (name, mobile),
+            setups (name),
+            vehicles (name),
+            event_staff (
+              staff (name)
+            )
+          `)
+          .order("event_date")
+          .order("event_time");
+
         if (error) throw error;
-        setEvents(data || []);
+
+        const formattedEvents = (data || []).map(e => ({
+          ...e,
+          customer_name: e.customers?.name,
+          customer_mobile: e.customers?.mobile,
+          setup_name: e.setups?.name,
+          vehicle_name: e.vehicles?.name,
+          staff_count: e.event_staff?.length || 0,
+          staff_names: e.event_staff?.map((s: any) => s.staff?.name).filter(Boolean) || []
+        }));
+
+        setEvents(formattedEvents);
       } catch (err) {
         console.error("Error fetching events:", err);
         setEvents([]);
@@ -81,7 +105,7 @@ export default function EventsPage() {
         ) : (
           <>
             <div className="flex justify-between items-center mb-1 mt-2">
-               <h2 className="text-[13px] font-black text-gray-900 uppercase tracking-wide">Tomorrow's Plan Details</h2>
+               <h2 className="text-[13px] font-black text-gray-900 uppercase tracking-wide">Plan Details</h2>
                <span className="bg-green-50 text-[#00A859] px-2.5 py-1 rounded-md text-[10px] font-black uppercase">All Ready</span>
             </div>
             {filteredEvents.map((event, index) => <EventCard key={event.id || index} event={event} />)}
@@ -97,12 +121,12 @@ export default function EventsPage() {
 }
 
 function EventCard({ event }: any) {
-  const crewNames = event.staff_names || ["Ravi", "Akash", "Mani", "Karthik", "Suresh"];
-  const crewInitials = crewNames.map((n: string) => n.substring(0, 2));
-  const setupName = event.setup_name || "BASIC SETUP";
+  const crewNames = event.staff_names || [];
+  const crewInitials = crewNames.map((n: string) => n.substring(0, 2).toUpperCase());
+  const setupName = event.setup_name || "NO SETUP";
   
   const handleShare = () => {
-    const message = `*Event Details*\n\n*Title:* ${event.title}\n*Time:* ${formatEventDate(event.event_date, event.event_time)}\n*Location:* ${event.location}\n*Setup:* ${setupName}\n*Crew Assigned:* ${event.staff_count || 5}`;
+    const message = `*Event Details*\n\n*Title:* ${event.title}\n*Time:* ${formatEventDate(event.event_date, event.event_time)}\n*Location:* ${event.location}\n*Setup:* ${setupName}\n*Crew Assigned:* ${event.staff_count || 0}`;
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
@@ -113,11 +137,11 @@ function EventCard({ event }: any) {
       <div className="flex justify-between items-start gap-2">
          <div>
             <h3 className="font-extrabold text-gray-900 text-[17px] leading-tight">{event.title}</h3>
-            <div className="mt-2 inline-block px-3 py-1 bg-green-50 text-[#00A859] text-[10px] font-bold rounded-md">
-               {event.staff_count ? `${event.staff_count} / ${event.staff_count} CREW ASSIGNED` : "5 / 5 CREW ASSIGNED"}
+            <div className={cn("mt-2 inline-block px-3 py-1 text-[10px] font-bold rounded-md", event.staff_count > 0 ? "bg-green-50 text-[#00A859]" : "bg-orange-50 text-orange-600")}>
+               {event.staff_count > 0 ? `${event.staff_count} CREW ASSIGNED` : "UNASSIGNED"}
             </div>
          </div>
-         <span className="px-3 py-1 bg-indigo-50 text-indigo-600 text-[10px] font-bold rounded-md uppercase text-right shrink-0">
+         <span className={cn("px-3 py-1 text-[10px] font-bold rounded-md uppercase text-right shrink-0", event.setup_name ? "bg-indigo-50 text-indigo-600" : "bg-gray-50 text-gray-500")}>
             {setupName}
          </span>
       </div>
@@ -138,14 +162,22 @@ function EventCard({ event }: any) {
 
       {/* Crew */}
       <div className="flex items-center gap-3">
-         <div className="flex -space-x-1.5">
-            {crewInitials.slice(0, 5).map((initial: string, idx: number) => (
-               <div key={idx} className="w-6 h-6 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center text-[9px] font-bold text-gray-900">
-                 {initial}
-               </div>
-            ))}
-         </div>
-         <span className="text-xs font-medium text-gray-500 truncate">{crewNames.join(", ")}</span>
+         {crewInitials.length > 0 ? (
+           <div className="flex -space-x-1.5">
+              {crewInitials.slice(0, 5).map((initial: string, idx: number) => (
+                 <div key={idx} className="w-6 h-6 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center text-[9px] font-bold text-gray-900">
+                   {initial}
+                 </div>
+              ))}
+           </div>
+         ) : (
+           <div className="w-6 h-6 rounded-full bg-orange-100 border-2 border-white flex items-center justify-center text-[9px] font-bold text-orange-600">
+             !
+           </div>
+         )}
+         <span className={cn("text-xs font-medium truncate", crewNames.length > 0 ? "text-gray-500" : "text-orange-500")}>
+            {crewNames.length > 0 ? crewNames.join(", ") : "No crew assigned"}
+         </span>
       </div>
 
       <div className="border-t border-gray-100"></div>
