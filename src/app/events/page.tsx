@@ -33,7 +33,7 @@ export default function EventsPage() {
 
         if (error) throw error;
 
-        const formattedEvents = (data || []).map(e => ({
+        const formattedEvents = (data || []).map((e: any) => ({
           ...e,
           customer_name: e.customers?.name,
           customer_mobile: e.customers?.mobile,

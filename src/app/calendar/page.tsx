@@ -26,7 +26,7 @@ export default function CalendarPage() {
           
         if (error) throw error;
         
-        const formattedEvents = (data || []).map(e => ({
+        const formattedEvents = (data || []).map((e: any) => ({
           ...e,
           setup_name: e.setups?.name,
           staff_count: e.event_staff?.length || 0

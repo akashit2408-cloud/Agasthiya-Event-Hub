@@ -37,7 +37,7 @@ export default function Dashboard() {
 
         if (summaryData) setSummary(summaryData);
         if (eventData && eventData.length > 0) {
-          const formattedEvents = eventData.map(e => ({
+          const formattedEvents = eventData.map((e: any) => ({
             ...e,
             setup_name: e.setups?.name,
             staff_count: e.event_staff?.length || 0,

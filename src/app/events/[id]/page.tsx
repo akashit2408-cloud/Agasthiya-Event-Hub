@@ -38,17 +38,17 @@ export default function EventDetailsPage() {
         // Format to match old structure
         const formattedEvent = {
           ...eventData,
-          customer_name: eventData.customers?.name,
-          customer_mobile: eventData.customers?.mobile,
-          customer_address: eventData.customers?.address,
-          setup_name: eventData.setups?.name,
-          vehicle_name: eventData.vehicles?.name,
-          vehicle_number: eventData.vehicles?.registration_number,
-          staff_count: eventData.event_staff?.length || 0,
+          customer_name: (eventData as any).customers?.name,
+          customer_mobile: (eventData as any).customers?.mobile,
+          customer_address: (eventData as any).customers?.address,
+          setup_name: (eventData as any).setups?.name,
+          vehicle_name: (eventData as any).vehicles?.name,
+          vehicle_number: (eventData as any).vehicles?.registration_number,
+          staff_count: (eventData as any).event_staff?.length || 0,
         };
         
         setEvent(formattedEvent);
-        setStaff(eventData.event_staff?.map((s: any) => ({
+        setStaff((eventData as any).event_staff?.map((s: any) => ({
           id: s.staff.id,
           name: s.staff.name,
           role: s.staff.role,
