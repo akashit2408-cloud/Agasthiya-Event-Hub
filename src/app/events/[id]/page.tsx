@@ -12,19 +12,57 @@ export default function EventDetailsPage() {
   const params = useParams<{ id: string }>();
   const [event, setEvent] = useState<any>(null);
   const [staff, setStaff] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchEvent() {
-      const eventId = params.id;
-      if (!eventId) return;
-
-      const { data: eventData, error } = await supabase.from("event_list").select("*").eq("id", eventId).single();
-      if (!error && eventData) setEvent(eventData);
-
-      const { data: staffRows } = await supabase.from("event_staff").select("staff(*)").eq("event_id", eventId);
-      if (staffRows && staffRows.length > 0) setStaff(staffRows.map((row: any) => row.staff).filter(Boolean));
+    const eventId = params.id;
+    async function fetchEventDetails() {
+      try {
+        const { data: eventData, error } = await supabase
+          .from("events")
+          .select(`
+            id, title, event_type, location, map_link, event_date, event_time, status, notes, total_amount,
+            customers (name, mobile, address),
+            setups (name),
+            vehicles (name, registration_number),
+            event_staff (
+              assigned_role,
+              staff (id, name, role, mobile, avatar_seed)
+            )
+          `)
+          .eq("id", eventId)
+          .single();
+          
+        if (error) throw error;
+        
+        // Format to match old structure
+        const formattedEvent = {
+          ...eventData,
+          customer_name: eventData.customers?.name,
+          customer_mobile: eventData.customers?.mobile,
+          customer_address: eventData.customers?.address,
+          setup_name: eventData.setups?.name,
+          vehicle_name: eventData.vehicles?.name,
+          vehicle_number: eventData.vehicles?.registration_number,
+          staff_count: eventData.event_staff?.length || 0,
+        };
+        
+        setEvent(formattedEvent);
+        setStaff(eventData.event_staff?.map((s: any) => ({
+          id: s.staff.id,
+          name: s.staff.name,
+          role: s.staff.role,
+          mobile: s.staff.mobile,
+          avatar_seed: s.staff.avatar_seed,
+          assigned_role: s.assigned_role
+        })) || []);
+      } catch (err) {
+        console.error("Error fetching event details:", err);
+      } finally {
+        setLoading(false);
+      }
     }
-    fetchEvent().catch((err) => console.error("Error fetching event detail:", err));
+    if (eventId) fetchEventDetails();
   }, [params.id]);
 
   if (!event) {

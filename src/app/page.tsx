@@ -20,15 +20,35 @@ export default function Dashboard() {
 
   useEffect(() => {
     async function fetchDashboard() {
-      const [{ data: summaryData }, { data: eventData }] = await Promise.all([
-        supabase.from("dashboard_summary").select("*").single(),
-        supabase.from("event_list").select("*").gte("event_date", new Date().toISOString().slice(0, 10)).order("event_date").order("event_time").limit(5),
-      ]);
+      try {
+        const [{ data: summaryData }, { data: eventData }] = await Promise.all([
+          supabase.from("dashboard_summary").select("*").single(),
+          supabase.from("events")
+            .select(`
+              id, title, event_type, location, map_link, event_date, event_time, status,
+              setups (name),
+              event_staff (staff (name))
+            `)
+            .gte("event_date", new Date().toISOString().slice(0, 10))
+            .order("event_date")
+            .order("event_time")
+            .limit(5),
+        ]);
 
-      if (summaryData) setSummary(summaryData);
-      if (eventData && eventData.length > 0) setEvents(eventData);
+        if (summaryData) setSummary(summaryData);
+        if (eventData && eventData.length > 0) {
+          const formattedEvents = eventData.map(e => ({
+            ...e,
+            setup_name: e.setups?.name,
+            staff_count: e.event_staff?.length || 0,
+          }));
+          setEvents(formattedEvents);
+        }
+      } catch (err) {
+        console.error("Error fetching dashboard:", err);
+      }
     }
-    fetchDashboard().catch((err) => console.error("Error fetching dashboard:", err));
+    fetchDashboard();
   }, []);
 
   const nextEvent = events[0];

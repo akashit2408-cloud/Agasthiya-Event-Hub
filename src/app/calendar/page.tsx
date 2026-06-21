@@ -9,13 +9,38 @@ import { formatEventDate } from "@/lib/demo-data";
 export default function CalendarPage() {
   const router = useRouter();
   const [events, setEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchEvents() {
-      const { data, error } = await supabase.from("event_list").select("*").order("event_date").order("event_time");
-      if (!error && data) setEvents(data);
+      try {
+        const { data, error } = await supabase
+          .from("events")
+          .select(`
+            id, title, event_date, event_time, status,
+            setups (name),
+            event_staff (staff (id))
+          `)
+          .order("event_date")
+          .order("event_time");
+          
+        if (error) throw error;
+        
+        const formattedEvents = (data || []).map(e => ({
+          ...e,
+          setup_name: e.setups?.name,
+          staff_count: e.event_staff?.length || 0
+        }));
+        
+        setEvents(formattedEvents);
+      } catch (err) {
+        console.error("Error fetching events:", err);
+        setEvents([]);
+      } finally {
+        setLoading(false);
+      }
     }
-    fetchEvents().catch((err) => console.error("Error fetching calendar:", err));
+    fetchEvents();
   }, []);
 
   return (
