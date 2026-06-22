@@ -13,6 +13,7 @@ export default function CreateEventPage() {
   const [staff, setStaff] = useState<any[]>([]);
   const [selectedStaff, setSelectedStaff] = useState<string[]>([]);
   const [staffRemarks, setStaffRemarks] = useState<Record<string, string>>({});
+  const [showRemarkInputFor, setShowRemarkInputFor] = useState<Record<string, boolean>>({});
   const [showAllStaff, setShowAllStaff] = useState(false);
   const [selectedSetups, setSelectedSetups] = useState<Record<string, number>>({});
   const [saving, setSaving] = useState(false);
@@ -206,13 +207,23 @@ export default function CreateEventPage() {
                 </div>
               </button>
               {selectedStaff.includes(member.id) && (
-                <input 
-                  type="text" 
-                  placeholder="Add remark/assigned role..." 
-                  className="w-full bg-gray-50 border-none rounded-xl py-2 px-3 text-xs font-medium outline-none focus:ring-2 focus:ring-primary/10 transition-all mt-1"
-                  value={staffRemarks[member.id] || ""}
-                  onChange={(e) => setStaffRemarks(prev => ({ ...prev, [member.id]: e.target.value }))}
-                />
+                showRemarkInputFor[member.id] || staffRemarks[member.id] ? (
+                  <input 
+                    type="text" 
+                    placeholder="Add remark/assigned role..." 
+                    className="w-full bg-gray-50 border-none rounded-xl py-2 px-3 text-xs font-medium outline-none focus:ring-2 focus:ring-primary/10 transition-all mt-1"
+                    value={staffRemarks[member.id] || ""}
+                    onChange={(e) => setStaffRemarks(prev => ({ ...prev, [member.id]: e.target.value }))}
+                  />
+                ) : (
+                  <button 
+                    type="button" 
+                    onClick={() => setShowRemarkInputFor(prev => ({ ...prev, [member.id]: true }))}
+                    className="text-[10px] font-bold text-gray-400 bg-gray-50 px-3 py-1.5 rounded-lg text-left mt-1 w-fit ml-12 hover:bg-gray-100 transition-colors"
+                  >
+                    + Add Remark
+                  </button>
+                )
               )}
             </div>
           ))}
