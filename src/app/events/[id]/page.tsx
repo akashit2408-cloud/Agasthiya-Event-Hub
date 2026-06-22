@@ -98,7 +98,7 @@ ${event.invitation_url ? `📎 *Invitation Attachment:*\n${event.invitation_url}
 *DJ Eventer Chennai*
 Powered by Agasthiya Events`;
 
-    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
 
