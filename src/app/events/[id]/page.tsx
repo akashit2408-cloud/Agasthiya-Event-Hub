@@ -94,6 +94,7 @@ ${event.remark ? `• ${event.remark}` : '• No specific instructions provided.
 
 ✅ *Please confirm receipt of this assignment.*
 
+${event.invitation_url ? `📎 *Invitation Attachment:*\n${event.invitation_url}\n` : ''}
 *DJ Eventer Chennai*
 Powered by Agasthiya Events`;
 
