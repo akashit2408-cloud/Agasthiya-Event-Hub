@@ -137,14 +137,17 @@ function EventCard({ event }: any) {
   return (
     <div className="bg-white p-4 rounded-[24px] border border-gray-100 shadow-sm space-y-4">
       {/* Header */}
-      <div className="flex justify-between items-start gap-2">
-         <div>
-            <h3 className="font-extrabold text-gray-900 text-[17px] leading-tight">{event.title}</h3>
+      <div className="flex justify-between items-start gap-3">
+         <div className="min-w-0 flex-1">
+            <h3 className="font-extrabold text-gray-900 text-[17px] leading-tight truncate" title={event.title}>{event.title}</h3>
             <div className={cn("mt-2 inline-block px-3 py-1 text-[10px] font-bold rounded-md", event.staff_count > 0 ? "bg-green-50 text-[#00A859]" : "bg-orange-50 text-orange-600")}>
                {event.staff_count > 0 ? `${event.staff_count} CREW ASSIGNED` : "UNASSIGNED"}
             </div>
          </div>
-         <span className={cn("px-3 py-1 text-[10px] font-bold rounded-md uppercase text-right shrink-0", event.setup_name ? "bg-indigo-50 text-indigo-600" : "bg-gray-50 text-gray-500")}>
+         <span 
+           className={cn("px-3 py-1 text-[10px] font-bold rounded-md uppercase text-right shrink-0 max-w-[45%] truncate", event.setup_name ? "bg-indigo-50 text-indigo-600" : "bg-gray-50 text-gray-500")}
+           title={setupName}
+         >
             {setupName}
          </span>
       </div>
@@ -178,7 +181,10 @@ function EventCard({ event }: any) {
              !
            </div>
          )}
-         <span className={cn("text-xs font-medium truncate", crewNames.length > 0 ? "text-gray-500" : "text-orange-500")}>
+         <span 
+           className={cn("text-xs font-medium truncate flex-1 min-w-0", crewNames.length > 0 ? "text-gray-500" : "text-orange-500")}
+           title={crewNames.length > 0 ? crewNames.join(", ") : "No crew assigned"}
+         >
             {crewNames.length > 0 ? crewNames.join(", ") : "No crew assigned"}
          </span>
       </div>
