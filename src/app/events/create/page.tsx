@@ -196,7 +196,7 @@ export default function CreateEventPage() {
       <form onSubmit={handleSubmit} className="p-5 space-y-5">
         <InputField name="customer_name" label="Customer Name" icon={<User size={18} />} placeholder="Enter customer name" required />
         <InputField name="mobile" label="Mobile Number" icon={<Phone size={18} />} placeholder="Enter mobile number" required />
-        <InputField name="title" label="Event Title" icon={<Calendar size={18} />} placeholder="Wedding Event" required />
+
         <SelectField name="event_type" label="Event Type" options={["Wedding", "Birthday", "Corporate", "Rental", "Other"]} />
         <InputField name="location" label="Location" icon={<MapPin size={18} />} placeholder="Enter location" required />
         <InputField name="map_link" label="Google Map Link" icon={<LinkIcon size={18} />} placeholder="Paste google map link" />
