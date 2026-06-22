@@ -35,7 +35,7 @@ export default function CreateStaffPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
-  const roles = ["DJ Operator", "Sound Engineer", "Light Operator", "Helper", "Driver"];
+  const roles = ["DJ Operator", "Helper", "Driver"];
   const statuses = ["Available", "Assigned", "Leave"];
 
   const validateForm = (): boolean => {
@@ -70,19 +70,40 @@ export default function CreateStaffPage() {
       return;
     }
 
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      setErrors({...errors, profileImage: "Image size should be less than 5MB"});
-      return;
-    }
-
-    // Create preview
     const reader = new FileReader();
-    reader.onloadend = () => {
-      const result = reader.result as string;
-      setImagePreview(result);
-      setFormData({...formData, profileImage: result});
-      setErrors({...errors, profileImage: undefined});
+    reader.onload = (event) => {
+      const img = document.createElement('img');
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 800;
+        const MAX_HEIGHT = 800;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+
+        // Compress down to WebP with 0.7 quality to target ~200kb or less
+        const compressedDataUrl = canvas.toDataURL('image/webp', 0.7);
+        setImagePreview(compressedDataUrl);
+        setFormData({...formData, profileImage: compressedDataUrl});
+        setErrors({...errors, profileImage: undefined});
+      };
+      img.src = event.target?.result as string;
     };
     reader.readAsDataURL(file);
   };
@@ -334,31 +355,7 @@ export default function CreateStaffPage() {
           </div>
         </div>
 
-        {/* Status Selection */}
-        <div className="space-y-2">
-          <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
-            Initial Status *
-          </label>
-          <div className="flex gap-3">
-            {statuses.map(status => (
-              <button
-                key={status}
-                type="button"
-                onClick={() => setFormData({...formData, status})}
-                className={cn(
-                  "flex-1 py-3 px-2 rounded-xl text-xs font-bold border transition-all text-center flex items-center justify-center gap-1.5 hover:shadow-md active:scale-95",
-                  formData.status === status 
-                    ? "bg-gray-900 border-gray-900 text-white shadow-sm" 
-                    : "bg-white border-gray-200 text-gray-600 hover:border-gray-300"
-                )}
-                aria-pressed={formData.status === status}
-              >
-                {formData.status === status && <CheckCircle2 size={14} />}
-                {status}
-              </button>
-            ))}
-          </div>
-        </div>
+
 
         {/* Info Card */}
         <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 flex gap-3">
