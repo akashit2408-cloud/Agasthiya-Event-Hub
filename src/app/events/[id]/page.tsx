@@ -132,15 +132,23 @@ export default function EventDetailsPage() {
                   <span className="text-sm font-bold text-gray-600">Staff ({staff.length})</span>
                 </div>
               </div>
-              <div className="flex -space-x-3">
+              <div className="flex flex-col gap-3 mt-3">
                 {staff.map((member, index) => {
                   const imageSrc = member.avatar_seed && member.avatar_seed.startsWith('data:image/') 
                     ? member.avatar_seed 
                     : `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=random&font-size=0.35&rounded=true&bold=true`;
                   
                   return (
-                    <div key={member.id || index} className="w-10 h-10 rounded-full border-4 border-white bg-gray-200 overflow-hidden shadow-sm">
-                      <img src={imageSrc} alt={member.name} className="w-full h-full object-cover" />
+                    <div key={member.id || index} className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden shadow-sm shrink-0">
+                        <img src={imageSrc} alt={member.name} className="w-full h-full object-cover" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-gray-900">{member.name}</p>
+                        {member.assigned_role && (
+                          <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide">{member.assigned_role}</p>
+                        )}
+                      </div>
                     </div>
                   );
                 })}
