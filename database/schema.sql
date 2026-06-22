@@ -325,7 +325,7 @@ insert into setups (name, quantity, status) values
   ('Honeycomb Setup', 5, 'Available'),
   ('Honeycomb with mirror ball sharpy Dj setup', 2, 'Available'),
   ('Cold Pyro', 10, 'Available'),
-  ('LED Dance Floor 12by12 size', 2, 'Available'),
+  ('LED Dance Floor', 2, 'Available'),
   ('Low Fog Entry', 5, 'Available'),
   ('360 Degree Selfie Booth', 2, 'Available'),
   ('Balloon Blast', 5, 'Available'),
