@@ -22,7 +22,10 @@ export default function EventsPage() {
           .select(`
             id, title, event_type, location, map_link, event_date, event_time, status,
             customers (name, mobile),
-            setups (name),
+            event_setups (
+              quantity,
+              setups (name)
+            ),
             vehicles (name),
             event_staff (
               staff (name)
@@ -37,7 +40,7 @@ export default function EventsPage() {
           ...e,
           customer_name: e.customers?.name,
           customer_mobile: e.customers?.mobile,
-          setup_name: e.setups?.name,
+          setup_name: e.event_setups?.map((es: any) => `${es.setups?.name} (${es.quantity})`).join(', ') || null,
           vehicle_name: e.vehicles?.name,
           staff_count: e.event_staff?.length || 0,
           staff_names: e.event_staff?.map((s: any) => s.staff?.name).filter(Boolean) || []

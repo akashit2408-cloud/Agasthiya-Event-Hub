@@ -103,7 +103,6 @@ create table if not exists events (
   map_link text,
   event_date date not null,
   event_time time not null,
-  setup_id uuid references setups(id) on delete set null,
   vehicle_id uuid references vehicles(id) on delete set null,
   status event_status not null default 'Planned',
   total_amount numeric(12,2) not null default 0 check (total_amount >= 0),
@@ -126,6 +125,14 @@ create table if not exists event_rentals (
   quantity integer not null default 1 check (quantity > 0),
   created_at timestamptz not null default now(),
   primary key (event_id, rental_id)
+);
+
+create table if not exists event_setups (
+  event_id uuid not null references events(id) on delete cascade,
+  setup_id uuid not null references setups(id) on delete restrict,
+  quantity integer not null default 1 check (quantity > 0),
+  created_at timestamptz not null default now(),
+  primary key (event_id, setup_id)
 );
 
 create table if not exists payments (
@@ -219,15 +226,17 @@ select
   e.status,
   c.name as customer_name,
   c.mobile as customer_mobile,
-  s.name as setup_name,
+  (select string_agg(s.name || ' (' || es_setup.quantity || ')', ', ') 
+   from event_setups es_setup 
+   join setups s on s.id = es_setup.setup_id 
+   where es_setup.event_id = e.id) as setup_name,
   v.name as vehicle_name,
   count(es.staff_id)::integer as staff_count
 from events e
 left join customers c on c.id = e.customer_id
-left join setups s on s.id = e.setup_id
 left join vehicles v on v.id = e.vehicle_id
 left join event_staff es on es.event_id = e.id
-group by e.id, c.name, c.mobile, s.name, v.name;
+group by e.id, c.name, c.mobile, v.name;
 
 alter table profiles enable row level security;
 alter table customers enable row level security;
@@ -238,6 +247,7 @@ alter table rentals enable row level security;
 alter table events enable row level security;
 alter table event_staff enable row level security;
 alter table event_rentals enable row level security;
+alter table event_setups enable row level security;
 alter table payments enable row level security;
 alter table whatsapp_templates enable row level security;
 alter table alerts enable row level security;
@@ -250,7 +260,7 @@ do $$ declare
 begin
   foreach table_name in array array[
     'profiles', 'customers', 'staff', 'vehicles', 'setups', 'rentals',
-    'events', 'event_staff', 'event_rentals', 'payments',
+    'events', 'event_staff', 'event_rentals', 'event_setups', 'payments',
     'whatsapp_templates', 'alerts', 'app_settings', 'audit_logs', 'backup_runs'
   ]
   loop
@@ -268,7 +278,7 @@ end $$;
 do $$ declare
   table_name text;
 begin
-  foreach table_name in array array['customers', 'events', 'event_staff', 'rentals', 'staff']
+  foreach table_name in array array['customers', 'events', 'event_staff', 'event_setups', 'rentals', 'staff']
   loop
     execute format('drop policy if exists anon_insert_dev on %I', table_name);
     execute format('create policy anon_insert_dev on %I for insert to anon with check (true)', table_name);
@@ -282,7 +292,7 @@ do $$ declare
 begin
   foreach table_name in array array[
     'profiles', 'customers', 'staff', 'vehicles', 'setups', 'rentals',
-    'events', 'event_staff', 'event_rentals', 'payments',
+    'events', 'event_staff', 'event_rentals', 'event_setups', 'payments',
     'whatsapp_templates', 'alerts', 'app_settings', 'backup_runs'
   ]
   loop
@@ -311,14 +321,15 @@ insert into staff (name, role, status, avatar_seed) values
 on conflict (name) do nothing;
 
 insert into setups (name, quantity, status) values
-  ('Basic Setup', 2, 'Available'),
-  ('Honeycomb Setup', 2, 'Booked'),
-  ('Premium Setup', 1, 'Maintenance'),
-  ('LED Dance Floor Setup', 1, 'Available'),
-  ('Line Array Setup', 1, 'Available'),
-  ('Outdoor Setup', 1, 'Available'),
-  ('Wedding Setup', 1, 'Available'),
-  ('Festival Setup', 1, 'Available')
+  ('Basic Setup', 5, 'Available'),
+  ('Honeycomb Setup', 5, 'Available'),
+  ('Honeycomb with mirror ball sharpy Dj setup', 2, 'Available'),
+  ('Cold Pyro', 10, 'Available'),
+  ('LED Dance Floor 12by12 size', 2, 'Available'),
+  ('Low Fog Entry', 5, 'Available'),
+  ('360 Degree Selfie Booth', 2, 'Available'),
+  ('Balloon Blast', 5, 'Available'),
+  ('3rd Dance Floor', 2, 'Available')
 on conflict (name) do nothing;
 
 insert into vehicles (name, registration_number, status) values

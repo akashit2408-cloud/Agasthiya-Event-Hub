@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, Calendar, MapPin, Phone, User, Link as LinkIcon } from "lucide-react";
+import { ChevronLeft, Calendar, MapPin, Phone, User, Link as LinkIcon, Layers } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
@@ -12,6 +12,7 @@ export default function CreateEventPage() {
   const [vehicles, setVehicles] = useState<any[]>([]);
   const [staff, setStaff] = useState<any[]>([]);
   const [selectedStaff, setSelectedStaff] = useState<string[]>([]);
+  const [selectedSetups, setSelectedSetups] = useState<Record<string, number>>({});
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -70,9 +71,9 @@ export default function CreateEventPage() {
         map_link: String(form.get("map_link") || "") || null,
         event_date: String(form.get("event_date") || ""),
         event_time: String(form.get("event_time") || "17:00"),
-        setup_id: String(form.get("setup_id") || "") || null,
         vehicle_id: String(form.get("vehicle_id") || "") || null,
         total_amount: Number(form.get("total_amount") || 0),
+        notes: String(form.get("notes") || ""),
         status: "Planned",
       })
       .select("id")
@@ -86,6 +87,13 @@ export default function CreateEventPage() {
 
     if (selectedStaff.length > 0) {
       await supabase.from("event_staff").insert(selectedStaff.map((staffId) => ({ event_id: newEvent.id, staff_id: staffId })));
+    }
+
+    const setupEntries = Object.entries(selectedSetups);
+    if (setupEntries.length > 0) {
+      await supabase.from("event_setups").insert(
+        setupEntries.map(([setupId, quantity]) => ({ event_id: newEvent.id, setup_id: setupId, quantity }))
+      );
     }
 
     setSaving(false);
@@ -119,7 +127,44 @@ export default function CreateEventPage() {
           <InputField name="event_time" label="Time" type="time" icon={<Calendar size={18} />} defaultValue="17:00" required />
         </div>
 
-        <SelectRows name="setup_id" label="Setup Required" rows={setups} emptyLabel="No setup" />
+        <div className="space-y-3">
+          <h2 className="text-sm font-bold text-primary uppercase tracking-wider">Select Setups ({Object.keys(selectedSetups).length})</h2>
+          {setups.map((setup) => (
+            <div key={setup.id} className="w-full flex items-center justify-between p-3 bg-card border border-gray-50 rounded-2xl">
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedSetups((prev) => {
+                    const newSetups = { ...prev };
+                    if (newSetups[setup.id]) {
+                      delete newSetups[setup.id];
+                    } else {
+                      newSetups[setup.id] = 1;
+                    }
+                    return newSetups;
+                  });
+                }}
+                className="flex-1 flex items-center gap-3 text-left"
+              >
+                <div className={cn("w-5 h-5 rounded flex items-center justify-center transition-colors", selectedSetups[setup.id] ? "bg-primary" : "border-2 border-gray-200")}>
+                  {selectedSetups[setup.id] && <div className="w-2 h-2 bg-white rounded-sm" />}
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-gray-900">{setup.name}</p>
+                </div>
+              </button>
+
+              {selectedSetups[setup.id] && (
+                <div className="flex items-center gap-2">
+                  <button type="button" onClick={() => setSelectedSetups(prev => ({...prev, [setup.id]: Math.max(1, prev[setup.id] - 1)}))} className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-lg text-gray-600 font-bold">-</button>
+                  <span className="text-sm font-bold w-4 text-center">{selectedSetups[setup.id]}</span>
+                  <button type="button" onClick={() => setSelectedSetups(prev => ({...prev, [setup.id]: prev[setup.id] + 1}))} className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-lg text-gray-600 font-bold">+</button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+        <InputField name="notes" label="Additional Notes" icon={<Layers size={18} />} placeholder="Any other specific requirements?" />
         <SelectRows name="vehicle_id" label="Vehicle Required" rows={vehicles} emptyLabel="No vehicle" />
         <InputField name="total_amount" label="Total Amount" type="number" icon={<Calendar size={18} />} placeholder="0" />
 

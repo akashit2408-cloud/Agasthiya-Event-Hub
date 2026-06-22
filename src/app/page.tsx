@@ -26,7 +26,10 @@ export default function Dashboard() {
           supabase.from("events")
             .select(`
               id, title, event_type, location, map_link, event_date, event_time, status,
-              setups (name),
+              event_setups (
+                quantity,
+                setups (name)
+              ),
               event_staff (staff (name))
             `)
             .gte("event_date", new Date().toISOString().slice(0, 10))
@@ -39,7 +42,7 @@ export default function Dashboard() {
         if (eventData && eventData.length > 0) {
           const formattedEvents = eventData.map((e: any) => ({
             ...e,
-            setup_name: e.setups?.name,
+            setup_name: e.event_setups?.map((es: any) => `${es.setups?.name} (${es.quantity})`).join(', ') || null,
             staff_count: e.event_staff?.length || 0,
           }));
           setEvents(formattedEvents);

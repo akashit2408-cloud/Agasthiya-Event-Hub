@@ -23,7 +23,10 @@ export default function EventDetailsPage() {
           .select(`
             id, title, event_type, location, map_link, event_date, event_time, status, notes, total_amount,
             customers (name, mobile, address),
-            setups (name),
+            event_setups (
+              quantity,
+              setups (name)
+            ),
             vehicles (name, registration_number),
             event_staff (
               assigned_role,
@@ -41,7 +44,7 @@ export default function EventDetailsPage() {
           customer_name: (eventData as any).customers?.name,
           customer_mobile: (eventData as any).customers?.mobile,
           customer_address: (eventData as any).customers?.address,
-          setup_name: (eventData as any).setups?.name,
+          setup_name: (eventData as any).event_setups?.map((es: any) => `${es.setups?.name} (${es.quantity})`).join(', ') || null,
           vehicle_name: (eventData as any).vehicles?.name,
           vehicle_number: (eventData as any).vehicles?.registration_number,
           staff_count: (eventData as any).event_staff?.length || 0,

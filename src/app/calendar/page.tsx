@@ -18,7 +18,10 @@ export default function CalendarPage() {
           .from("events")
           .select(`
             id, title, event_date, event_time, status,
-            setups (name),
+            event_setups (
+              quantity,
+              setups (name)
+            ),
             event_staff (staff (id))
           `)
           .order("event_date")
@@ -28,7 +31,7 @@ export default function CalendarPage() {
         
         const formattedEvents = (data || []).map((e: any) => ({
           ...e,
-          setup_name: e.setups?.name,
+          setup_name: e.event_setups?.map((es: any) => `${es.setups?.name} (${es.quantity})`).join(', ') || null,
           staff_count: e.event_staff?.length || 0
         }));
         
