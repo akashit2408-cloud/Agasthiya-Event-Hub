@@ -117,7 +117,17 @@ export default function EventDetailsPage() {
               <span className="text-xs font-bold">{event.location}</span>
             </div>
             {event.map_link && (
-              <a href={event.map_link.startsWith('http') ? event.map_link : `https://${event.map_link}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-[10px] font-black bg-white text-primary px-3 py-1.5 rounded-full uppercase tracking-tighter hover:bg-gray-50 active:scale-95 transition-transform">
+              <a 
+                href={(() => {
+                  const link = event.map_link.trim();
+                  if (link.startsWith('http://') || link.startsWith('https://')) return link;
+                  if (link.includes('maps.app.goo.gl') || link.includes('google.com') || link.includes('goo.gl/maps')) return `https://${link}`;
+                  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(link)}`;
+                })()}
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="flex items-center gap-1.5 text-[10px] font-black bg-white text-primary px-3 py-1.5 rounded-full uppercase tracking-tighter hover:bg-gray-50 active:scale-95 transition-transform"
+              >
                 View Map <ExternalLink size={10} />
               </a>
             )}
