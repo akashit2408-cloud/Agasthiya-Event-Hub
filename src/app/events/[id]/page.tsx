@@ -39,10 +39,14 @@ export default function EventDetailsPage() {
       if (error) throw error;
       setEvent({ ...event, status: 'Cancelled' });
       setShowCancelModal(false);
+      
+      // Hard redirect to the events list to ensure fresh data is loaded
+      setTimeout(() => {
+        window.location.href = '/events';
+      }, 600);
     } catch (err) {
       console.error("Error cancelling event:", err);
       alert("Failed to cancel event. Please try again.");
-    } finally {
       setIsCancelling(false);
     }
   };
