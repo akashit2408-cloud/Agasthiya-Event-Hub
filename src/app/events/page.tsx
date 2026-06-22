@@ -146,10 +146,15 @@ function EventCard({ event }: any) {
     <div className="bg-white p-4 rounded-[24px] border border-gray-100 shadow-sm space-y-4">
       {/* Header */}
       <div className="flex justify-between items-start gap-3">
-         <div className="min-w-0 flex-1">
+         <div className="min-w-0 flex-1 flex flex-wrap items-center gap-2">
             <h3 className="font-extrabold text-gray-900 text-[17px] leading-tight truncate" title={event.title}>{event.title}</h3>
-            <div className={cn("mt-2 inline-block px-3 py-1 text-[10px] font-bold rounded-md", event.staff_count > 0 ? "bg-green-50 text-[#00A859]" : "bg-orange-50 text-orange-600")}>
-               {event.staff_count > 0 ? `${event.staff_count} CREW ASSIGNED` : "UNASSIGNED"}
+            {event.status === 'Cancelled' && (
+              <span className="bg-red-100 text-red-600 px-2 py-0.5 rounded text-[10px] font-black uppercase">Cancelled</span>
+            )}
+            <div className={cn("mt-1 w-full flex")}>
+              <div className={cn("inline-block px-3 py-1 text-[10px] font-bold rounded-md", event.staff_count > 0 ? "bg-green-50 text-[#00A859]" : "bg-orange-50 text-orange-600")}>
+                 {event.staff_count > 0 ? `${event.staff_count} CREW ASSIGNED` : "UNASSIGNED"}
+              </div>
             </div>
          </div>
          <span 
