@@ -27,8 +27,7 @@ export default function EventDetailsPage() {
       
     const crewList = staff.length > 0 
       ? staff.map(s => {
-          const isDj = s.assigned_role?.toLowerCase().includes("dj");
-          return `${isDj ? '🎧' : '👤'} ${s.name}${s.assigned_role ? ` - ${s.assigned_role}` : ''}`;
+          return `• ${s.name}${s.assigned_role ? ` (${s.assigned_role})` : ''}`;
         }).join('\n') 
       : "No crew assigned yet";
       
@@ -52,41 +51,36 @@ export default function EventDetailsPage() {
       return `${hours.toString().padStart(2, "0")}:${m} ${ampm}`;
     }
 
-    const message = `🎵 *DJ EVENTER CHENNAI*
+    const message = `🎵 *DJ EVENTER CHENNAI* 🎵
 *NEW EVENT ASSIGNMENT*
 
-━━━━━━
-🎂 *Event Name:* ${event.title}
-📌 *Event Type:* ${event.event_type}
+🎂 *Event:* ${event.title}
+📌 *Type:* ${event.event_type}
 
-📅 *Date:* ${formatDateStr(event.event_date)}
-⏰ *Event Time:* ${formatTime12(event.event_time)}
+📅 *Date & Time:* ${formatDateStr(event.event_date)}, ${formatTime12(event.event_time)}
+🕐 *Reporting Time:* ${event.reporting_time || 'Check notes'}
 
-📍 *Location / Venue:*
-${event.location}${event.map_link ? `\n🗺️ *Map Link:* ${event.map_link}` : ''}
+📍 *Location:* ${event.location?.split(',')[0] || event.location}
+🗺️ *Venue:* ${event.location}
+${event.map_link ? `Map: ${event.map_link}` : ''}
 
-━━━━━━
-🎵 *Setup Requirements*
+🎵 *Setup Requirements:*
 ${setupName}
 
-━━━━━━
-🚚 *Transport Allocation*
-${transport}
+🚚 *Transport:* ${transport}
 
-━━━━━━
-👷 *Assigned Crew*
+👷 *Crew Members:*
 ${crewList}
 
-━━━━━━
-📝 *Instructions & Notes*
-${event.remark ? `• ${event.remark}` : '• No specific instructions provided.'}
+📝 *Notes:* ${event.remark ? event.remark : 'None'}
 
-━━━━━━
-✅ *Please confirm receipt of this assignment.*
+✅ Please confirm receipt of this schedule.
+ Verify all equipment before loading
+ Coordinate with team members before departure
+ Contact supervisor immediately if any issue arises
 
 ${event.invitation_url ? `📎 *Invitation Attachment:*\n${event.invitation_url}\n` : ''}
-*DJ Eventer Chennai*
-Powered by Agasthiya Events`;
+*DJ Eventer Chennai | Agasthiya Events*`;
 
     // Always copy to clipboard as a reliable backup!
     navigator.clipboard.writeText(message).catch(e => console.error(e));
