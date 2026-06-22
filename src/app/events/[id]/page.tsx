@@ -69,14 +69,23 @@ _Please confirm receipt of this schedule._`;
     if (!event) return;
     setIsCancelling(true);
     try {
-      const { error } = await supabase.from('events').update({ status: 'Cancelled' }).eq('id', event.id);
+      const { data: updatedEvent, error } = await supabase
+        .from("events")
+        .update({ status: "Cancelled" })
+        .eq("id", event.id)
+        .select("id, status")
+        .single();
+
       if (error) throw error;
-      setEvent({ ...event, status: 'Cancelled' });
+      setEvent((currentEvent: any) => ({
+        ...currentEvent,
+        status: updatedEvent.status,
+      }));
       setShowCancelModal(false);
-      setIsCancelling(false);
     } catch (err) {
       console.error("Error cancelling event:", err);
-      alert("Failed to cancel event. Please try again.");
+      alert("The event could not be cancelled. Please try again.");
+    } finally {
       setIsCancelling(false);
     }
   };

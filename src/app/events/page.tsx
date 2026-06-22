@@ -1,13 +1,13 @@
 "use client";
 
-import { Search, Filter, Calendar, MapPin, Users, Truck, Plus, Eye, Clock } from "lucide-react";
+import { Search, Filter, Calendar, MapPin, Plus, Eye, Clock } from "lucide-react";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { formatEventDate } from "@/lib/demo-data";
 
-const tabs = ["All", "Today", "Upcoming", "Completed"];
+const tabs = ["All", "Today", "Upcoming", "Completed", "Cancelled"];
 
 export default function EventsPage() {
   const [activeTab, setActiveTab] = useState("All");
@@ -59,9 +59,11 @@ export default function EventsPage() {
 
   const today = new Date().toISOString().slice(0, 10);
   const filteredEvents = events.filter((event) => {
+    const status = event.status?.toLowerCase();
     if (activeTab === "Today") return event.event_date === today;
-    if (activeTab === "Upcoming") return event.event_date > today && event.status !== "Cancelled";
-    if (activeTab === "Completed") return event.status === "Completed";
+    if (activeTab === "Upcoming") return event.event_date > today && status !== "cancelled" && status !== "canceled";
+    if (activeTab === "Completed") return status === "completed";
+    if (activeTab === "Cancelled") return status === "cancelled" || status === "canceled";
     return true;
   });
 
@@ -85,13 +87,13 @@ export default function EventsPage() {
           </button>
         </div>
 
-        <div className="flex justify-between border-b border-gray-100">
+        <div className="grid grid-cols-5 border-b border-gray-100">
           {tabs.map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={cn(
-                "pb-3 px-2 text-xs font-bold transition-all relative",
+                "min-w-0 pb-3 px-0.5 text-[11px] font-bold transition-all relative",
                 activeTab === tab ? "text-primary" : "text-gray-400"
               )}
             >

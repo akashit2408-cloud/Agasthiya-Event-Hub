@@ -289,6 +289,12 @@ end $$;
 
 -- Temporary dev policies for the current client-only app.
 -- Remove these after real Supabase auth is wired into /login.
+drop policy if exists anon_update_dev on events;
+create policy anon_update_dev on events
+  for update to anon
+  using (true)
+  with check (true);
+
 do $$ declare
   table_name text;
 begin
