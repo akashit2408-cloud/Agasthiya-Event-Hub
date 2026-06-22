@@ -73,7 +73,13 @@ export default function CreateEventPage() {
         supabase.from("staff").select("*").order("role").order("name"),
       ]);
       setSetups(setupRows || []);
-      setVehicles(vehicleRows || []);
+      
+      const v = vehicleRows || [];
+      if (!v.some((vh: any) => vh.name.toLowerCase() === 'others')) {
+        v.push({ id: 'others', name: 'Others' });
+      }
+      setVehicles(v);
+      
       setStaff(staffRows || []);
     }
     fetchResources().catch((err) => console.error("Error loading event resources:", err));
@@ -111,6 +117,23 @@ export default function CreateEventPage() {
       customerId = newCustomer.id;
     }
 
+    let form_vehicle_id = String(form.get("vehicle_id") || "");
+    let final_vehicle_id: string | null = form_vehicle_id || null;
+
+    if (form_vehicle_id === "others") {
+      const { data: otherVehicle } = await supabase.from("vehicles").select("id").ilike("name", "others").maybeSingle();
+      if (otherVehicle) {
+        final_vehicle_id = otherVehicle.id;
+      } else {
+        const { data: newVehicle, error: newVehicleError } = await supabase.from("vehicles").insert({ name: "Others", status: "Available" }).select("id").single();
+        if (!newVehicleError && newVehicle) {
+          final_vehicle_id = newVehicle.id;
+        } else {
+          final_vehicle_id = null;
+        }
+      }
+    }
+
     const { data: newEvent, error: eventError } = await supabase
       .from("events")
       .insert({
@@ -121,7 +144,7 @@ export default function CreateEventPage() {
         map_link: String(form.get("map_link") || "") || null,
         event_date: String(form.get("event_date") || ""),
         event_time: String(form.get("event_time") || "17:00"),
-        vehicle_id: String(form.get("vehicle_id") || "") || null,
+        vehicle_id: final_vehicle_id,
         total_amount: Number(form.get("total_amount") || 0),
         notes: String(form.get("notes") || ""),
         invitation_url: invitationImage,
