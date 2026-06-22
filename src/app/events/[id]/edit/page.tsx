@@ -153,15 +153,16 @@ export default function EditEventPage() {
           mobile,
           address: String(form.get("location") || ""),
         })
-        .select("id")
-        .single();
+        .select("id");
 
       if (customerError) {
         setSaving(false);
         alert(customerError.message);
         return;
       }
-      customerId = newCustomer.id;
+      if (newCustomer && newCustomer.length > 0) {
+        customerId = newCustomer[0].id;
+      }
     }
 
     let form_vehicle_id = String(form.get("vehicle_id") || "");
@@ -172,9 +173,9 @@ export default function EditEventPage() {
       if (otherVehicle) {
         final_vehicle_id = otherVehicle.id;
       } else {
-        const { data: newVehicle, error: newVehicleError } = await supabase.from("vehicles").insert({ name: "Others", status: "Available" }).select("id").single();
-        if (!newVehicleError && newVehicle) {
-          final_vehicle_id = newVehicle.id;
+        const { data: newVehicle, error: newVehicleError } = await supabase.from("vehicles").insert({ name: "Others", status: "Available" }).select("id");
+        if (!newVehicleError && newVehicle && newVehicle.length > 0) {
+          final_vehicle_id = newVehicle[0].id;
         } else {
           final_vehicle_id = null;
         }
@@ -198,13 +199,16 @@ export default function EditEventPage() {
         remark: remark,
       })
       .eq("id", params.id)
-      .select("id")
-      .single();
+      .select("id");
 
     if (eventError) {
       setSaving(false);
       alert(eventError.message);
       return;
+    }
+    
+    if (!newEvent || newEvent.length === 0) {
+       console.warn("Update may not have applied correctly. Check RLS policies.");
     }
 
     await supabase.from("event_staff").delete().eq("event_id", params.id);
