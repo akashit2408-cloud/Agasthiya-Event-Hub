@@ -12,4 +12,10 @@ if (!hasValidSupabaseUrl || !supabaseAnonKey) {
 const resolvedSupabaseUrl = hasValidSupabaseUrl && supabaseUrl ? supabaseUrl : "https://placeholder.supabase.co"
 const resolvedSupabaseAnonKey = supabaseAnonKey || "placeholder-anon-key"
 
-export const supabase = createClient(resolvedSupabaseUrl, resolvedSupabaseAnonKey)
+export const supabase = createClient(resolvedSupabaseUrl, resolvedSupabaseAnonKey, {
+  global: {
+    fetch: (url, options) => {
+      return fetch(url, { ...options, cache: 'no-store' });
+    }
+  }
+});
