@@ -21,39 +21,81 @@ export default function EventDetailsPage() {
   const handleShare = () => {
     if (!event) return;
     
-    const setupName = event.setup_name || "NO SETUP";
+    const setupName = event.setup_name 
+      ? event.setup_name.split(', ').map((s: string) => `• ${s}`).join('\n\n') 
+      : "• No setup";
+      
     const crewList = staff.length > 0 
-      ? staff.map(s => `• ${s.name} (${s.assigned_role || s.role || 'Crew'})`).join('\n') 
+      ? staff.map(s => {
+          const isDj = s.assigned_role?.toLowerCase().includes("dj");
+          return `${isDj ? '🎧' : '👤'} ${s.name}${s.assigned_role ? ` - ${s.assigned_role}` : ''}`;
+        }).join('\n\n') 
       : "No crew assigned yet";
       
     const transport = event.vehicle_name 
-      ? `${event.vehicle_name} ${event.vehicle_number ? `[${event.vehicle_number}]` : ''}`
+      ? `${event.vehicle_name}${event.vehicle_number ? ` [${event.vehicle_number}]` : ''}`
       : 'Not Assigned';
 
-    const message = `🎉 *NEW EVENT ASSIGNMENT* 🎉
+    const formatDateStr = (dateStr: string) => {
+      if (!dateStr) return "";
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+    };
 
-*Event:* ${event.title}
-*Type:* ${event.event_type}
+    function formatTime12(timeStr: string) {
+      if (!timeStr) return "";
+      const [h, m] = timeStr.split(":");
+      let hours = parseInt(h, 10);
+      const ampm = hours >= 12 ? "PM" : "AM";
+      hours = hours % 12 || 12;
+      return `${hours.toString().padStart(2, "0")}:${m} ${ampm}`;
+    }
 
-📅 *Date & Time:* 
-${formatEventDate(event.event_date, event.event_time)}
+    const message = `🎵 *DJ EVENTER CHENNAI*
+*NEW EVENT ASSIGNMENT*
 
-📍 *Location:* 
-${event.location}${event.map_link ? `\n🗺️ *Map:* ${event.map_link}` : ''}
+━━━━━━━━━━━━━━━━━━
 
-🛠️ *Setup Requirements:* 
+🎂 *Event Name:* ${event.title}
+📌 *Event Type:* ${event.event_type}
+
+📅 *Date:* ${formatDateStr(event.event_date)}
+⏰ *Event Time:* ${formatTime12(event.event_time)}
+
+📍 *Location / Venue:*
+${event.location}${event.map_link ? `\n\n🗺️ *Map Link:* ${event.map_link}` : ''}
+
+━━━━━━━━━━━━━━━━━━
+
+🎵 *Setup Requirements*
+
 ${setupName}
 
-🚗 *Transport:* 
+━━━━━━━━━━━━━━━━━━
+
+🚚 *Transport Allocation*
+
 ${transport}
 
-👥 *Crew Members:* 
+━━━━━━━━━━━━━━━━━━
+
+👷 *Assigned Crew*
+
 ${crewList}
 
-📝 *Notes:* 
-${event.remark || event.notes || 'None'}
+━━━━━━━━━━━━━━━━━━
 
-_Please confirm receipt of this schedule._`;
+📝 *Instructions & Notes*
+
+${event.remark ? `• ${event.remark}` : '• No specific instructions provided.'}
+
+━━━━━━━━━━━━━━━━━━
+
+✅ *Please confirm receipt of this assignment.*
+
+*DJ Eventer Chennai*
+Powered by Agasthiya Events`;
 
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
