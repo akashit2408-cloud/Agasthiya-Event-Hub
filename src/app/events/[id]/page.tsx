@@ -91,9 +91,15 @@ Powered by Agasthiya Events`;
     // Always copy to clipboard as a reliable backup!
     navigator.clipboard.writeText(message).catch(e => console.error(e));
 
-    // Use wa.me which is the standard, since we've drastically reduced the URL size
-    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
+    // Since they have WhatsApp Desktop installed, use the native protocol! 
+    // This completely bypasses the browser's network proxy and avoids the ERR_CONNECTION_CLOSED error!
+    const whatsappUrl = `whatsapp://send?text=${encodeURIComponent(message)}`;
+    window.location.href = whatsappUrl;
+    
+    // In case they want to use web as well, provide a brief instruction
+    setTimeout(() => {
+      alert("✅ Perfect message copied to clipboard!\n\nIf WhatsApp Desktop didn't open automatically, you can open WhatsApp manually and hit Paste (Ctrl+V)!");
+    }, 500);
   };
 
   const handleCancelClick = (event: MouseEvent<HTMLButtonElement>) => {
