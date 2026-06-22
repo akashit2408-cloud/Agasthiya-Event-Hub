@@ -22,14 +22,14 @@ export default function EventDetailsPage() {
     if (!event) return;
     
     const setupName = event.setup_name 
-      ? event.setup_name.split(', ').map((s: string) => `• ${s}`).join('\n\n') 
+      ? event.setup_name.split(', ').map((s: string) => `• ${s}`).join('\n') 
       : "• No setup";
       
     const crewList = staff.length > 0 
       ? staff.map(s => {
           const isDj = s.assigned_role?.toLowerCase().includes("dj");
           return `${isDj ? '🎧' : '👤'} ${s.name}${s.assigned_role ? ` - ${s.assigned_role}` : ''}`;
-        }).join('\n\n') 
+        }).join('\n') 
       : "No crew assigned yet";
       
     const transport = event.vehicle_name 
@@ -55,8 +55,7 @@ export default function EventDetailsPage() {
     const message = `🎵 *DJ EVENTER CHENNAI*
 *NEW EVENT ASSIGNMENT*
 
-----------------------------------
-
+---
 🎂 *Event Name:* ${event.title}
 📌 *Event Type:* ${event.event_type}
 
@@ -64,49 +63,37 @@ export default function EventDetailsPage() {
 ⏰ *Event Time:* ${formatTime12(event.event_time)}
 
 📍 *Location / Venue:*
-${event.location}${event.map_link ? `\n\n🗺️ *Map Link:* ${event.map_link}` : ''}
+${event.location}${event.map_link ? `\n🗺️ *Map Link:* ${event.map_link}` : ''}
 
-----------------------------------
-
+---
 🎵 *Setup Requirements*
-
 ${setupName}
 
-----------------------------------
-
+---
 🚚 *Transport Allocation*
-
 ${transport}
 
-----------------------------------
-
+---
 👷 *Assigned Crew*
-
 ${crewList}
 
-----------------------------------
-
+---
 📝 *Instructions & Notes*
-
 ${event.remark ? `• ${event.remark}` : '• No specific instructions provided.'}
 
-----------------------------------
-
+---
 ✅ *Please confirm receipt of this assignment.*
 
 ${event.invitation_url ? `📎 *Invitation Attachment:*\n${event.invitation_url}\n` : ''}
 *DJ Eventer Chennai*
 Powered by Agasthiya Events`;
 
-    navigator.clipboard.writeText(message).then(() => {
-      // Use web.whatsapp.com to bypass api/wa.me proxy issues
-      const whatsappUrl = `https://web.whatsapp.com/send?text=${encodeURIComponent(message)}`;
-      window.open(whatsappUrl, '_blank');
-    }).catch(err => {
-      console.error("Could not copy text: ", err);
-      const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
-      window.open(whatsappUrl, '_blank');
-    });
+    // Always copy to clipboard as a reliable backup!
+    navigator.clipboard.writeText(message).catch(e => console.error(e));
+
+    // Use wa.me which is the standard, since we've drastically reduced the URL size
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
   };
 
   const handleCancelClick = (event: MouseEvent<HTMLButtonElement>) => {
