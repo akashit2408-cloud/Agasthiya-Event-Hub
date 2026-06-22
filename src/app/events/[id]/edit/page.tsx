@@ -136,100 +136,112 @@ export default function EditEventPage() {
     event.preventDefault();
     setSaving(true);
 
-    const form = new FormData(event.currentTarget);
-    const mobile = String(form.get("mobile") || "");
-    const customerName = String(form.get("customer_name") || "");
+    try {
+      const form = new FormData(event.currentTarget);
+      const mobile = String(form.get("mobile") || "");
+      const customerName = String(form.get("customer_name") || "");
 
-    let customerId: string | null = null;
-    const { data: existingCustomer } = await supabase.from("customers").select("id").eq("mobile", mobile).maybeSingle();
+      let customerId: string | null = null;
+      const { data: existingCustomer } = await supabase.from("customers").select("id").eq("mobile", mobile).maybeSingle();
 
-    if (existingCustomer) {
-      customerId = existingCustomer.id;
-    } else {
-      const { data: newCustomer, error: customerError } = await supabase
-        .from("customers")
-        .insert({
-          name: customerName,
-          mobile,
-          address: String(form.get("location") || ""),
-        })
-        .select("id");
-
-      if (customerError) {
-        setSaving(false);
-        alert(customerError.message);
-        return;
-      }
-      if (newCustomer && newCustomer.length > 0) {
-        customerId = newCustomer[0].id;
-      }
-    }
-
-    let form_vehicle_id = String(form.get("vehicle_id") || "");
-    let final_vehicle_id: string | null = form_vehicle_id || null;
-
-    if (form_vehicle_id === "others") {
-      const { data: otherVehicle } = await supabase.from("vehicles").select("id").ilike("name", "others").maybeSingle();
-      if (otherVehicle) {
-        final_vehicle_id = otherVehicle.id;
+      if (existingCustomer) {
+        customerId = existingCustomer.id;
       } else {
-        const { data: newVehicle, error: newVehicleError } = await supabase.from("vehicles").insert({ name: "Others", status: "Available" }).select("id");
-        if (!newVehicleError && newVehicle && newVehicle.length > 0) {
-          final_vehicle_id = newVehicle[0].id;
-        } else {
-          final_vehicle_id = null;
+        const { data: newCustomer, error: customerError } = await supabase
+          .from("customers")
+          .insert({
+            name: customerName,
+            mobile,
+            address: String(form.get("location") || ""),
+          })
+          .select("id");
+
+        if (customerError) {
+          setSaving(false);
+          alert("Error saving customer: " + customerError.message);
+          return;
+        }
+        if (newCustomer && newCustomer.length > 0) {
+          customerId = newCustomer[0].id;
         }
       }
-    }
 
-    const { data: newEvent, error: eventError } = await supabase
-      .from("events")
-      .update({
-        customer_id: customerId,
-        title: String(form.get("title") || `${form.get("event_type")} Event`),
-        event_type: String(form.get("event_type") || "Event"),
-        location: String(form.get("location") || ""),
-        map_link: String(form.get("map_link") || "") || null,
-        event_date: String(form.get("event_date") || ""),
-        event_time: String(form.get("event_time") || "17:00"),
-        vehicle_id: final_vehicle_id,
-        total_amount: Number(form.get("total_amount") || 0),
-        notes: String(form.get("notes") || ""),
-        invitation_url: invitationImage,
-        remark: remark,
-      })
-      .eq("id", params.id)
-      .select("id");
+      let form_vehicle_id = String(form.get("vehicle_id") || "");
+      let final_vehicle_id: string | null = form_vehicle_id || null;
 
-    if (eventError) {
+      if (form_vehicle_id === "others") {
+        const { data: otherVehicle } = await supabase.from("vehicles").select("id").ilike("name", "others").maybeSingle();
+        if (otherVehicle) {
+          final_vehicle_id = otherVehicle.id;
+        } else {
+          const { data: newVehicle, error: newVehicleError } = await supabase.from("vehicles").insert({ name: "Others", status: "Available" }).select("id");
+          if (!newVehicleError && newVehicle && newVehicle.length > 0) {
+            final_vehicle_id = newVehicle[0].id;
+          } else {
+            final_vehicle_id = null;
+          }
+        }
+      }
+
+      const { data: newEvent, error: eventError } = await supabase
+        .from("events")
+        .update({
+          customer_id: customerId,
+          title: String(form.get("title") || `${form.get("event_type")} Event`),
+          event_type: String(form.get("event_type") || "Event"),
+          location: String(form.get("location") || ""),
+          map_link: String(form.get("map_link") || "") || null,
+          event_date: String(form.get("event_date") || ""),
+          event_time: String(form.get("event_time") || "17:00"),
+          vehicle_id: final_vehicle_id,
+          total_amount: Number(form.get("total_amount") || 0),
+          notes: String(form.get("notes") || ""),
+          invitation_url: invitationImage,
+          remark: remark,
+        })
+        .eq("id", params.id)
+        .select("id");
+
+      if (eventError) {
+        setSaving(false);
+        alert("Error saving event: " + eventError.message);
+        return;
+      }
+      
+      if (!newEvent || newEvent.length === 0) {
+         console.warn("Update may not have applied correctly. Check RLS policies.");
+      }
+
+      const { error: staffDelErr } = await supabase.from("event_staff").delete().eq("event_id", params.id);
+      if (staffDelErr) console.error("Error deleting old staff:", staffDelErr);
+
+      if (selectedStaff.length > 0) {
+        const { error: staffInsErr } = await supabase.from("event_staff").insert(selectedStaff.map((staffId) => ({ 
+          event_id: params.id, 
+          staff_id: staffId,
+          assigned_role: staffRemarks[staffId] || null
+        })));
+        if (staffInsErr) console.error("Error inserting staff:", staffInsErr);
+      }
+
+      const { error: setupDelErr } = await supabase.from("event_setups").delete().eq("event_id", params.id);
+      if (setupDelErr) console.error("Error deleting old setups:", setupDelErr);
+
+      const setupEntries = Object.entries(selectedSetups);
+      if (setupEntries.length > 0) {
+        const { error: setupInsErr } = await supabase.from("event_setups").insert(
+          setupEntries.map(([setupId, quantity]) => ({ event_id: params.id, setup_id: setupId, quantity }))
+        );
+        if (setupInsErr) console.error("Error inserting setups:", setupInsErr);
+      }
+
       setSaving(false);
-      alert(eventError.message);
-      return;
+      window.location.href = `/events/${params.id}`;
+    } catch (err: any) {
+      console.error("Unhandled error in handleSubmit:", err);
+      alert(err.message || "An unknown error occurred while saving.");
+      setSaving(false);
     }
-    
-    if (!newEvent || newEvent.length === 0) {
-       console.warn("Update may not have applied correctly. Check RLS policies.");
-    }
-
-    await supabase.from("event_staff").delete().eq("event_id", params.id);
-    if (selectedStaff.length > 0) {
-      await supabase.from("event_staff").insert(selectedStaff.map((staffId) => ({ 
-        event_id: params.id, 
-        staff_id: staffId,
-        assigned_role: staffRemarks[staffId] || null
-      })));
-    }
-
-    await supabase.from("event_setups").delete().eq("event_id", params.id);
-    const setupEntries = Object.entries(selectedSetups);
-    if (setupEntries.length > 0) {
-      await supabase.from("event_setups").insert(
-        setupEntries.map(([setupId, quantity]) => ({ event_id: params.id, setup_id: setupId, quantity }))
-      );
-    }
-
-    setSaving(false);
-    router.back();
   }
 
   function toggleStaff(staffId: string) {
