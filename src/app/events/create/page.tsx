@@ -117,7 +117,7 @@ export default function CreateEventPage() {
       customerId = newCustomer.id;
     }
 
-    let form_vehicle_id = String(form.get("vehicle_id") || "");
+    const form_vehicle_id = String(form.get("vehicle_id") || "");
     let final_vehicle_id: string | null = form_vehicle_id || null;
 
     if (form_vehicle_id === "others") {
