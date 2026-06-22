@@ -20,9 +20,41 @@ export default function EventDetailsPage() {
 
   const handleShare = () => {
     if (!event) return;
-    const crewNames = staff.map(s => s.name).join(", ");
+    
     const setupName = event.setup_name || "NO SETUP";
-    const message = `*Event Details*\n\n*Title:* ${event.title}\n*Time:* ${formatEventDate(event.event_date, event.event_time)}\n*Location:* ${event.location}\n*Setup:* ${setupName}\n*Crew Assigned:* ${staff.length > 0 ? crewNames : "UNASSIGNED"}`;
+    const crewList = staff.length > 0 
+      ? staff.map(s => `• ${s.name} (${s.assigned_role || s.role || 'Crew'})`).join('\n') 
+      : "No crew assigned yet";
+      
+    const transport = event.vehicle_name 
+      ? `${event.vehicle_name} ${event.vehicle_number ? `[${event.vehicle_number}]` : ''}`
+      : 'Not Assigned';
+
+    const message = `🎉 *NEW EVENT ASSIGNMENT* 🎉
+
+*Event:* ${event.title}
+*Type:* ${event.event_type}
+
+📅 *Date & Time:* 
+${formatEventDate(event.event_date, event.event_time)}
+
+📍 *Location:* 
+${event.location}${event.map_link ? `\n🗺️ *Map:* ${event.map_link}` : ''}
+
+🛠️ *Setup Requirements:* 
+${setupName}
+
+🚗 *Transport:* 
+${transport}
+
+👥 *Crew Members:* 
+${crewList}
+
+📝 *Notes:* 
+${event.remark || event.notes || 'None'}
+
+_Please confirm receipt of this schedule._`;
+
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
