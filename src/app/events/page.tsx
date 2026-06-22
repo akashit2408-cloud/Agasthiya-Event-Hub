@@ -105,6 +105,14 @@ export default function EventsPage() {
       <div className="p-5 space-y-4 overflow-y-auto">
         {loading ? (
           <p className="py-10 text-center text-sm font-medium text-gray-500">Loading events...</p>
+        ) : filteredEvents.length === 0 ? (
+          <div className="py-20 flex flex-col items-center justify-center text-center px-4">
+             <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-3">
+                <Calendar size={24} className="text-gray-400" />
+             </div>
+             <p className="text-sm font-bold text-gray-900 mb-1">No events found</p>
+             <p className="text-xs text-gray-500">There are no events in this category yet.</p>
+          </div>
         ) : (
           <>
             <div className="flex justify-between items-center mb-1 mt-2">
