@@ -55,7 +55,7 @@ export default function EventDetailsPage() {
     const message = `🎵 *DJ EVENTER CHENNAI*
 *NEW EVENT ASSIGNMENT*
 
-━━━━━━━━━━━━━━━━━━
+----------------------------------
 
 🎂 *Event Name:* ${event.title}
 📌 *Event Type:* ${event.event_type}
@@ -66,31 +66,31 @@ export default function EventDetailsPage() {
 📍 *Location / Venue:*
 ${event.location}${event.map_link ? `\n\n🗺️ *Map Link:* ${event.map_link}` : ''}
 
-━━━━━━━━━━━━━━━━━━
+----------------------------------
 
 🎵 *Setup Requirements*
 
 ${setupName}
 
-━━━━━━━━━━━━━━━━━━
+----------------------------------
 
 🚚 *Transport Allocation*
 
 ${transport}
 
-━━━━━━━━━━━━━━━━━━
+----------------------------------
 
 👷 *Assigned Crew*
 
 ${crewList}
 
-━━━━━━━━━━━━━━━━━━
+----------------------------------
 
 📝 *Instructions & Notes*
 
 ${event.remark ? `• ${event.remark}` : '• No specific instructions provided.'}
 
-━━━━━━━━━━━━━━━━━━
+----------------------------------
 
 ✅ *Please confirm receipt of this assignment.*
 
@@ -98,8 +98,15 @@ ${event.invitation_url ? `📎 *Invitation Attachment:*\n${event.invitation_url}
 *DJ Eventer Chennai*
 Powered by Agasthiya Events`;
 
-    const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
+    navigator.clipboard.writeText(message).then(() => {
+      // Use web.whatsapp.com to bypass api/wa.me proxy issues
+      const whatsappUrl = `https://web.whatsapp.com/send?text=${encodeURIComponent(message)}`;
+      window.open(whatsappUrl, '_blank');
+    }).catch(err => {
+      console.error("Could not copy text: ", err);
+      const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
+      window.open(whatsappUrl, '_blank');
+    });
   };
 
   const handleCancelClick = (event: MouseEvent<HTMLButtonElement>) => {
