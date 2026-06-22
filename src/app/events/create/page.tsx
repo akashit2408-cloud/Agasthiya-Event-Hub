@@ -13,6 +13,7 @@ export default function CreateEventPage() {
   const [staff, setStaff] = useState<any[]>([]);
   const [selectedStaff, setSelectedStaff] = useState<string[]>([]);
   const [staffRemarks, setStaffRemarks] = useState<Record<string, string>>({});
+  const [showAllStaff, setShowAllStaff] = useState(false);
   const [selectedSetups, setSelectedSetups] = useState<Record<string, number>>({});
   const [saving, setSaving] = useState(false);
 
@@ -174,8 +175,17 @@ export default function CreateEventPage() {
         <InputField name="total_amount" label="Total Amount" type="number" icon={<Calendar size={18} />} placeholder="0" />
 
         <div className="space-y-3">
-          <h2 className="text-sm font-bold text-primary uppercase tracking-wider">Select Staff ({selectedStaff.length})</h2>
-          {staff.map((member) => (
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-bold text-primary uppercase tracking-wider">Select Staff ({selectedStaff.length})</h2>
+            <button 
+              type="button" 
+              onClick={() => setShowAllStaff(!showAllStaff)}
+              className="text-xs font-bold text-primary bg-primary/10 px-3 py-1 rounded-full"
+            >
+              {showAllStaff ? "Show Selected" : "Show All Staff"}
+            </button>
+          </div>
+          {(showAllStaff ? staff : staff.filter(m => selectedStaff.includes(m.id))).map((member) => (
             <div key={member.id} className="w-full flex flex-col gap-2 p-3 bg-card border border-gray-50 rounded-2xl">
               <button
                 type="button"
