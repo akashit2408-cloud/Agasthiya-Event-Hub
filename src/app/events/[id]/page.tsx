@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, Calendar, MapPin, Users, Truck, Layers, MessageSquare, ExternalLink, Copy, Edit2 } from "lucide-react";
+import { ChevronLeft, Calendar, MapPin, Users, Truck, Layers, MessageSquare, ExternalLink, Copy, Edit2, Info, ImageIcon } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
@@ -21,7 +21,7 @@ export default function EventDetailsPage() {
         const { data: eventData, error } = await supabase
           .from("events")
           .select(`
-            id, title, event_type, location, map_link, event_date, event_time, status, notes, total_amount,
+            id, title, event_type, location, map_link, event_date, event_time, status, notes, total_amount, invitation_url, remark,
             customers (name, mobile, address),
             event_setups (
               quantity,
@@ -114,6 +114,32 @@ export default function EventDetailsPage() {
             )}
           </div>
         </div>
+
+        {event.remark && (
+          <div className="bg-orange-50 p-4 rounded-3xl border border-orange-100 flex items-start gap-3">
+            <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center shrink-0">
+              <Info size={16} className="text-orange-500" />
+            </div>
+            <div>
+              <p className="text-[10px] font-black text-orange-400 uppercase tracking-widest mb-1">Remarks / Instructions</p>
+              <p className="text-sm font-bold text-orange-900 leading-snug">{event.remark}</p>
+            </div>
+          </div>
+        )}
+
+        {event.invitation_url && (
+          <div className="bg-card p-4 rounded-3xl border border-gray-50">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                <ImageIcon size={16} className="text-primary" />
+              </div>
+              <p className="text-sm font-black text-gray-900 uppercase tracking-widest">Invitation</p>
+            </div>
+            <div className="w-full rounded-2xl overflow-hidden border border-gray-100">
+              <img src={event.invitation_url} alt="Event Invitation" className="w-full h-auto object-cover" />
+            </div>
+          </div>
+        )}
 
         <div className="space-y-4">
           <div className="flex justify-between items-center">

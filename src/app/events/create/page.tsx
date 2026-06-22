@@ -1,8 +1,8 @@
 "use client";
 
-import { ChevronLeft, Calendar, MapPin, Phone, User, Link as LinkIcon, Layers } from "lucide-react";
+import { ChevronLeft, Calendar, MapPin, Phone, User, Link as LinkIcon, Layers, Camera, X, ImageIcon, MessageSquare } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 
@@ -17,6 +17,53 @@ export default function CreateEventPage() {
   const [showAllStaff, setShowAllStaff] = useState(false);
   const [selectedSetups, setSelectedSetups] = useState<Record<string, number>>({});
   const [saving, setSaving] = useState(false);
+  const [invitationImage, setInvitationImage] = useState<string | null>(null);
+  const [remark, setRemark] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert("Please select an image file");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = document.createElement('img');
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 1000;
+        const MAX_HEIGHT = 1000;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+
+        const compressedDataUrl = canvas.toDataURL('image/webp', 0.7);
+        setInvitationImage(compressedDataUrl);
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
 
   useEffect(() => {
     async function fetchResources() {
@@ -77,6 +124,8 @@ export default function CreateEventPage() {
         vehicle_id: String(form.get("vehicle_id") || "") || null,
         total_amount: Number(form.get("total_amount") || 0),
         notes: String(form.get("notes") || ""),
+        invitation_url: invitationImage,
+        remark: remark,
         status: "Planned",
       })
       .select("id")
@@ -128,6 +177,45 @@ export default function CreateEventPage() {
         <SelectField name="event_type" label="Event Type" options={["Wedding", "Birthday", "Corporate", "Rental", "Other"]} />
         <InputField name="location" label="Location" icon={<MapPin size={18} />} placeholder="Enter location" required />
         <InputField name="map_link" label="Google Map Link" icon={<LinkIcon size={18} />} placeholder="Paste google map link" />
+
+        <div className="space-y-3">
+          <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Event Invitation</label>
+          <div className="bg-card border-2 border-dashed border-gray-200 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
+            {invitationImage ? (
+              <div className="relative w-full max-w-[200px] rounded-xl overflow-hidden border border-gray-100 shadow-sm">
+                <img src={invitationImage} alt="Invitation Preview" className="w-full h-auto object-cover" />
+                <button type="button" onClick={() => setInvitationImage(null)} className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5 shadow-lg active:scale-95">
+                  <X size={14} />
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="w-12 h-12 bg-primary/10 text-primary rounded-full flex items-center justify-center mb-3">
+                  <ImageIcon size={24} />
+                </div>
+                <p className="text-sm font-bold text-gray-900 mb-1">Upload Invitation</p>
+                <p className="text-xs text-gray-500 mb-4 max-w-[200px]">PNG, JPG up to 5MB (Will be auto-compressed)</p>
+                <button type="button" onClick={() => fileInputRef.current?.click()} className="px-5 py-2.5 bg-white border border-gray-200 text-gray-700 text-xs font-bold rounded-xl shadow-sm hover:border-primary hover:text-primary transition-colors">
+                  Select Image
+                </button>
+              </>
+            )}
+            <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Remarks / Instructions</label>
+          <div className="relative">
+            <MessageSquare className="absolute left-4 top-4 text-gray-400" size={18} />
+            <textarea 
+              value={remark}
+              onChange={(e) => setRemark(e.target.value)}
+              placeholder="e.g. Come to godown at 12:30 PM..."
+              className="w-full bg-white border border-gray-200 rounded-2xl py-3.5 pl-12 pr-4 text-sm font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none min-h-[100px] resize-none"
+            />
+          </div>
+        </div>
 
         <div className="grid grid-cols-2 gap-4">
           <InputField name="event_date" label="Date" type="date" icon={<Calendar size={18} />} required />

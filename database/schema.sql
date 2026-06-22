@@ -107,6 +107,8 @@ create table if not exists events (
   status event_status not null default 'Planned',
   total_amount numeric(12,2) not null default 0 check (total_amount >= 0),
   notes text,
+  invitation_url text,
+  remark text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
