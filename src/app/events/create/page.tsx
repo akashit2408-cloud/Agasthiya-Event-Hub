@@ -12,6 +12,7 @@ export default function CreateEventPage() {
   const [vehicles, setVehicles] = useState<any[]>([]);
   const [staff, setStaff] = useState<any[]>([]);
   const [selectedStaff, setSelectedStaff] = useState<string[]>([]);
+  const [staffRemarks, setStaffRemarks] = useState<Record<string, string>>({});
   const [selectedSetups, setSelectedSetups] = useState<Record<string, number>>({});
   const [saving, setSaving] = useState(false);
 
@@ -86,7 +87,11 @@ export default function CreateEventPage() {
     }
 
     if (selectedStaff.length > 0) {
-      await supabase.from("event_staff").insert(selectedStaff.map((staffId) => ({ event_id: newEvent.id, staff_id: staffId })));
+      await supabase.from("event_staff").insert(selectedStaff.map((staffId) => ({ 
+        event_id: newEvent.id, 
+        staff_id: staffId,
+        assigned_role: staffRemarks[staffId] || null
+      })));
     }
 
     const setupEntries = Object.entries(selectedSetups);
@@ -171,25 +176,35 @@ export default function CreateEventPage() {
         <div className="space-y-3">
           <h2 className="text-sm font-bold text-primary uppercase tracking-wider">Select Staff ({selectedStaff.length})</h2>
           {staff.map((member) => (
-            <button
-              type="button"
-              key={member.id}
-              onClick={() => toggleStaff(member.id)}
-              className="w-full flex items-center justify-between p-3 bg-card border border-gray-50 rounded-2xl"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden">
-                  <img src={member.avatar_seed && member.avatar_seed.startsWith('data:image/') ? member.avatar_seed : `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=random&font-size=0.35&rounded=true&bold=true`} alt={member.name} className="w-full h-full object-cover" />
+            <div key={member.id} className="w-full flex flex-col gap-2 p-3 bg-card border border-gray-50 rounded-2xl">
+              <button
+                type="button"
+                onClick={() => toggleStaff(member.id)}
+                className="w-full flex items-center justify-between"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden">
+                    <img src={member.avatar_seed && member.avatar_seed.startsWith('data:image/') ? member.avatar_seed : `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=random&font-size=0.35&rounded=true&bold=true`} alt={member.name} className="w-full h-full object-cover" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-xs font-bold text-gray-900">{member.name}</p>
+                    <p className="text-[10px] text-gray-400 font-medium">{member.role}</p>
+                  </div>
                 </div>
-                <div className="text-left">
-                  <p className="text-xs font-bold text-gray-900">{member.name}</p>
-                  <p className="text-[10px] text-gray-400 font-medium">{member.role}</p>
+                <div className={cn("w-5 h-5 rounded flex items-center justify-center transition-colors", selectedStaff.includes(member.id) ? "bg-primary" : "border-2 border-gray-200")}>
+                  {selectedStaff.includes(member.id) && <div className="w-2 h-2 bg-white rounded-sm" />}
                 </div>
-              </div>
-              <div className={cn("w-5 h-5 rounded flex items-center justify-center transition-colors", selectedStaff.includes(member.id) ? "bg-primary" : "border-2 border-gray-200")}>
-                {selectedStaff.includes(member.id) && <div className="w-2 h-2 bg-white rounded-sm" />}
-              </div>
-            </button>
+              </button>
+              {selectedStaff.includes(member.id) && (
+                <input 
+                  type="text" 
+                  placeholder="Add remark/assigned role..." 
+                  className="w-full bg-gray-50 border-none rounded-xl py-2 px-3 text-xs font-medium outline-none focus:ring-2 focus:ring-primary/10 transition-all mt-1"
+                  value={staffRemarks[member.id] || ""}
+                  onChange={(e) => setStaffRemarks(prev => ({ ...prev, [member.id]: e.target.value }))}
+                />
+              )}
+            </div>
           ))}
         </div>
 
