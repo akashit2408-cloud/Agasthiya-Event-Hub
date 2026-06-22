@@ -10,6 +10,7 @@ export default function StaffPage() {
   const [activeTab, setActiveTab] = useState("All");
   const [staff, setStaff] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     async function fetchStaff() {
@@ -31,19 +32,18 @@ export default function StaffPage() {
     All: staff.length,
     Available: staff.filter(s => s.status === "Available").length,
     Assigned: staff.filter(s => s.status === "Assigned").length,
-    Leave: staff.filter(s => s.status === "Leave").length,
   };
 
   const tabs = [
     { id: "All", label: `All (${counts.All})` },
     { id: "Available", label: `Available (${counts.Available})` },
     { id: "Assigned", label: `Assigned (${counts.Assigned})` },
-    { id: "Leave", label: `Leave (${counts.Leave})` },
   ];
 
   const filteredStaff = staff.filter((member) => {
-    if (activeTab === "All") return true;
-    return member.status === activeTab;
+    const matchesSearch = member.name.toLowerCase().includes(searchQuery.toLowerCase()) || member.role.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesTab = activeTab === "All" || member.status === activeTab;
+    return matchesSearch && matchesTab;
   });
 
   return (
@@ -56,7 +56,9 @@ export default function StaffPage() {
           <input 
             type="text" 
             placeholder="Search staff..." 
-            className="w-full bg-gray-50 border-none rounded-2xl py-3.5 pl-12 pr-4 text-sm font-medium outline-none"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-gray-50 border-none rounded-2xl py-3.5 pl-12 pr-4 text-sm font-medium outline-none focus:ring-2 focus:ring-primary/20 transition-all"
           />
           <button className="absolute right-4 top-1/2 -translate-y-1/2">
              <Filter size={18} className="text-primary" />
