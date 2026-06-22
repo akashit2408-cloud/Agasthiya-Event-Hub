@@ -97,10 +97,10 @@ export default function EventDetailsPage() {
 
       <div className="p-5 space-y-6">
         <div className="bg-primary p-6 rounded-[2rem] text-white space-y-4 relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-8 opacity-10">
+          <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
             <Calendar size={120} />
           </div>
-          <div className="flex justify-between items-start">
+          <div className="flex justify-between items-start relative z-10">
             <div>
               <h2 className="text-xl font-black">{event.title}</h2>
               <div className="flex items-center gap-2 mt-2 opacity-90">
@@ -111,13 +111,13 @@ export default function EventDetailsPage() {
             <span className="px-3 py-1 bg-white/20 backdrop-blur-md text-[10px] font-black rounded-full uppercase">{event.status}</span>
           </div>
 
-          <div className="flex items-center justify-between pt-4 border-t border-white/20">
+          <div className="flex items-center justify-between pt-4 border-t border-white/20 relative z-10">
             <div className="flex items-center gap-2">
               <MapPin size={16} />
               <span className="text-xs font-bold">{event.location}</span>
             </div>
             {event.map_link && (
-              <a href={event.map_link.startsWith('http') ? event.map_link : `https://${event.map_link}`} target="_blank" className="flex items-center gap-1.5 text-[10px] font-black bg-white text-primary px-3 py-1.5 rounded-full uppercase tracking-tighter">
+              <a href={event.map_link.startsWith('http') ? event.map_link : `https://${event.map_link}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-[10px] font-black bg-white text-primary px-3 py-1.5 rounded-full uppercase tracking-tighter hover:bg-gray-50 active:scale-95 transition-transform">
                 View Map <ExternalLink size={10} />
               </a>
             )}
