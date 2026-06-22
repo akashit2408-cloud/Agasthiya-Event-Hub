@@ -55,7 +55,7 @@ export default function EventDetailsPage() {
     const message = `🎵 *DJ EVENTER CHENNAI*
 *NEW EVENT ASSIGNMENT*
 
----
+━━━━━━
 🎂 *Event Name:* ${event.title}
 📌 *Event Type:* ${event.event_type}
 
@@ -65,23 +65,23 @@ export default function EventDetailsPage() {
 📍 *Location / Venue:*
 ${event.location}${event.map_link ? `\n🗺️ *Map Link:* ${event.map_link}` : ''}
 
----
+━━━━━━
 🎵 *Setup Requirements*
 ${setupName}
 
----
+━━━━━━
 🚚 *Transport Allocation*
 ${transport}
 
----
+━━━━━━
 👷 *Assigned Crew*
 ${crewList}
 
----
+━━━━━━
 📝 *Instructions & Notes*
 ${event.remark ? `• ${event.remark}` : '• No specific instructions provided.'}
 
----
+━━━━━━
 ✅ *Please confirm receipt of this assignment.*
 
 ${event.invitation_url ? `📎 *Invitation Attachment:*\n${event.invitation_url}\n` : ''}
