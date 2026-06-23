@@ -33,7 +33,7 @@ export default function CreateEventPage() {
       });
       const result = await response.json();
       if (result.data) {
-        const { title, event_type, event_date, event_time, location } = result.data;
+        const { title, event_type, event_date, event_time, location, map_link } = result.data;
         
         const titleEl = document.getElementById('input-title') as HTMLInputElement;
         if (titleEl && title && !titleEl.value) titleEl.value = title;
@@ -49,6 +49,9 @@ export default function CreateEventPage() {
 
         const locEl = document.getElementById('input-location') as HTMLInputElement;
         if (locEl && location && !locEl.value) locEl.value = location;
+
+        const mapLinkEl = document.getElementById('input-map-link') as HTMLInputElement;
+        if (mapLinkEl && map_link && !mapLinkEl.value) mapLinkEl.value = map_link;
       } else {
         alert("Could not extract data automatically.");
       }
@@ -238,7 +241,7 @@ export default function CreateEventPage() {
         <InputField id="input-title" name="title" label="Event Title" icon={<Calendar size={18} />} placeholder="Wedding Event" required />
         <SelectField id="select-event-type" name="event_type" label="Event Type" options={["Wedding", "Birthday", "Corporate", "Rental", "Other"]} />
         <InputField id="input-location" name="location" label="Location" icon={<MapPin size={18} />} placeholder="Enter location" required />
-        <InputField name="map_link" label="Google Map Link" icon={<LinkIcon size={18} />} placeholder="Paste google map link" />
+        <InputField id="input-map-link" name="map_link" label="Google Map Link" icon={<LinkIcon size={18} />} placeholder="Paste google map link" />
 
         <div className="space-y-3">
           <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Event Invitation</label>
