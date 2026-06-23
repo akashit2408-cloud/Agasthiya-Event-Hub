@@ -55,6 +55,15 @@ export default function EventDetailsPage() {
 
     const validInvitationUrl = event.invitation_url && !event.invitation_url.startsWith('data:') ? event.invitation_url : null;
 
+    let finalMapLink = '';
+    if (event.map_link) {
+      if (event.map_link.includes('http')) {
+        finalMapLink = `Map: ${event.map_link}\n`;
+      } else {
+        finalMapLink = `Map: https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.map_link)}\n`;
+      }
+    }
+
     const message = `🎵 *DJ EVENTER CHENNAI*
 *NEW EVENT ASSIGNMENT*
 
@@ -66,7 +75,7 @@ export default function EventDetailsPage() {
 
 📍 *Location:* ${event.location?.split(',')[0] || event.location}
 🗺️ *Venue:* ${event.location}
-${event.map_link ? `Map: ${event.map_link}\n` : ''}
+${finalMapLink}
 🎵 *Setup Requirements:*
 ${setupName}
 
