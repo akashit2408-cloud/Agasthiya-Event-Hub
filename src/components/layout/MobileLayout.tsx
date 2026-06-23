@@ -15,18 +15,17 @@ export default function MobileLayout({ children }: { children: React.ReactNode }
     const hasSeenSplash = sessionStorage.getItem("hasSeenSplash");
     if (hasSeenSplash) {
       setShowSplash(false);
-      return;
     }
-
-    const timer = setTimeout(() => {
-      setShowSplash(false);
-      sessionStorage.setItem("hasSeenSplash", "true");
-    }, 2000);
-    return () => clearTimeout(timer);
+    // No timer here anymore, let the video trigger onComplete
   }, []);
 
+  const handleSplashComplete = () => {
+    setShowSplash(false);
+    sessionStorage.setItem("hasSeenSplash", "true");
+  };
+
   if (showSplash) {
-    return <SplashScreen />;
+    return <SplashScreen onComplete={handleSplashComplete} />;
   }
 
   const isAuthPage = pathname === "/login";
