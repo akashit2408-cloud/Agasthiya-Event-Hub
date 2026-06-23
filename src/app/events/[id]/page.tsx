@@ -182,7 +182,7 @@ ${validInvitationUrl ? `📎 *Invitation Attachment:*\n${validInvitationUrl}\n\n
         const { data: eventData, error } = await supabase
           .from("events")
           .select(`
-            id, title, event_type, location, map_link, event_date, event_time, status, notes, total_amount, invitation_url, remark,
+            id, title, event_type, location, map_link, event_date, event_time, status, notes, total_amount, invitation_url, remark, drop_sequence,
             customers (name, mobile, address),
             event_setups (
               quantity,
