@@ -199,10 +199,13 @@ function EventCard({ event }: any) {
       }
     }
 
-    const message = `🎵 *DJ EVENTER CHENNAI*
-*NEW EVENT ASSIGNMENT*
+    const isRental = event.event_type?.toLowerCase() === 'rental';
+    const displayTitle = isRental && event.customer_name ? `Setup for ${event.customer_name}` : event.title;
 
-🎂 *Event:* ${event.title}
+    const message = `🎵 *DJ EVENTER CHENNAI*
+*${isRental ? 'NEW RENTAL ASSIGNMENT' : 'NEW EVENT ASSIGNMENT'}*
+
+${isRental ? '📦' : '🎂'} *Event:* ${displayTitle}
 📌 *Type:* ${event.event_type}
 
 📅 *Date & Time:* ${formatDateStr(event.event_date)}, ${formatTime12(event.event_time)}
