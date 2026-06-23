@@ -96,8 +96,8 @@ export default function SetupsPage() {
       </button>
 
       {showAddModal && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in">
-          <div className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 space-y-6 animate-in slide-in-from-bottom-10 sm:slide-in-from-bottom-0">
+        <div className="fixed inset-0 bg-black/60 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in">
+          <div className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 pb-10 space-y-6 animate-in slide-in-from-bottom-10 sm:slide-in-from-bottom-0">
             <div className="flex justify-between items-center">
               <h3 className="text-xl font-black text-gray-900">Add Equipment</h3>
               <button onClick={() => setShowAddModal(false)} className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
