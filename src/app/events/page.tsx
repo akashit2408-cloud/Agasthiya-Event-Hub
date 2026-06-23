@@ -97,7 +97,7 @@ export default function EventsPage() {
           </button>
         </div>
 
-        <div className="flex overflow-x-auto [&::-webkit-scrollbar]:hidden border-b border-gray-100 gap-6 pb-1 -mx-5 px-5">
+        <div className="flex overflow-x-auto [&::-webkit-scrollbar]:hidden border-b border-gray-100 gap-6 pb-1 -mx-5 px-5 after:content-[''] after:w-1 after:shrink-0">
           {tabs.map((tab) => (
             <button
               key={tab}
