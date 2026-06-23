@@ -27,7 +27,9 @@ export default function EventDetailsPage() {
       
     const crewList = staff.length > 0 
       ? staff.map(s => {
-          return `• ${s.name}${s.role && s.role.toLowerCase() !== 'helper' ? ` ${s.role.toLowerCase()}` : ''}${s.assigned_role ? ` (${s.assigned_role})` : ''}`;
+          let rolePart = s.role && s.role.toLowerCase() !== 'helper' ? ` (${s.role.split(' ').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ')})` : '';
+          let remarkPart = s.assigned_role ? ` - ${s.assigned_role}` : '';
+          return `• ${s.name}${rolePart}${remarkPart}`;
         }).join('\n') 
       : "No crew assigned yet";
       
@@ -53,19 +55,18 @@ export default function EventDetailsPage() {
 
     const validInvitationUrl = event.invitation_url && !event.invitation_url.startsWith('data:') ? event.invitation_url : null;
 
-    const message = `🎵 *DJ EVENTER CHENNAI* 🎵
+    const message = `🎵 *DJ EVENTER CHENNAI*
 *NEW EVENT ASSIGNMENT*
 
 🎂 *Event:* ${event.title}
 📌 *Type:* ${event.event_type}
 
 📅 *Date & Time:* ${formatDateStr(event.event_date)}, ${formatTime12(event.event_time)}
-🕐 *Reporting Time:* ${event.reporting_time || 'Check notes'}
+🕐 *Reporting Time:* ${event.reporting_time || 'Check Notes'}
 
 📍 *Location:* ${event.location?.split(',')[0] || event.location}
 🗺️ *Venue:* ${event.location}
-${event.map_link ? `Map: ${event.map_link}` : ''}
-
+${event.map_link ? `Map: ${event.map_link}\n` : ''}
 🎵 *Setup Requirements:*
 ${setupName}
 
@@ -76,12 +77,14 @@ ${crewList}
 
 📝 *Notes:* ${event.remark ? event.remark : 'None'}
 
-✅ Please confirm receipt of this schedule.
- Verify all equipment before loading
- Coordinate with team members before departure
- Contact supervisor immediately if any issue arises
+⚠️ *Important Instructions:*
+• Verify all equipment before loading
+• Coordinate with team members before departure
+• Contact supervisor immediately if any issue arises
 
-${validInvitationUrl ? `📎 *Invitation Attachment:*\n${validInvitationUrl}\n` : ''}*DJ Eventer Chennai | Agasthiya Events*`;
+✅ Please confirm receipt of this assignment.
+
+${validInvitationUrl ? `📎 *Invitation Attachment:*\n${validInvitationUrl}\n\n` : ''}*DJ Eventer Chennai | Agasthiya Events*`;
 
     try {
       const shareData: any = { text: message };
