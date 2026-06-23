@@ -17,6 +17,8 @@ export default function EditEventPage() {
   const [selectedStaff, setSelectedStaff] = useState<string[]>([]);
   const [staffRemarks, setStaffRemarks] = useState<Record<string, string>>({});
   const [showRemarkInputFor, setShowRemarkInputFor] = useState<Record<string, boolean>>({});
+  const [dropSequence, setDropSequence] = useState<string>("None");
+  const [customVehicleName, setCustomVehicleName] = useState<string>("");
   const [showAllStaff, setShowAllStaff] = useState(false);
   const [selectedSetups, setSelectedSetups] = useState<Record<string, number>>({});
   const [saving, setSaving] = useState(false);
@@ -100,8 +102,9 @@ export default function EditEventPage() {
 
         if (eData) {
           setEventData(eData);
-          setInvitationImage(eData.invitation_url || null);
-          setRemark(eData.remark || "");
+          if (eData.invitation_url) setInvitationImage(eData.invitation_url);
+          if (eData.remark) setRemark(eData.remark);
+          if (eData.drop_sequence) setDropSequence(eData.drop_sequence);
           
           if (eData.event_setups) {
             const initialSetups: Record<string, number> = {};
@@ -170,11 +173,12 @@ export default function EditEventPage() {
       let final_vehicle_id: string | null = form_vehicle_id || null;
 
       if (form_vehicle_id === "others") {
-        const { data: otherVehicle } = await supabase.from("vehicles").select("id").ilike("name", "others").maybeSingle();
-        if (otherVehicle) {
-          final_vehicle_id = otherVehicle.id;
+        const cName = customVehicleName.trim() || "Others";
+        const { data: existingCustom } = await supabase.from("vehicles").select("id").ilike("name", cName).maybeSingle();
+        if (existingCustom) {
+          final_vehicle_id = existingCustom.id;
         } else {
-          const { data: newVehicle, error: newVehicleError } = await supabase.from("vehicles").insert({ name: "Others", status: "Available" }).select("id");
+          const { data: newVehicle, error: newVehicleError } = await supabase.from("vehicles").insert({ name: cName, status: "Available" }).select("id");
           if (!newVehicleError && newVehicle && newVehicle.length > 0) {
             final_vehicle_id = newVehicle[0].id;
           } else {
@@ -198,6 +202,7 @@ export default function EditEventPage() {
           notes: String(form.get("notes") || ""),
           invitation_url: invitationImage,
           remark: remark,
+          drop_sequence: dropSequence === "None" ? null : dropSequence,
         })
         .eq("id", params.id)
         .select("id");
@@ -314,6 +319,70 @@ export default function EditEventPage() {
           <InputField name="event_time" label="Time" type="time" icon={<Calendar size={18} />} defaultValue={eventData?.event_time || "17:00"} required />
         </div>
 
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+          <div className="flex items-center gap-2 mb-6">
+            <Truck className="text-purple-600" size={20} />
+            <h2 className="text-lg font-bold text-gray-800">Transport Allocation</h2>
+          </div>
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Assign Vehicle</label>
+                <select
+                  name="vehicle_id"
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-purple-500 transition-all outline-none"
+                  defaultValue={eventData?.vehicle_id || ""}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val !== "others") setCustomVehicleName("");
+                  }}
+                >
+                  <option value="">No Vehicle Assigned</option>
+                  {vehicles.map((v) => (
+                    <option key={v.id} value={v.id}>
+                      {v.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Drop Sequence</label>
+                <select
+                  value={dropSequence}
+                  onChange={(e) => setDropSequence(e.target.value)}
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-purple-500 transition-all outline-none"
+                >
+                  <option value="None">None</option>
+                  <option value="Drop 1">Drop 1</option>
+                  <option value="Drop 2">Drop 2</option>
+                  <option value="Drop 3">Drop 3</option>
+                  <option value="Drop 4">Drop 4</option>
+                </select>
+              </div>
+            </div>
+            <div id="custom-vehicle-input" className="mt-2" style={{ display: 'none' }}>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Specify Vehicle (Uber, Rental, Friend's Car)</label>
+              <input
+                type="text"
+                value={customVehicleName}
+                onChange={(e) => setCustomVehicleName(e.target.value)}
+                placeholder="e.g., Uber (TN 01 AB 1234)"
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-purple-500 transition-all outline-none"
+              />
+            </div>
+            <script dangerouslySetInnerHTML={{__html: `
+              document.querySelector('select[name="vehicle_id"]').addEventListener('change', function(e) {
+                document.getElementById('custom-vehicle-input').style.display = e.target.value === 'others' ? 'block' : 'none';
+              });
+              setTimeout(() => {
+                if (document.querySelector('select[name="vehicle_id"]').value === 'others') {
+                  document.getElementById('custom-vehicle-input').style.display = 'block';
+                }
+              }, 500);
+            `}} />
+          </div>
+        </div>
+
         <div className="space-y-3">
           <h2 className="text-sm font-bold text-primary uppercase tracking-wider">Select Setups ({Object.keys(selectedSetups).length})</h2>
           {setups.map((setup) => (
@@ -352,7 +421,6 @@ export default function EditEventPage() {
           ))}
         </div>
         <InputField name="notes" label="Additional Notes" icon={<Layers size={18} />} placeholder="Any other specific requirements?" defaultValue={eventData?.notes || ""} />
-        <SelectRows name="vehicle_id" label="Vehicle Required" rows={vehicles} emptyLabel="No vehicle" defaultValue={eventData?.vehicle_id || ""} />
         <InputField name="total_amount" label="Total Amount" type="number" icon={<Calendar size={18} />} placeholder="0" defaultValue={eventData?.total_amount || 0} />
 
         <div className="space-y-3">

@@ -33,9 +33,12 @@ export default function EventDetailsPage() {
         }).join('\n') 
       : "No crew assigned yet";
       
-    const transport = event.vehicle_name 
+    const transportName = event.vehicle_name 
       ? `${event.vehicle_name}${event.vehicle_number ? ` [${event.vehicle_number}]` : ''}`
       : 'Not Assigned';
+    const transport = event.drop_sequence 
+      ? `${transportName} (${event.drop_sequence})`
+      : transportName;
 
     const formatDateStr = (dateStr: string) => {
       if (!dateStr) return "";
@@ -321,7 +324,11 @@ ${validInvitationUrl ? `📎 *Invitation Attachment:*\n${validInvitationUrl}\n\n
           <div className="space-y-3">
             <ResourceItem icon={<Layers className="text-primary" size={20} />} label="Setup" value={event.setup_name || "No setup"} />
             {event.vehicle_name && (
-               <ResourceItem icon={<Truck className="text-primary" size={20} />} label="Vehicle" value={event.vehicle_name} />
+               <ResourceItem 
+                 icon={<Truck className="text-primary" size={20} />} 
+                 label="Vehicle" 
+                 value={`${event.vehicle_name}${event.drop_sequence ? ` (${event.drop_sequence})` : ''}`} 
+               />
             )}
 
             <div className="bg-card p-4 rounded-3xl border border-gray-50 space-y-4">
