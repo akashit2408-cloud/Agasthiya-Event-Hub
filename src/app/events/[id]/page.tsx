@@ -339,11 +339,20 @@ ${validInvitationUrl ? `📎 *Invitation Attachment:*\n${validInvitationUrl}\n\n
 
         {event.invitation_url && (
           <div className="bg-card p-4 rounded-3xl border border-gray-50">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                <ImageIcon size={16} className="text-primary" />
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <ImageIcon size={16} className="text-primary" />
+                </div>
+                <p className="text-sm font-black text-gray-900 uppercase tracking-widest">Invitation</p>
               </div>
-              <p className="text-sm font-black text-gray-900 uppercase tracking-widest">Invitation</p>
+              <a 
+                href={event.invitation_url} 
+                download={`invitation_${event.id}.jpg`} 
+                className="text-[10px] font-black bg-primary/10 text-primary px-3 py-1.5 rounded-full uppercase tracking-tighter hover:bg-primary/20 transition-colors"
+              >
+                Download
+              </a>
             </div>
             <div className="w-full rounded-2xl overflow-hidden border border-gray-100">
               <img src={event.invitation_url} alt="Event Invitation" className="w-full h-auto object-cover" />
