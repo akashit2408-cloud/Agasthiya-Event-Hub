@@ -12,15 +12,18 @@ export default function MobileLayout({ children }: { children: React.ReactNode }
   const router = useRouter();
 
   useEffect(() => {
+    const hasSeenSplash = sessionStorage.getItem("hasSeenSplash");
+    if (hasSeenSplash) {
+      setShowSplash(false);
+      return;
+    }
+
     const timer = setTimeout(() => {
       setShowSplash(false);
-      // After splash, if not on login and not authenticated, go to login
-      if (pathname !== "/login" && !isAuthenticated) {
-        // router.push("/login"); // Commented out for now so you can see the dashboard directly if you want, but I will enable it.
-      }
+      sessionStorage.setItem("hasSeenSplash", "true");
     }, 2000);
     return () => clearTimeout(timer);
-  }, [pathname, isAuthenticated, router]);
+  }, []);
 
   if (showSplash) {
     return <SplashScreen />;
