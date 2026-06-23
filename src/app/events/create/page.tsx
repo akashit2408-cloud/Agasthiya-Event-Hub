@@ -17,9 +17,48 @@ export default function CreateEventPage() {
   const [showAllStaff, setShowAllStaff] = useState(false);
   const [selectedSetups, setSelectedSetups] = useState<Record<string, number>>({});
   const [saving, setSaving] = useState(false);
+  const [isExtracting, setIsExtracting] = useState(false);
   const [invitationImage, setInvitationImage] = useState<string | null>(null);
   const [remark, setRemark] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleExtract = async () => {
+    if (!invitationImage) return;
+    setIsExtracting(true);
+    try {
+      const response = await fetch('/api/extract-invitation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: invitationImage })
+      });
+      const result = await response.json();
+      if (result.data) {
+        const { title, event_type, event_date, event_time, location } = result.data;
+        
+        const titleEl = document.getElementById('input-title') as HTMLInputElement;
+        if (titleEl && title && !titleEl.value) titleEl.value = title;
+        
+        const typeEl = document.getElementById('select-event-type') as HTMLSelectElement;
+        if (typeEl && event_type) typeEl.value = event_type;
+
+        const dateEl = document.getElementById('input-date') as HTMLInputElement;
+        if (dateEl && event_date && !dateEl.value) dateEl.value = event_date;
+
+        const timeEl = document.getElementById('input-time') as HTMLInputElement;
+        if (timeEl && event_time && !timeEl.value) timeEl.value = event_time;
+
+        const locEl = document.getElementById('input-location') as HTMLInputElement;
+        if (locEl && location && !locEl.value) locEl.value = location;
+      } else {
+        alert("Could not extract data automatically.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error during extraction.");
+    } finally {
+      setIsExtracting(false);
+    }
+  };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -196,19 +235,24 @@ export default function CreateEventPage() {
       <form onSubmit={handleSubmit} className="p-5 space-y-5">
         <InputField name="customer_name" label="Customer Name" icon={<User size={18} />} placeholder="Enter customer name" required />
         <InputField name="mobile" label="Mobile Number" icon={<Phone size={18} />} placeholder="Enter mobile number" required />
-        <InputField name="title" label="Event Title" icon={<Calendar size={18} />} placeholder="Wedding Event" required />
-        <SelectField name="event_type" label="Event Type" options={["Wedding", "Birthday", "Corporate", "Rental", "Other"]} />
-        <InputField name="location" label="Location" icon={<MapPin size={18} />} placeholder="Enter location" required />
+        <InputField id="input-title" name="title" label="Event Title" icon={<Calendar size={18} />} placeholder="Wedding Event" required />
+        <SelectField id="select-event-type" name="event_type" label="Event Type" options={["Wedding", "Birthday", "Corporate", "Rental", "Other"]} />
+        <InputField id="input-location" name="location" label="Location" icon={<MapPin size={18} />} placeholder="Enter location" required />
         <InputField name="map_link" label="Google Map Link" icon={<LinkIcon size={18} />} placeholder="Paste google map link" />
 
         <div className="space-y-3">
           <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Event Invitation</label>
           <div className="bg-card border-2 border-dashed border-gray-200 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
             {invitationImage ? (
-              <div className="relative w-full max-w-[200px] rounded-xl overflow-hidden border border-gray-100 shadow-sm">
-                <img src={invitationImage} alt="Invitation Preview" className="w-full h-auto object-cover" />
-                <button type="button" onClick={() => setInvitationImage(null)} className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5 shadow-lg active:scale-95">
-                  <X size={14} />
+              <div className="flex flex-col items-center gap-3">
+                <div className="relative w-full max-w-[200px] rounded-xl overflow-hidden border border-gray-100 shadow-sm">
+                  <img src={invitationImage} alt="Invitation Preview" className="w-full h-auto object-cover" />
+                  <button type="button" onClick={() => setInvitationImage(null)} className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5 shadow-lg active:scale-95">
+                    <X size={14} />
+                  </button>
+                </div>
+                <button type="button" onClick={handleExtract} disabled={isExtracting} className="px-4 py-2 bg-purple-50 text-purple-700 font-bold text-xs rounded-xl border border-purple-200 flex items-center gap-2 shadow-sm active:scale-95 transition-all">
+                  <span>✨</span> {isExtracting ? "Extracting Details..." : "Auto-fill Details"}
                 </button>
               </div>
             ) : (
@@ -241,8 +285,8 @@ export default function CreateEventPage() {
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <InputField name="event_date" label="Date" type="date" icon={<Calendar size={18} />} required />
-          <InputField name="event_time" label="Time" type="time" icon={<Calendar size={18} />} defaultValue="17:00" required />
+          <InputField id="input-date" name="event_date" label="Date" type="date" icon={<Calendar size={18} />} required />
+          <InputField id="input-time" name="event_time" label="Time" type="time" icon={<Calendar size={18} />} defaultValue="17:00" required />
         </div>
 
         <div className="space-y-3">
@@ -360,11 +404,11 @@ function InputField({ label, icon, ...props }: any) {
   );
 }
 
-function SelectField({ label, name, options }: any) {
+function SelectField({ label, name, options, id }: any) {
   return (
     <label className="block space-y-1.5">
       <span className="text-xs font-bold text-gray-500 ml-1">{label}</span>
-      <select name={name} className="w-full bg-gray-50 border-none rounded-2xl py-4 px-4 text-sm font-medium outline-none">
+      <select id={id} name={name} className="w-full bg-gray-50 border-none rounded-2xl py-4 px-4 text-sm font-medium outline-none">
         {options.map((option: string) => <option key={option}>{option}</option>)}
       </select>
     </label>
