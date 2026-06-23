@@ -51,6 +51,8 @@ export default function EventDetailsPage() {
       return `${hours.toString().padStart(2, "0")}:${m} ${ampm}`;
     }
 
+    const validInvitationUrl = event.invitation_url && !event.invitation_url.startsWith('data:') ? event.invitation_url : null;
+
     const message = `🎵 *DJ EVENTER CHENNAI* 🎵
 *NEW EVENT ASSIGNMENT*
 
@@ -79,8 +81,7 @@ ${crewList}
  Coordinate with team members before departure
  Contact supervisor immediately if any issue arises
 
-${event.invitation_url ? `📎 *Invitation Attachment:*\n${event.invitation_url}\n` : ''}
-*DJ Eventer Chennai | Agasthiya Events*`;
+${validInvitationUrl ? `📎 *Invitation Attachment:*\n${validInvitationUrl}\n` : ''}*DJ Eventer Chennai | Agasthiya Events*`;
 
     // Always copy to clipboard as a reliable backup!
     navigator.clipboard.writeText(message).catch(e => console.error(e));
