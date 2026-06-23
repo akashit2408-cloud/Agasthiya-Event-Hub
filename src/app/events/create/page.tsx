@@ -100,7 +100,6 @@ export default function CreateEventPage() {
 
         const compressedDataUrl = canvas.toDataURL('image/webp', 0.7);
         setInvitationImage(compressedDataUrl);
-        handleExtract(compressedDataUrl);
       };
       img.src = event.target?.result as string;
     };
@@ -254,15 +253,9 @@ export default function CreateEventPage() {
                     <X size={14} />
                   </button>
                 </div>
-                {isExtracting ? (
-                  <div className="px-4 py-2 bg-purple-50 text-purple-700 font-bold text-xs rounded-xl border border-purple-200 flex items-center gap-2 shadow-sm animate-pulse">
-                    <span>✨</span> AI is reading invitation...
-                  </div>
-                ) : (
-                  <div className="px-4 py-2 bg-green-50 text-green-700 font-bold text-xs rounded-xl border border-green-200 flex items-center gap-2 shadow-sm">
-                    <span>✅</span> Autofill Complete
-                  </div>
-                )}
+                <button type="button" onClick={() => handleExtract(invitationImage!)} disabled={isExtracting} className="px-4 py-2 bg-purple-50 text-purple-700 font-bold text-xs rounded-xl border border-purple-200 flex items-center gap-2 shadow-sm active:scale-95 transition-all">
+                  <span>✨</span> {isExtracting ? "Extracting Details..." : "Auto-fill Details"}
+                </button>
               </div>
             ) : (
               <>

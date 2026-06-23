@@ -26,6 +26,8 @@ export async function POST(req: Request) {
 
     const prompt = `
       You are an expert event data extraction assistant. I will provide an image of an event/wedding invitation.
+      CRITICAL INSTRUCTION: If the invitation contains details for BOTH a "Wedding" (or Muhurtham) and a "Reception", you MUST prioritize extracting the Date, Time, and Location for the RECEPTION. The DJ is usually hired for the Reception, so those details are the most important.
+
       Extract the following information from the image and return it strictly as a JSON object:
       - title: The name of the event or the couple's names (e.g., "Rahul & Priya Wedding", "John's 1st Birthday"). Keep it short.
       - event_type: Categorize it into EXACTLY ONE of these: "Wedding", "Birthday", "Corporate", or "Other".
