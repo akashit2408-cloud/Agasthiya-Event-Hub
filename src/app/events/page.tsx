@@ -97,13 +97,13 @@ export default function EventsPage() {
           </button>
         </div>
 
-        <div className="grid grid-cols-5 border-b border-gray-100">
+        <div className="flex overflow-x-auto [&::-webkit-scrollbar]:hidden border-b border-gray-100 gap-6 pb-1 -mx-5 px-5">
           {tabs.map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={cn(
-                "min-w-0 pb-3 px-0.5 text-[11px] font-bold transition-all relative",
+                "whitespace-nowrap pb-2 px-1 text-xs font-bold transition-all relative",
                 activeTab === tab ? "text-primary" : "text-gray-400"
               )}
             >
