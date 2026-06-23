@@ -20,7 +20,7 @@ export default function EventsPage() {
         const { data, error } = await supabase
           .from("events")
           .select(`
-            id, title, event_type, location, map_link, event_date, event_time, status, drop_sequence,
+            id, title, event_type, location, map_link, event_date, event_time, status, drop_sequence, invitation_url, remark, notes,
             customers (name, mobile),
             event_setups (
               quantity,
@@ -270,7 +270,7 @@ ${validInvitationUrl ? `📎 *Invitation Attachment:*\n${validInvitationUrl}\n\n
     window.location.href = whatsappUrl;
     
     setTimeout(() => {
-      alert("✅ Message copied to clipboard!\n\nNote: Image attachment only works automatically on Mobile devices using the native Share menu.");
+      alert("✅ Message copied to clipboard!\n\nTo share the Invitation Image on a computer:\n1. Open the Event Details page.\n2. Right-click the invitation image and click 'Copy Image'.\n3. Paste it directly into your WhatsApp chat!");
     }, 500);
   };
 
