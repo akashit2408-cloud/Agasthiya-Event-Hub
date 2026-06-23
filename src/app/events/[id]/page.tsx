@@ -18,7 +18,7 @@ export default function EventDetailsPage() {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
 
-  const handleShare = () => {
+  const handleShare = async () => {
     if (!event) return;
     
     const setupName = event.setup_name 
@@ -83,17 +83,48 @@ ${crewList}
 
 ${validInvitationUrl ? `📎 *Invitation Attachment:*\n${validInvitationUrl}\n` : ''}*DJ Eventer Chennai | Agasthiya Events*`;
 
-    // Always copy to clipboard as a reliable backup!
-    navigator.clipboard.writeText(message).catch(e => console.error(e));
+    try {
+      const shareData: any = { text: message };
+      
+      // If there is a base64 image, convert it to a File object so native sharing can attach it
+      if (event.invitation_url && event.invitation_url.startsWith('data:image')) {
+        const arr = event.invitation_url.split(',');
+        const mimeMatch = arr[0].match(/:(.*?);/);
+        if (mimeMatch) {
+          const mime = mimeMatch[1];
+          const bstr = atob(arr[1]);
+          let n = bstr.length;
+          const u8arr = new Uint8Array(n);
+          while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+          }
+          const ext = mime.split('/')[1] || 'jpg';
+          const file = new File([u8arr], `invitation.${ext}`, { type: mime });
+          shareData.files = [file];
+        }
+      }
 
-    // Since they have WhatsApp Desktop installed, use the native protocol! 
-    // This completely bypasses the browser's network proxy and avoids the ERR_CONNECTION_CLOSED error!
+      if (navigator.canShare && navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+        return; // Success!
+      } else if (navigator.share) {
+        // Fallback for browsers that support share but maybe not canShare or files
+        await navigator.share({ text: message });
+        return;
+      }
+    } catch (err: any) {
+      console.error("Error sharing:", err);
+      // If user aborted, do nothing
+      if (err.name === 'AbortError') return;
+    }
+
+    // Fallback for desktop or unsupported browsers
+    navigator.clipboard.writeText(message).catch(e => console.error(e));
     const whatsappUrl = `whatsapp://send?text=${encodeURIComponent(message)}`;
     window.location.href = whatsappUrl;
     
-    // In case they want to use web as well, provide a brief instruction
     setTimeout(() => {
-      alert("✅ Perfect message copied to clipboard!\n\nIf WhatsApp Desktop didn't open automatically, you can open WhatsApp manually and hit Paste (Ctrl+V)!");
+      alert("✅ Message copied to clipboard!\n\nNote: Image attachment only works automatically on Mobile devices using the native Share menu.");
     }, 500);
   };
 
