@@ -27,7 +27,7 @@ export default function EventDetailsPage() {
       
     const crewList = staff.length > 0 
       ? staff.map(s => {
-          return `• ${s.name}${s.role ? ` ${s.role.toLowerCase()}` : ''}${s.assigned_role ? ` (${s.assigned_role})` : ''}`;
+          return `• ${s.name}${s.role && s.role.toLowerCase() !== 'helper' ? ` ${s.role.toLowerCase()}` : ''}${s.assigned_role ? ` (${s.assigned_role})` : ''}`;
         }).join('\n') 
       : "No crew assigned yet";
       
@@ -331,7 +331,7 @@ ${validInvitationUrl ? `📎 *Invitation Attachment:*\n${validInvitationUrl}\n` 
                       </div>
                       <div>
                         <p className="text-sm font-bold text-gray-900">
-                          {member.name} {member.role && <span className="font-medium text-gray-500">{member.role.toLowerCase()}</span>}
+                          {member.name} {member.role && member.role.toLowerCase() !== 'helper' && <span className="font-medium text-gray-500">{member.role.toLowerCase()}</span>}
                         </p>
                         {member.assigned_role && (
                           <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide">({member.assigned_role})</p>
