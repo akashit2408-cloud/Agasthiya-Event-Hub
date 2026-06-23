@@ -191,7 +191,8 @@ function EventCard({ event }: any) {
       if (event.map_link.includes('http')) {
         finalMapLink = `Map: ${event.map_link}\n`;
       } else {
-        finalMapLink = `Map: https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.map_link)}\n`;
+        const cleanQuery = encodeURIComponent(event.map_link).replace(/%20/g, '+');
+        finalMapLink = `Map: https://www.google.com/maps/search/?api=1&query=${cleanQuery}\n`;
       }
     }
 
