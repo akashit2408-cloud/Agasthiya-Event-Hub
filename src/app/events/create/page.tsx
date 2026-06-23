@@ -52,11 +52,11 @@ export default function CreateEventPage() {
         const mapLinkEl = document.getElementById('input-map-link') as HTMLInputElement;
         if (mapLinkEl && map_link && !mapLinkEl.value) mapLinkEl.value = map_link;
       } else {
-        alert("Could not extract data automatically.");
+        alert("Error: " + (result.error || "Could not extract data automatically."));
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert("Error during extraction.");
+      alert("Error during extraction: " + err.message);
     } finally {
       setIsExtracting(false);
     }
