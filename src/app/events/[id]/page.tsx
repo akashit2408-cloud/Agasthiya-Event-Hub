@@ -139,13 +139,12 @@ ${validInvitationUrl ? `📎 *Invitation Attachment:*\n${validInvitationUrl}\n\n
       if (err.name === 'AbortError') return;
     }
 
-    // Fallback for desktop or unsupported browsers
     navigator.clipboard.writeText(message).catch(e => console.error(e));
     const whatsappUrl = `whatsapp://send?text=${encodeURIComponent(message)}`;
     window.location.href = whatsappUrl;
     
     setTimeout(() => {
-      alert("✅ Message copied to clipboard!\n\nNote: Image attachment only works automatically on Mobile devices using the native Share menu.");
+      alert("✅ Message copied to clipboard!\n\nTo share the Invitation Image on a computer:\n1. Right-click the invitation image below.\n2. Click 'Copy Image'.\n3. Paste it directly into your WhatsApp chat!");
     }, 500);
   };
 
