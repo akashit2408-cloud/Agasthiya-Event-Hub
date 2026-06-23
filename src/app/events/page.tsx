@@ -26,9 +26,10 @@ export default function EventsPage() {
               quantity,
               setups (name)
             ),
-            vehicles (name),
+            vehicles (name, registration_number),
             event_staff (
-              staff (name)
+              assigned_role,
+              staff (id, name, role, mobile, avatar_seed)
             )
           `)
           .order("event_date")
@@ -42,8 +43,17 @@ export default function EventsPage() {
           customer_mobile: e.customers?.mobile,
           setup_name: e.event_setups?.map((es: any) => `${es.setups?.name} (${es.quantity})`).join(', ') || null,
           vehicle_name: e.vehicles?.name,
+          vehicle_number: e.vehicles?.registration_number,
           staff_count: e.event_staff?.length || 0,
-          staff_names: e.event_staff?.map((s: any) => s.staff?.name).filter(Boolean) || []
+          staff_names: e.event_staff?.map((s: any) => s.staff?.name).filter(Boolean) || [],
+          staff: e.event_staff?.map((s: any) => ({
+            id: s.staff?.id,
+            name: s.staff?.name,
+            role: s.staff?.role,
+            mobile: s.staff?.mobile,
+            avatar_seed: s.staff?.avatar_seed,
+            assigned_role: s.assigned_role
+          })) || []
         }));
 
         setEvents(formattedEvents);
@@ -138,43 +148,123 @@ function EventCard({ event }: any) {
   const crewInitials = crewNames.map((n: string) => n.substring(0, 2).toUpperCase());
   const setupName = event.setup_name || "NO SETUP";
   
-  const handleShare = () => {
-    const setupName = event.setup_name || "NO SETUP";
-    const crewList = event.staff_names && event.staff_names.length > 0 
-      ? event.staff_names.map((n: string) => `• ${n}`).join('\n') 
+  const handleShare = async () => {
+    if (!event) return;
+    
+    const setupName = event.setup_name 
+      ? event.setup_name.split(', ').map((s: string) => `• ${s}`).join('\n') 
+      : "• No setup";
+      
+    const staff = event.staff || [];
+    const crewList = staff.length > 0 
+      ? staff.map((s: any) => {
+          let rolePart = s.role && s.role.toLowerCase() !== 'helper' ? ` (${s.role.split(' ').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ')})` : '';
+          let remarkPart = s.assigned_role ? ` - ${s.assigned_role}` : '';
+          return `• ${s.name}${rolePart}${remarkPart}`;
+        }).join('\n') 
       : "No crew assigned yet";
       
     const transport = event.vehicle_name 
-      ? event.vehicle_name
+      ? `${event.vehicle_name}${event.vehicle_number ? ` [${event.vehicle_number}]` : ''}`
       : 'Not Assigned';
 
-    const message = `🎉 *NEW EVENT ASSIGNMENT* 🎉
+    const formatDateStr = (dateStr: string) => {
+      if (!dateStr) return "";
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+    };
 
-*Event:* ${event.title}
-*Type:* ${event.event_type}
+    function formatTime12(timeStr: string) {
+      if (!timeStr) return "";
+      const [h, m] = timeStr.split(":");
+      let hours = parseInt(h, 10);
+      const ampm = hours >= 12 ? "PM" : "AM";
+      hours = hours % 12 || 12;
+      return `${hours.toString().padStart(2, "0")}:${m} ${ampm}`;
+    }
 
-📅 *Date & Time:* 
-${formatEventDate(event.event_date, event.event_time)}
+    const validInvitationUrl = event.invitation_url && !event.invitation_url.startsWith('data:') ? event.invitation_url : null;
 
-📍 *Location:* 
-${event.location}${event.map_link ? `\n🗺️ *Map:* ${event.map_link}` : ''}
+    let finalMapLink = '';
+    if (event.map_link) {
+      if (event.map_link.includes('http')) {
+        finalMapLink = `Map: ${event.map_link}\n`;
+      } else {
+        finalMapLink = `Map: https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.map_link)}\n`;
+      }
+    }
 
-🛠️ *Setup Requirements:* 
+    const message = `🎵 *DJ EVENTER CHENNAI*
+*NEW EVENT ASSIGNMENT*
+
+🎂 *Event:* ${event.title}
+📌 *Type:* ${event.event_type}
+
+📅 *Date & Time:* ${formatDateStr(event.event_date)}, ${formatTime12(event.event_time)}
+🕐 *Reporting Time:* ${event.reporting_time || 'Check Notes'}
+
+📍 *Location:* ${event.location?.split(',')[0] || event.location}
+🗺️ *Venue:* ${event.location}
+${finalMapLink}
+🎵 *Setup Requirements:*
 ${setupName}
 
-🚗 *Transport:* 
-${transport}
+🚚 *Transport:* ${transport}
 
-👥 *Crew Members:* 
+👷 *Crew Members:*
 ${crewList}
 
-📝 *Notes:* 
-${event.remark || event.notes || 'None'}
+📝 *Notes:* ${event.remark || event.notes || 'None'}
 
-_Please confirm receipt of this schedule._`;
+⚠️ *Important Instructions:*
+• Verify all equipment before loading
+• Coordinate with team members before departure
+• Contact supervisor immediately if any issue arises
 
-    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
+✅ Please confirm receipt of this assignment.
+
+${validInvitationUrl ? `📎 *Invitation Attachment:*\n${validInvitationUrl}\n\n` : ''}*DJ Eventer Chennai | Agasthiya Events*`;
+
+    try {
+      const shareData: any = { text: message };
+      
+      if (event.invitation_url && event.invitation_url.startsWith('data:image')) {
+        const arr = event.invitation_url.split(',');
+        const mimeMatch = arr[0].match(/:(.*?);/);
+        if (mimeMatch) {
+          const mime = mimeMatch[1];
+          const bstr = atob(arr[1]);
+          let n = bstr.length;
+          const u8arr = new Uint8Array(n);
+          while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+          }
+          const ext = mime.split('/')[1] || 'jpg';
+          const file = new File([u8arr], `invitation.${ext}`, { type: mime });
+          shareData.files = [file];
+        }
+      }
+
+      if (navigator.canShare && navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+        return; 
+      } else if (navigator.share) {
+        await navigator.share({ text: message });
+        return;
+      }
+    } catch (err: any) {
+      console.error("Error sharing:", err);
+      if (err.name === 'AbortError') return;
+    }
+
+    navigator.clipboard.writeText(message).catch(e => console.error(e));
+    const whatsappUrl = `whatsapp://send?text=${encodeURIComponent(message)}`;
+    window.location.href = whatsappUrl;
+    
+    setTimeout(() => {
+      alert("✅ Message copied to clipboard!\n\nNote: Image attachment only works automatically on Mobile devices using the native Share menu.");
+    }, 500);
   };
 
   return (
