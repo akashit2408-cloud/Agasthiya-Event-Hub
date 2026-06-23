@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, Filter, Layers, CheckCircle2, Clock, AlertCircle } from "lucide-react";
+import { Search, Filter, Layers, Plus, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
@@ -9,22 +9,41 @@ export default function SetupsPage() {
   const [activeTab, setActiveTab] = useState("All");
   const [setups, setSetups] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newSetup, setNewSetup] = useState({ name: "", quantity: 1, status: "Available" });
+  const [isSaving, setIsSaving] = useState(false);
 
-  useEffect(() => {
-    async function fetchSetups() {
-      try {
-        const { data, error } = await supabase.from("setups").select("*").order("name");
-        if (error) throw error;
-        setSetups(data || []);
-      } catch (err) {
-        console.error("Error fetching setups:", err);
-        setSetups([]);
-      } finally {
-        setLoading(false);
-      }
+  const fetchSetups = async () => {
+    try {
+      const { data, error } = await supabase.from("setups").select("*").order("name");
+      if (error) throw error;
+      setSetups(data || []);
+    } catch (err) {
+      console.error("Error fetching setups:", err);
+      setSetups([]);
+    } finally {
+      setLoading(false);
     }
+  };
     fetchSetups();
   }, []);
+
+  const handleAddSetup = async () => {
+    if (!newSetup.name) return;
+    setIsSaving(true);
+    try {
+      const { error } = await supabase.from("setups").insert(newSetup);
+      if (error) throw error;
+      setShowAddModal(false);
+      setNewSetup({ name: "", quantity: 1, status: "Available" });
+      await fetchSetups();
+    } catch (err) {
+      console.error(err);
+      alert("Error adding setup");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const filteredSetups = activeTab === "All" ? setups : setups.filter((setup) => setup.status === activeTab);
 
@@ -66,6 +85,72 @@ export default function SetupsPage() {
           filteredSetups.map((setup, index) => <SetupCard key={setup.id || index} {...setup} />)
         )}
       </div>
+
+      <button 
+        onClick={() => setShowAddModal(true)}
+        className="fixed bottom-24 right-6 w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center shadow-xl active:scale-95 transition-transform z-10"
+      >
+        <Plus size={28} />
+      </button>
+
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in">
+          <div className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 space-y-6 animate-in slide-in-from-bottom-10 sm:slide-in-from-bottom-0">
+            <div className="flex justify-between items-center">
+              <h3 className="text-xl font-black text-gray-900">Add Equipment</h3>
+              <button onClick={() => setShowAddModal(false)} className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                <X size={16} />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 block">Equipment Name</label>
+                <input 
+                  type="text" 
+                  value={newSetup.name}
+                  onChange={(e) => setNewSetup({...newSetup, name: e.target.value})}
+                  className="w-full bg-gray-50 border-none rounded-xl p-4 text-sm font-bold text-gray-900 outline-none focus:ring-2 focus:ring-primary/20"
+                  placeholder="e.g. 4th Dance Floor"
+                />
+              </div>
+              
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 block">Quantity</label>
+                  <input 
+                    type="number" 
+                    min="1"
+                    value={newSetup.quantity}
+                    onChange={(e) => setNewSetup({...newSetup, quantity: parseInt(e.target.value) || 1})}
+                    className="w-full bg-gray-50 border-none rounded-xl p-4 text-sm font-bold text-gray-900 outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 block">Status</label>
+                  <select 
+                    value={newSetup.status}
+                    onChange={(e) => setNewSetup({...newSetup, status: e.target.value})}
+                    className="w-full bg-gray-50 border-none rounded-xl p-4 text-sm font-bold text-gray-900 outline-none focus:ring-2 focus:ring-primary/20"
+                  >
+                    <option value="Available">Available</option>
+                    <option value="Booked">Booked</option>
+                    <option value="Maintenance">Maintenance</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <button 
+              onClick={handleAddSetup}
+              disabled={isSaving || !newSetup.name}
+              className="w-full bg-primary text-white py-4 rounded-xl font-bold active:scale-95 transition-transform disabled:opacity-50"
+            >
+              {isSaving ? "Saving..." : "Save Equipment"}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
