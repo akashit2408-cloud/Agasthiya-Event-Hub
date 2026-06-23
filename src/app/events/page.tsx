@@ -20,7 +20,7 @@ export default function EventsPage() {
         const { data, error } = await supabase
           .from("events")
           .select(`
-            id, title, event_type, location, map_link, event_date, event_time, status,
+            id, title, event_type, location, map_link, event_date, event_time, status, drop_sequence,
             customers (name, mobile),
             event_setups (
               quantity,
@@ -164,9 +164,12 @@ function EventCard({ event }: any) {
         }).join('\n') 
       : "No crew assigned yet";
       
-    const transport = event.vehicle_name 
+    const transportName = event.vehicle_name 
       ? `${event.vehicle_name}${event.vehicle_number ? ` [${event.vehicle_number}]` : ''}`
       : 'Not Assigned';
+    const transport = event.drop_sequence 
+      ? `${transportName} (${event.drop_sequence})`
+      : transportName;
 
     const formatDateStr = (dateStr: string) => {
       if (!dateStr) return "";
