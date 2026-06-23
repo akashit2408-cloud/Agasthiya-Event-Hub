@@ -242,7 +242,7 @@ export default function CreateEventPage() {
         <InputField name="customer_name" label="Customer Name" icon={<User size={18} />} placeholder="Enter customer name" required />
         <InputField name="mobile" label="Mobile Number" icon={<Phone size={18} />} placeholder="Enter mobile number" required />
         <InputField id="input-title" name="title" label="Event Title" icon={<Calendar size={18} />} placeholder="Wedding Event" required />
-        <SelectField id="select-event-type" name="event_type" label="Event Type" options={["Wedding", "Birthday", "Corporate", "Rental", "Other"]} />
+        <SelectField id="select-event-type" name="event_type" label="Event Type" options={["Wedding", "Reception", "Birthday", "Corporate", "School Event", "College Event", "Sangeet", "Baby Shower", "Rental", "Other"]} />
         <InputField id="input-location" name="location" label="Location" icon={<MapPin size={18} />} placeholder="Enter location" required />
         <InputField id="input-map-link" name="map_link" label="Google Map Link" icon={<LinkIcon size={18} />} placeholder="Paste google map link" />
 
