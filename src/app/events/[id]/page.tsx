@@ -27,7 +27,7 @@ export default function EventDetailsPage() {
       
     const crewList = staff.length > 0 
       ? staff.map(s => {
-          return `• ${s.name}${s.assigned_role ? ` (${s.assigned_role})` : ''}`;
+          return `• ${s.name}${s.role ? ` ${s.role.toLowerCase()}` : ''}${s.assigned_role ? ` (${s.assigned_role})` : ''}`;
         }).join('\n') 
       : "No crew assigned yet";
       
@@ -298,9 +298,11 @@ ${event.invitation_url ? `📎 *Invitation Attachment:*\n${event.invitation_url}
                         <img src={imageSrc} alt={member.name} className="w-full h-full object-cover" />
                       </div>
                       <div>
-                        <p className="text-sm font-bold text-gray-900">{member.name}</p>
+                        <p className="text-sm font-bold text-gray-900">
+                          {member.name} {member.role && <span className="font-medium text-gray-500">{member.role.toLowerCase()}</span>}
+                        </p>
                         {member.assigned_role && (
-                          <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide">{member.assigned_role}</p>
+                          <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide">({member.assigned_role})</p>
                         )}
                       </div>
                     </div>
