@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, Calendar, MapPin, Phone, User, Link as LinkIcon, Layers, Camera, X, ImageIcon, MessageSquare } from "lucide-react";
+import { ChevronLeft, Calendar, MapPin, Truck, Phone, User, Link as LinkIcon, Layers, Camera, X, ImageIcon, MessageSquare } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/lib/supabase";
