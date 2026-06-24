@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
 
 interface SplashScreenProps {
@@ -9,10 +9,24 @@ interface SplashScreenProps {
 
 export default function SplashScreen({ onComplete }: SplashScreenProps) {
   const [mounted, setMounted] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    // Ensure video is muted and plays to bypass some mobile autoplay restrictions
+    if (videoRef.current) {
+      videoRef.current.defaultMuted = true;
+      videoRef.current.muted = true;
+      videoRef.current.play().catch((e) => {
+        console.warn("Autoplay prevented:", e);
+        // If autoplay fails, we just call onComplete so the user isn't stuck
+        if (onComplete) onComplete();
+      });
+    }
+  }, [mounted, onComplete]);
 
   if (!mounted) return null;
 
@@ -25,6 +39,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
       transition={{ duration: 0.5 }}
     >
       <video
+        ref={videoRef}
         className="w-full h-full object-contain pointer-events-none"
         autoPlay
         muted
@@ -37,7 +52,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
           if (onComplete) onComplete();
         }}
       >
-        <source src="/AGASTHIYA_EVENT_-_Premium_Logo.mp4" type="video/mp4" />
+        <source src="/entrance_video.mp4" type="video/mp4" />
       </video>
     </motion.div>
   );
