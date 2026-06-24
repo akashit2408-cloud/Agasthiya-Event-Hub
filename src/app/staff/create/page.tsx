@@ -396,7 +396,7 @@ export default function CreateStaffPage() {
       </div>
 
       {/* Submit Button */}
-      <div className="p-5 pb-8 bg-white border-t border-gray-100 sticky bottom-0">
+      <div className="p-5 pb-28 bg-white border-t border-gray-100 sticky bottom-0">
         <button 
           onClick={handleSubmit}
           disabled={!isFormValid || isSubmitting}
