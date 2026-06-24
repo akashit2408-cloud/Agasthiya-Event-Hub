@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, Filter, Phone, MessageSquare, ChevronRight, Plus } from "lucide-react";
+import { Search, Filter, Phone, MessageSquare, ChevronRight, Plus, Pencil } from "lucide-react";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
@@ -100,7 +100,7 @@ export default function StaffPage() {
   );
 }
 
-function StaffCard({ name, role, status, avatar_seed, mobile }: any) {
+function StaffCard({ id, name, role, status, avatar_seed, mobile }: any) {
   const statusStyles: any = {
     Available: "text-success bg-green-100",
     Assigned: "text-orange-600 bg-orange-100",
@@ -123,10 +123,13 @@ function StaffCard({ name, role, status, avatar_seed, mobile }: any) {
         </div>
       </div>
       
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2">
         <span className={cn("px-2 py-0.5 text-[8px] font-black rounded-full uppercase", statusStyles[status])}>
           {status}
         </span>
+        <Link href={`/staff/${id}/edit`} className="p-2 bg-gray-50 rounded-xl shadow-none border border-gray-100 active:scale-95 transition-transform">
+          <Pencil size={14} className="text-gray-600" />
+        </Link>
         {mobile ? (
           <a href={`tel:${mobile}`} className="p-2 bg-white rounded-xl shadow-sm border border-gray-50 active:scale-95 transition-transform">
              <Phone size={14} className="text-gray-900" />
