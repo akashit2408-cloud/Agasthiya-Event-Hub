@@ -577,11 +577,12 @@ ${validInvitationUrl ? `📎 *Invitation Attachment:*\n${validInvitationUrl}\n\n
 
       {/* Staff Payment Modal */}
       {selectedStaffForPayment && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setSelectedStaffForPayment(null)}>
-          <div 
-            className="bg-white rounded-[2rem] p-6 w-full max-w-sm shadow-2xl animate-in zoom-in-95 duration-200 relative overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div className="fixed inset-0 z-[60] bg-black/40 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto" onClick={() => setSelectedStaffForPayment(null)}>
+          <div className="flex min-h-full items-center justify-center p-4">
+            <div 
+              className="bg-white rounded-[2rem] p-6 w-full max-w-sm shadow-2xl animate-in zoom-in-95 duration-200 relative overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
             <div className="flex items-center gap-4 mb-6">
               <div className="w-14 h-14 rounded-full bg-gray-100 overflow-hidden shadow-sm shrink-0">
                  <img 
@@ -629,6 +630,7 @@ ${validInvitationUrl ? `📎 *Invitation Attachment:*\n${validInvitationUrl}\n\n
                 </button>
               </div>
             </div>
+          </div>
           </div>
         </div>
       )}
