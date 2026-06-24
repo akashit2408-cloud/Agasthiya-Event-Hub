@@ -22,7 +22,7 @@ export default function MobileLayout({ children }: { children: React.ReactNode }
     const timer = setTimeout(() => {
       setShowSplash(false);
       sessionStorage.setItem("hasSeenSplash", "true");
-    }, 2000);
+    }, 8500); // Extended for cinematic entrance animation
     return () => clearTimeout(timer);
   }, [showSplash]);
 

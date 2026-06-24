@@ -21,11 +21,29 @@ export default function CreateEventPage() {
   const [resourceCategory, setResourceCategory] = useState<"Setup" | "Equipment">("Setup");
   const [saving, setSaving] = useState(false);
   const [isExtracting, setIsExtracting] = useState(false);
+  const [extractionProgress, setExtractionProgress] = useState(0);
+  const [extractionError, setExtractionError] = useState("");
   const [invitationImage, setInvitationImage] = useState<string | null>(null);
   const [remark, setRemark] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const getExtractionErrorMessage = (message?: string, status?: number) => {
+    const rawMessage = (message || "").toLowerCase();
+    if (status === 503 || rawMessage.includes("503") || rawMessage.includes("service unavailable") || rawMessage.includes("high demand")) {
+      return "Auto-fill is temporarily busy because Gemini is under high demand. Please try again after a minute.";
+    }
+
+    if (status === 400) {
+      return "Please upload a clear invitation image and try auto-fill again.";
+    }
+
+    return "Auto-fill could not extract the details now. Please try again or enter the details manually.";
+  };
+
   const handleExtract = async (imageData: string) => {
+    if (isExtracting) return;
+    setExtractionError("");
+    setExtractionProgress(1);
     setIsExtracting(true);
     try {
       const response = await fetch('/api/extract-invitation', {
@@ -34,33 +52,37 @@ export default function CreateEventPage() {
         body: JSON.stringify({ image: imageData })
       });
       const result = await response.json();
-      if (result.data) {
-        const { title, event_type, event_date, event_time, location, map_link } = result.data;
-        
-        const titleEl = document.getElementById('input-title') as HTMLInputElement;
-        if (titleEl && title && !titleEl.value) titleEl.value = title;
-        
-        const typeEl = document.getElementById('select-event-type') as HTMLSelectElement;
-        if (typeEl && event_type) typeEl.value = event_type;
 
-        const dateEl = document.getElementById('input-date') as HTMLInputElement;
-        if (dateEl && event_date && !dateEl.value) dateEl.value = event_date;
-
-        const timeEl = document.getElementById('input-time') as HTMLInputElement;
-        if (timeEl && event_time && !timeEl.value) timeEl.value = event_time;
-
-        const locEl = document.getElementById('input-location') as HTMLInputElement;
-        if (locEl && location && !locEl.value) locEl.value = location;
-
-        const mapLinkEl = document.getElementById('input-map-link') as HTMLInputElement;
-        if (mapLinkEl && map_link && !mapLinkEl.value) mapLinkEl.value = map_link;
-      } else {
-        alert("Error: " + (result.error || "Could not extract data automatically."));
+      if (!response.ok || !result.data) {
+        setExtractionError(getExtractionErrorMessage(result.error, response.status));
+        return;
       }
+
+      const { title, event_type, event_date, event_time, location, map_link } = result.data;
+      
+      const titleEl = document.getElementById('input-title') as HTMLInputElement;
+      if (titleEl && title && !titleEl.value) titleEl.value = title;
+      
+      const typeEl = document.getElementById('select-event-type') as HTMLSelectElement;
+      if (typeEl && event_type) typeEl.value = event_type;
+
+      const dateEl = document.getElementById('input-date') as HTMLInputElement;
+      if (dateEl && event_date && !dateEl.value) dateEl.value = event_date;
+
+      const timeEl = document.getElementById('input-time') as HTMLInputElement;
+      if (timeEl && event_time && !timeEl.value) timeEl.value = event_time;
+
+      const locEl = document.getElementById('input-location') as HTMLInputElement;
+      if (locEl && location && !locEl.value) locEl.value = location;
+
+      const mapLinkEl = document.getElementById('input-map-link') as HTMLInputElement;
+      if (mapLinkEl && map_link && !mapLinkEl.value) mapLinkEl.value = map_link;
     } catch (err: any) {
       console.error(err);
-      alert("Error during extraction: " + err.message);
+      setExtractionError(getExtractionErrorMessage(err.message));
     } finally {
+      setExtractionProgress(100);
+      await new Promise((resolve) => window.setTimeout(resolve, 450));
       setIsExtracting(false);
     }
   };
@@ -102,12 +124,27 @@ export default function CreateEventPage() {
         ctx?.drawImage(img, 0, 0, width, height);
 
         const compressedDataUrl = canvas.toDataURL('image/webp', 0.7);
+        setExtractionError("");
+        setExtractionProgress(0);
         setInvitationImage(compressedDataUrl);
       };
       img.src = event.target?.result as string;
     };
     reader.readAsDataURL(file);
   };
+
+  useEffect(() => {
+    if (!isExtracting) return;
+
+    const progressTimer = window.setInterval(() => {
+      setExtractionProgress((current) => {
+        if (current >= 94) return current;
+        return Math.min(94, current + 3);
+      });
+    }, 140);
+
+    return () => window.clearInterval(progressTimer);
+  }, [isExtracting]);
 
   useEffect(() => {
     async function fetchResources() {
@@ -254,7 +291,16 @@ export default function CreateEventPage() {
               <div className="flex flex-col items-center gap-3">
                 <div className="relative w-full max-w-[200px] rounded-xl overflow-hidden border border-gray-100 shadow-sm">
                   <img src={invitationImage} alt="Invitation Preview" className="w-full h-auto object-cover" />
-                  <button type="button" onClick={() => setInvitationImage(null)} className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5 shadow-lg active:scale-95">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setInvitationImage(null);
+                      setExtractionError("");
+                      setExtractionProgress(0);
+                    }}
+                    disabled={isExtracting}
+                    className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5 shadow-lg active:scale-95 disabled:opacity-50"
+                  >
                     <X size={14} />
                   </button>
                 </div>
