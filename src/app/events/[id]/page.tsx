@@ -400,7 +400,6 @@ ${validInvitationUrl ? `📎 *Invitation Attachment:*\n${validInvitationUrl}\n\n
                     : `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=random&font-size=0.35&rounded=true&bold=true`;
                   
                   return (
-                  return (
                     <button 
                       key={member.id || index} 
                       onClick={() => { setSelectedStaffForPayment(member); setPaymentAmount(""); }}
