@@ -25,9 +25,10 @@ export default function MobileLayout({ children }: { children: React.ReactNode }
     }
 
     // Fallback timer just in case the video fails to load or play
+    // Increased to 15 seconds so longer videos don't get accidentally cut off
     const timer = setTimeout(() => {
       handleSplashComplete();
-    }, 10000); // 10 seconds fallback
+    }, 15000); // 15 seconds fallback
     return () => clearTimeout(timer);
   }, [showSplash]);
 
