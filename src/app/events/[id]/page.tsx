@@ -20,7 +20,6 @@ export default function EventDetailsPage() {
   const [showCompleteModal, setShowCompleteModal] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
   const [selectedStaffForPayment, setSelectedStaffForPayment] = useState<any>(null);
-  const [paymentAmount, setPaymentAmount] = useState("");
 
   const handleShare = async () => {
     if (!event) return;
@@ -152,12 +151,7 @@ ${validInvitationUrl ? `📎 *Invitation Attachment:*\n${validInvitationUrl}\n\n
 
   const handleStaffPaymentSubmit = async (method: "Cash" | "GPay") => {
     try {
-      const amount = parseFloat(paymentAmount);
       if (method === 'GPay') {
-          if (!amount || amount <= 0) {
-            alert("Please enter a valid amount.");
-            return;
-          }
           if (!selectedStaffForPayment.gpay_number) {
             alert("This staff member does not have a GPay / UPI ID saved in their profile.");
             return;
@@ -183,8 +177,7 @@ ${validInvitationUrl ? `📎 *Invitation Attachment:*\n${validInvitationUrl}\n\n
       if (method === 'GPay') {
           const pa = encodeURIComponent(selectedStaffForPayment.gpay_number);
           const pn = encodeURIComponent(selectedStaffForPayment.name);
-          const am = amount.toFixed(2);
-          const upiLink = `upi://pay?pa=${pa}&pn=${pn}&am=${am}&cu=INR`;
+          const upiLink = `upi://pay?pa=${pa}&pn=${pn}&cu=INR`;
           window.location.href = upiLink;
       }
       
@@ -599,22 +592,7 @@ ${validInvitationUrl ? `📎 *Invitation Attachment:*\n${validInvitationUrl}\n\n
             </div>
 
             <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
-                  Payment Amount
-                </label>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-lg">₹</span>
-                  <input 
-                    type="number" 
-                    placeholder="Enter amount"
-                    value={paymentAmount}
-                    onChange={(e) => setPaymentAmount(e.target.value)}
-                    className="w-full bg-gray-50 border border-gray-200 rounded-2xl py-4 pl-12 pr-4 text-lg font-black text-gray-900 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
-                  />
-                </div>
-              </div>
-
+              <p className="text-sm text-gray-500 text-center mb-2">How would you like to mark this payment?</p>
               <div className="grid grid-cols-2 gap-3 pt-2">
                 <button 
                   onClick={() => handleStaffPaymentSubmit('Cash')}
