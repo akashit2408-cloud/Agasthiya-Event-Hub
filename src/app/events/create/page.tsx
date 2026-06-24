@@ -304,9 +304,33 @@ export default function CreateEventPage() {
                     <X size={14} />
                   </button>
                 </div>
-                <button type="button" onClick={() => handleExtract(invitationImage!)} disabled={isExtracting} className="px-4 py-2 bg-purple-50 text-purple-700 font-bold text-xs rounded-xl border border-purple-200 flex items-center gap-2 shadow-sm active:scale-95 transition-all">
-                  <span>✨</span> {isExtracting ? "Extracting Details..." : "Auto-fill Details"}
-                </button>
+                {isExtracting ? (
+                  <div className="w-full max-w-[220px] flex flex-col items-center gap-2 mt-2">
+                    <div className="flex items-center justify-between w-full px-1">
+                      <span className="text-xs font-bold text-purple-700 flex items-center gap-1">
+                        <span className="animate-pulse">✨</span> Extracting...
+                      </span>
+                      <span className="text-xs font-bold text-purple-700">{extractionProgress}%</span>
+                    </div>
+                    <div className="w-full h-2 bg-purple-100 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-purple-500 transition-all duration-300 ease-out relative"
+                        style={{ width: `${extractionProgress}%` }}
+                      >
+                        <div className="absolute top-0 right-0 bottom-0 left-0 bg-white/20 animate-[shimmer_1s_infinite]" />
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <button type="button" onClick={() => handleExtract(invitationImage!)} className="px-4 py-2 bg-purple-50 text-purple-700 font-bold text-xs rounded-xl border border-purple-200 flex items-center gap-2 shadow-sm active:scale-95 transition-all mt-2">
+                    <span>✨</span> Auto-fill Details
+                  </button>
+                )}
+                {extractionError && (
+                  <div className="text-[10px] text-red-500 bg-red-50 p-2.5 rounded-xl border border-red-100 text-center max-w-[250px] font-medium mt-1">
+                    {extractionError}
+                  </div>
+                )}
               </div>
             ) : (
               <>
