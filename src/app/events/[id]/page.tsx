@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, Calendar, MapPin, Users, Truck, Layers, ExternalLink, Edit2, Info, ImageIcon } from "lucide-react";
+import { ChevronLeft, Calendar, MapPin, Users, Truck, Layers, ExternalLink, Edit2, Info, ImageIcon, ChevronRight } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState, type MouseEvent } from "react";
 import { cn } from "@/lib/utils";
@@ -19,6 +19,8 @@ export default function EventDetailsPage() {
   const [isCancelling, setIsCancelling] = useState(false);
   const [showCompleteModal, setShowCompleteModal] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
+  const [selectedStaffForPayment, setSelectedStaffForPayment] = useState<any>(null);
+  const [paymentAmount, setPaymentAmount] = useState("");
 
   const handleShare = async () => {
     if (!event) return;
@@ -226,7 +228,7 @@ ${validInvitationUrl ? `📎 *Invitation Attachment:*\n${validInvitationUrl}\n\n
             vehicles (name, registration_number),
             event_staff (
               assigned_role,
-              staff (id, name, role, mobile, avatar_seed)
+              staff (id, name, role, mobile, gpay_number, avatar_seed)
             )
           `)
           .eq("id", eventId)
@@ -257,6 +259,7 @@ ${validInvitationUrl ? `📎 *Invitation Attachment:*\n${validInvitationUrl}\n\n
           name: s.staff.name,
           role: s.staff.role,
           mobile: s.staff.mobile,
+          gpay_number: s.staff.gpay_number,
           avatar_seed: s.staff.avatar_seed,
           assigned_role: s.assigned_role
         })) || []);
@@ -397,19 +400,27 @@ ${validInvitationUrl ? `📎 *Invitation Attachment:*\n${validInvitationUrl}\n\n
                     : `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=random&font-size=0.35&rounded=true&bold=true`;
                   
                   return (
-                    <div key={member.id || index} className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden shadow-sm shrink-0">
-                        <img src={imageSrc} alt={member.name} className="w-full h-full object-cover" />
+                  return (
+                    <button 
+                      key={member.id || index} 
+                      onClick={() => { setSelectedStaffForPayment(member); setPaymentAmount(""); }}
+                      className="flex items-center justify-between p-2 -mx-2 rounded-2xl hover:bg-gray-50 transition-colors w-full text-left"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden shadow-sm shrink-0">
+                          <img src={imageSrc} alt={member.name} className="w-full h-full object-cover" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-gray-900">
+                            {member.name} {member.role && member.role.toLowerCase() !== 'helper' && <span className="font-medium text-gray-500">{member.role.toLowerCase()}</span>}
+                          </p>
+                          {member.assigned_role && (
+                            <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide">({member.assigned_role})</p>
+                          )}
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-sm font-bold text-gray-900">
-                          {member.name} {member.role && member.role.toLowerCase() !== 'helper' && <span className="font-medium text-gray-500">{member.role.toLowerCase()}</span>}
-                        </p>
-                        {member.assigned_role && (
-                          <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide">({member.assigned_role})</p>
-                        )}
-                      </div>
-                    </div>
+                      <ChevronRight className="text-gray-300" size={18} />
+                    </button>
                   );
                 })}
               </div>
@@ -505,6 +516,78 @@ ${validInvitationUrl ? `📎 *Invitation Attachment:*\n${validInvitationUrl}\n\n
                   className="w-full py-4 bg-gray-100 text-gray-900 rounded-2xl font-black text-sm uppercase tracking-widest active:scale-95 transition-transform disabled:opacity-50"
                 >
                   Go Back
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Staff Payment Modal */}
+      {selectedStaffForPayment && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setSelectedStaffForPayment(null)}>
+          <div 
+            className="bg-white rounded-t-[2rem] p-6 w-full max-w-sm shadow-2xl animate-in slide-in-from-bottom-full duration-300 relative overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-14 h-14 rounded-full bg-gray-100 overflow-hidden shadow-sm shrink-0">
+                 <img 
+                    src={selectedStaffForPayment.avatar_seed && selectedStaffForPayment.avatar_seed.startsWith('data:image/') 
+                      ? selectedStaffForPayment.avatar_seed 
+                      : `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedStaffForPayment.name)}&background=random&font-size=0.35&rounded=true&bold=true`} 
+                    alt={selectedStaffForPayment.name} className="w-full h-full object-cover" 
+                 />
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-gray-900 leading-tight">Pay {selectedStaffForPayment.name}</h3>
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">{selectedStaffForPayment.role}</p>
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Payment Amount</label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-lg">₹</span>
+                  <input 
+                    type="number" 
+                    placeholder="Enter amount"
+                    value={paymentAmount}
+                    onChange={(e) => setPaymentAmount(e.target.value)}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-2xl py-4 pl-12 pr-4 text-lg font-black text-gray-900 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 pt-2">
+                <button 
+                  onClick={() => setSelectedStaffForPayment(null)}
+                  className="w-full py-4 bg-gray-100 text-gray-700 rounded-2xl font-black text-sm uppercase tracking-widest active:scale-95 transition-transform"
+                >
+                  Pay Cash
+                </button>
+                <button 
+                  onClick={() => {
+                    const amount = parseFloat(paymentAmount);
+                    if (!amount || amount <= 0) {
+                      alert("Please enter a valid amount.");
+                      return;
+                    }
+                    if (!selectedStaffForPayment.gpay_number) {
+                      alert("This staff member does not have a GPay / UPI ID saved in their profile.");
+                      return;
+                    }
+                    const pa = encodeURIComponent(selectedStaffForPayment.gpay_number);
+                    const pn = encodeURIComponent(selectedStaffForPayment.name);
+                    const am = amount.toFixed(2);
+                    const upiLink = `upi://pay?pa=${pa}&pn=${pn}&am=${am}&cu=INR`;
+                    window.location.href = upiLink;
+                    setTimeout(() => setSelectedStaffForPayment(null), 1000);
+                  }}
+                  className="w-full py-4 bg-blue-500 text-white rounded-2xl font-black text-sm uppercase tracking-widest active:scale-95 transition-transform shadow-lg shadow-blue-500/30"
+                >
+                  Pay GPay
                 </button>
               </div>
             </div>

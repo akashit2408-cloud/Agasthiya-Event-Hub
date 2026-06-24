@@ -10,6 +10,7 @@ import { supabase } from "@/lib/supabase";
 interface FormData {
   name: string;
   phone: string;
+  gpayNumber: string;
   role: string;
   status: string;
   profileImage: string | null;
@@ -27,6 +28,7 @@ export default function CreateStaffPage() {
   const [formData, setFormData] = useState<FormData>({
     name: "",
     phone: "",
+    gpayNumber: "",
     role: "Helper",
     status: "Available",
     profileImage: null
@@ -125,6 +127,7 @@ export default function CreateStaffPage() {
       const { error } = await supabase.from('staff').insert([{
         name: formData.name,
         mobile: formData.phone,
+        gpay_number: formData.gpayNumber || null,
         role: formData.role,
         status: formData.status,
         avatar_seed: formData.profileImage || null
@@ -148,6 +151,10 @@ export default function CreateStaffPage() {
     const value = e.target.value.replace(/\D/g, '').slice(0, 10);
     setFormData({...formData, phone: value});
     if (errors.phone) setErrors({...errors, phone: undefined});
+  };
+
+  const handleGpayChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({...formData, gpayNumber: e.target.value});
   };
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -327,6 +334,27 @@ export default function CreateStaffPage() {
               {errors.phone}
             </p>
           )}
+        </div>
+
+        {/* GPay/UPI Field */}
+        <div className="space-y-2">
+          <label 
+            htmlFor="gpayNumber"
+            className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1"
+          >
+            Google Pay / UPI ID (Optional)
+          </label>
+          <div className="relative">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-lg">₹</span>
+            <input 
+              id="gpayNumber"
+              type="text" 
+              placeholder="e.g. 9876543210 or name@okaxis"
+              value={formData.gpayNumber}
+              onChange={handleGpayChange}
+              className="w-full bg-white border border-gray-200 rounded-2xl py-3.5 pl-12 pr-4 text-sm font-bold text-gray-900 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
+            />
+          </div>
         </div>
 
         {/* Role Selection */}

@@ -55,6 +55,7 @@ create table if not exists staff (
   name text not null unique,
   role text not null,
   mobile text,
+  gpay_number text,
   status staff_status not null default 'Available',
   avatar_seed text,
   created_at timestamptz not null default now(),
@@ -384,3 +385,6 @@ on conflict (name) do nothing;
 insert into app_settings (key, value) values
   ('company', '{"name":"DJ Eventer Chennai ERP","timezone":"Asia/Kolkata"}')
 on conflict (key) do nothing;
+
+-- Keep existing installations compatible when this schema is reapplied.
+alter table staff add column if not exists gpay_number text;
