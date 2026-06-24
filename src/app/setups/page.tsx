@@ -1,16 +1,18 @@
 "use client";
 
-import { Search, Filter, Layers, Plus, X } from "lucide-react";
+import { Search, Layers, Plus, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
 
 export default function SetupsPage() {
   const [activeTab, setActiveTab] = useState("All");
+  const [activeCategory, setActiveCategory] = useState<"Setup" | "Equipment">("Setup");
+  const [searchQuery, setSearchQuery] = useState("");
   const [setups, setSetups] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [newSetup, setNewSetup] = useState({ name: "", quantity: 1, status: "Available" });
+  const [newSetup, setNewSetup] = useState({ name: "", category: "Setup", quantity: 1, status: "Available" });
   const [isSaving, setIsSaving] = useState(false);
 
   const fetchSetups = async () => {
@@ -27,6 +29,7 @@ export default function SetupsPage() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchSetups();
   }, []);
 
@@ -37,7 +40,7 @@ export default function SetupsPage() {
       const { error } = await supabase.from("setups").insert(newSetup);
       if (error) throw error;
       setShowAddModal(false);
-      setNewSetup({ name: "", quantity: 1, status: "Available" });
+      setNewSetup({ name: "", category: activeCategory, quantity: 1, status: "Available" });
       await fetchSetups();
     } catch (err: any) {
       console.error(err);
@@ -47,18 +50,46 @@ export default function SetupsPage() {
     }
   };
 
-  const filteredSetups = activeTab === "All" ? setups : setups.filter((setup) => setup.status === activeTab);
+  const filteredSetups = setups.filter((setup) => {
+    const matchesCategory = (setup.category || "Setup") === activeCategory;
+    const matchesStatus = activeTab === "All" || setup.status === activeTab;
+    const matchesSearch = setup.name.toLowerCase().includes(searchQuery.trim().toLowerCase());
+    return matchesCategory && matchesStatus && matchesSearch;
+  });
+
+  const openAddModal = () => {
+    setNewSetup({ name: "", category: activeCategory, quantity: 1, status: "Available" });
+    setShowAddModal(true);
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-white pb-20">
       <div className="p-5 space-y-4">
-        <h1 className="text-xl font-bold text-gray-900">DJ Setups</h1>
+        <h1 className="text-xl font-bold text-gray-900">Setups & Equipment</h1>
+
+        <div className="grid grid-cols-2 rounded-2xl bg-gray-100 p-1">
+          {(["Setup", "Equipment"] as const).map((category) => (
+            <button
+              key={category}
+              type="button"
+              onClick={() => setActiveCategory(category)}
+              className={cn(
+                "rounded-xl py-3 text-sm font-bold transition-all",
+                activeCategory === category ? "bg-white text-primary shadow-sm" : "text-gray-500"
+              )}
+            >
+              {category === "Setup" ? "Setups" : "Equipment"}
+            </button>
+          ))}
+        </div>
         
         <div className="relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
           <input 
             type="text" 
-            placeholder="Search setups..." 
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder={`Search ${activeCategory === "Setup" ? "setups" : "equipment"}...`}
             className="w-full bg-gray-50 border-none rounded-2xl py-3.5 pl-12 pr-4 text-sm font-medium outline-none"
           />
         </div>
@@ -84,12 +115,18 @@ export default function SetupsPage() {
         {loading ? (
           <p className="py-10 text-center text-sm font-medium text-gray-500">Loading setups...</p>
         ) : (
-          filteredSetups.map((setup, index) => <SetupCard key={setup.id || index} {...setup} />)
+          filteredSetups.length > 0 ? (
+            filteredSetups.map((setup, index) => <SetupCard key={setup.id || index} {...setup} />)
+          ) : (
+            <p className="py-10 text-center text-sm font-medium text-gray-500">
+              No {activeCategory === "Setup" ? "setups" : "equipment"} found.
+            </p>
+          )
         )}
       </div>
 
       <button 
-        onClick={() => setShowAddModal(true)}
+        onClick={openAddModal}
         className="fixed bottom-24 right-6 w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center shadow-xl active:scale-95 transition-transform z-10"
       >
         <Plus size={28} />
@@ -105,7 +142,7 @@ export default function SetupsPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center">
-              <h3 className="text-xl font-black text-gray-900">Add Equipment</h3>
+              <h3 className="text-xl font-black text-gray-900">Add {activeCategory}</h3>
               <button onClick={() => setShowAddModal(false)} className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
                 <X size={16} />
               </button>
@@ -113,13 +150,13 @@ export default function SetupsPage() {
             
             <div className="space-y-4">
               <div>
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 block">Equipment Name</label>
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 block">{activeCategory} Name</label>
                 <input 
                   type="text" 
                   value={newSetup.name}
                   onChange={(e) => setNewSetup({...newSetup, name: e.target.value})}
                   className="w-full bg-gray-50 border-none rounded-xl p-4 text-sm font-bold text-gray-900 outline-none focus:ring-2 focus:ring-primary/20"
-                  placeholder="e.g. 4th Dance Floor"
+                  placeholder={activeCategory === "Setup" ? "e.g. Premium DJ Setup" : "e.g. VRX A-Plus Speakers"}
                 />
               </div>
               
@@ -157,7 +194,7 @@ export default function SetupsPage() {
               disabled={isSaving || !newSetup.name}
               className="w-full bg-primary text-white py-4 rounded-xl font-bold active:scale-95 transition-transform disabled:opacity-50"
             >
-              {isSaving ? "Saving..." : "Save Equipment"}
+              {isSaving ? "Saving..." : `Save ${activeCategory}`}
             </button>
           </div>
         </div>

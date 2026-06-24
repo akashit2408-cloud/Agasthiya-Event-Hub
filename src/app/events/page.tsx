@@ -158,8 +158,8 @@ function EventCard({ event }: any) {
     const staff = event.staff || [];
     const crewList = staff.length > 0 
       ? staff.map((s: any) => {
-          let rolePart = s.role && s.role.toLowerCase() !== 'helper' ? ` (${s.role.split(' ').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ')})` : '';
-          let remarkPart = s.assigned_role ? ` - ${s.assigned_role}` : '';
+          const rolePart = s.role && s.role.toLowerCase() !== 'helper' ? ` (${s.role.split(' ').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ')})` : '';
+          const remarkPart = s.assigned_role ? ` - ${s.assigned_role}` : '';
           return `• ${s.name}${rolePart}${remarkPart}`;
         }).join('\n') 
       : "No crew assigned yet";

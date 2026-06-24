@@ -75,12 +75,26 @@ create table if not exists vehicles (
 create table if not exists setups (
   id uuid primary key default gen_random_uuid(),
   name text not null unique,
+  category text not null default 'Setup' check (category in ('Setup', 'Equipment')),
   quantity integer not null default 1 check (quantity >= 0),
   status resource_status not null default 'Available',
   notes text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+-- Keep existing installations compatible when this schema is reapplied.
+alter table setups add column if not exists category text not null default 'Setup';
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint where conname = 'setups_category_check'
+  ) then
+    alter table setups
+      add constraint setups_category_check check (category in ('Setup', 'Equipment'));
+  end if;
+end $$;
 
 create table if not exists rentals (
   id uuid primary key default gen_random_uuid(),
@@ -328,17 +342,28 @@ insert into staff (name, role, status, avatar_seed) values
   ('Prakash', 'Sound Engineer', 'Leave', 'Prakash')
 on conflict (name) do nothing;
 
-insert into setups (name, quantity, status) values
-  ('Basic Setup', 5, 'Available'),
-  ('Honeycomb Setup', 5, 'Available'),
-  ('Honeycomb with mirror ball sharpy Dj setup', 2, 'Available'),
-  ('Cold Pyro', 10, 'Available'),
-  ('LED Dance Floor', 2, 'Available'),
-  ('Low Fog Entry', 5, 'Available'),
-  ('360 Degree Selfie Booth', 2, 'Available'),
-  ('Balloon Blast', 5, 'Available'),
-  ('3rd Dance Floor', 2, 'Available')
+insert into setups (name, category, quantity, status) values
+  ('Basic Setup', 'Setup', 5, 'Available'),
+  ('Honeycomb Setup', 'Setup', 5, 'Available'),
+  ('Honeycomb with mirror ball sharpy Dj setup', 'Setup', 2, 'Available'),
+  ('Cold Pyro', 'Equipment', 10, 'Available'),
+  ('LED Dance Floor', 'Equipment', 2, 'Available'),
+  ('Low Fog Entry', 'Equipment', 5, 'Available'),
+  ('360 Degree Selfie Booth', 'Equipment', 2, 'Available'),
+  ('Balloon Blast', 'Equipment', 5, 'Available'),
+  ('3rd Dance Floor', 'Equipment', 2, 'Available')
 on conflict (name) do nothing;
+
+update setups
+set category = 'Equipment'
+where name in (
+  'Cold Pyro',
+  'LED Dance Floor',
+  'Low Fog Entry',
+  '360 Degree Selfie Booth',
+  'Balloon Blast',
+  '3rd Dance Floor'
+);
 
 insert into vehicles (name, registration_number, status) values
   ('Vehicle 1', 'TN-00-DJ-0001', 'Available'),

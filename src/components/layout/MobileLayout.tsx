@@ -6,15 +6,16 @@ import BottomNav from "./BottomNav";
 import SplashScreen from "./SplashScreen";
 
 export default function MobileLayout({ children }: { children: React.ReactNode }) {
-  const [showSplash, setShowSplash] = useState(true);
+  const [showSplash, setShowSplash] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return !sessionStorage.getItem("hasSeenSplash");
+  });
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
 
   useEffect(() => {
-    const hasSeenSplash = sessionStorage.getItem("hasSeenSplash");
-    if (hasSeenSplash) {
-      setShowSplash(false);
+    if (!showSplash) {
       return;
     }
 
@@ -23,7 +24,7 @@ export default function MobileLayout({ children }: { children: React.ReactNode }
       sessionStorage.setItem("hasSeenSplash", "true");
     }, 2000);
     return () => clearTimeout(timer);
-  }, []);
+  }, [showSplash]);
 
   if (showSplash) {
     return <SplashScreen />;

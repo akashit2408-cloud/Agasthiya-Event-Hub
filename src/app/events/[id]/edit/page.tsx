@@ -21,6 +21,7 @@ export default function EditEventPage() {
   const [customVehicleName, setCustomVehicleName] = useState<string>("");
   const [showAllStaff, setShowAllStaff] = useState(false);
   const [selectedSetups, setSelectedSetups] = useState<Record<string, number>>({});
+  const [resourceCategory, setResourceCategory] = useState<"Setup" | "Equipment">("Setup");
   const [saving, setSaving] = useState(false);
   const [invitationImage, setInvitationImage] = useState<string | null>(null);
   const [remark, setRemark] = useState("");
@@ -361,7 +362,7 @@ export default function EditEventPage() {
               </div>
             </div>
             <div id="custom-vehicle-input" className="mt-2" style={{ display: 'none' }}>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Specify Vehicle (Uber, Rental, Friend's Car)</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Specify Vehicle (Uber, Rental, Friend&apos;s Car)</label>
               <input
                 type="text"
                 value={customVehicleName}
@@ -384,8 +385,26 @@ export default function EditEventPage() {
         </div>
 
         <div className="space-y-3">
-          <h2 className="text-sm font-bold text-primary uppercase tracking-wider">Select Setups ({Object.keys(selectedSetups).length})</h2>
-          {setups.map((setup) => (
+          <h2 className="text-sm font-bold text-primary uppercase tracking-wider">Select Resources ({Object.keys(selectedSetups).length})</h2>
+          <div className="grid grid-cols-2 rounded-2xl bg-gray-100 p-1">
+            {(["Setup", "Equipment"] as const).map((category) => {
+              const selectedCount = setups.filter((item) => (item.category || "Setup") === category && selectedSetups[item.id]).length;
+              return (
+                <button
+                  key={category}
+                  type="button"
+                  onClick={() => setResourceCategory(category)}
+                  className={cn(
+                    "rounded-xl py-3 text-xs font-bold transition-all",
+                    resourceCategory === category ? "bg-white text-primary shadow-sm" : "text-gray-500"
+                  )}
+                >
+                  {category === "Setup" ? "Setups" : "Equipment"} ({selectedCount})
+                </button>
+              );
+            })}
+          </div>
+          {setups.filter((setup) => (setup.category || "Setup") === resourceCategory).map((setup) => (
             <div key={setup.id} className="w-full flex items-center justify-between p-3 bg-card border border-gray-50 rounded-2xl">
               <button
                 type="button"
@@ -419,6 +438,11 @@ export default function EditEventPage() {
               )}
             </div>
           ))}
+          {setups.filter((setup) => (setup.category || "Setup") === resourceCategory).length === 0 && (
+            <p className="py-6 text-center text-xs font-medium text-gray-500">
+              No {resourceCategory === "Setup" ? "setups" : "equipment"} available.
+            </p>
+          )}
         </div>
         <InputField name="notes" label="Additional Notes" icon={<Layers size={18} />} placeholder="Any other specific requirements?" defaultValue={eventData?.notes || ""} />
         <InputField name="total_amount" label="Total Amount" type="number" icon={<Calendar size={18} />} placeholder="0" defaultValue={eventData?.total_amount || 0} />

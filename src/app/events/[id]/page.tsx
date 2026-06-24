@@ -29,8 +29,8 @@ export default function EventDetailsPage() {
       
     const crewList = staff.length > 0 
       ? staff.map(s => {
-          let rolePart = s.role && s.role.toLowerCase() !== 'helper' ? ` (${s.role.split(' ').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ')})` : '';
-          let remarkPart = s.assigned_role ? ` - ${s.assigned_role}` : '';
+          const rolePart = s.role && s.role.toLowerCase() !== 'helper' ? ` (${s.role.split(' ').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ')})` : '';
+          const remarkPart = s.assigned_role ? ` - ${s.assigned_role}` : '';
           return `• ${s.name}${rolePart}${remarkPart}`;
         }).join('\n') 
       : "No crew assigned yet";
@@ -221,7 +221,7 @@ ${validInvitationUrl ? `📎 *Invitation Attachment:*\n${validInvitationUrl}\n\n
             customers (name, mobile, address),
             event_setups (
               quantity,
-              setups (name)
+              setups (name, category)
             ),
             vehicles (name, registration_number),
             event_staff (
@@ -240,7 +240,12 @@ ${validInvitationUrl ? `📎 *Invitation Attachment:*\n${validInvitationUrl}\n\n
           customer_name: (eventData as any).customers?.name,
           customer_mobile: (eventData as any).customers?.mobile,
           customer_address: (eventData as any).customers?.address,
-          setup_name: (eventData as any).event_setups?.map((es: any) => `${es.setups?.name} (${es.quantity})`).join(', ') || null,
+          setup_name: (eventData as any).event_setups
+            ?.filter((es: any) => (es.setups?.category || "Setup") === "Setup")
+            .map((es: any) => `${es.setups?.name} (${es.quantity})`).join(', ') || null,
+          equipment_name: (eventData as any).event_setups
+            ?.filter((es: any) => es.setups?.category === "Equipment")
+            .map((es: any) => `${es.setups?.name} (${es.quantity})`).join(', ') || null,
           vehicle_name: (eventData as any).vehicles?.name,
           vehicle_number: (eventData as any).vehicles?.registration_number,
           staff_count: (eventData as any).event_staff?.length || 0,
@@ -367,6 +372,9 @@ ${validInvitationUrl ? `📎 *Invitation Attachment:*\n${validInvitationUrl}\n\n
 
           <div className="space-y-3">
             <ResourceItem icon={<Layers className="text-primary" size={20} />} label="Setup" value={event.setup_name || "No setup"} />
+            {event.equipment_name && (
+              <ResourceItem icon={<Layers className="text-primary" size={20} />} label="Equipment" value={event.equipment_name} />
+            )}
             {event.vehicle_name && (
                <ResourceItem 
                  icon={<Truck className="text-primary" size={20} />} 
