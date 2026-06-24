@@ -162,6 +162,12 @@ export default function EditStaffPage() {
 
     setIsSubmitting(true);
     
+    if (formData.gpayNumber && /^\d{10}$/.test(formData.gpayNumber)) {
+      alert("Please enter a valid UPI ID (e.g., name@okaxis or 9876543210@upi). Do not enter just a 10-digit phone number, otherwise GPay will not know which bank to open.");
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       const { error } = await supabase.from('staff').update({
         name: formData.name,
@@ -394,12 +400,15 @@ export default function EditStaffPage() {
             <input 
               id="gpayNumber"
               type="text" 
-              placeholder="e.g. 9876543210 or name@okaxis"
+              placeholder="e.g. 9876543210@upi or name@okaxis"
               value={formData.gpayNumber}
               onChange={handleGpayChange}
               className="w-full bg-white border border-gray-200 rounded-2xl py-3.5 pl-12 pr-4 text-sm font-bold text-gray-900 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
             />
           </div>
+          <p className="text-[10px] text-gray-500 ml-1 font-medium mt-1">
+            *Must be a valid UPI ID ending in @bank (e.g., @okaxis). Do not use just a phone number.
+          </p>
         </div>
 
         {/* Role Selection */}
@@ -441,7 +450,7 @@ export default function EditStaffPage() {
       </div>
 
       {/* Submit Button */}
-      <div className="p-5 pb-28 bg-white border-t border-gray-100 sticky bottom-0">
+      <div className="p-5 pb-20 bg-white border-t border-gray-100 sticky bottom-0">
         <button 
           onClick={handleSubmit}
           disabled={!isFormValid || isSubmitting}
