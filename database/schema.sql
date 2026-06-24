@@ -132,6 +132,8 @@ create table if not exists event_staff (
   event_id uuid not null references events(id) on delete cascade,
   staff_id uuid not null references staff(id) on delete restrict,
   assigned_role text,
+  payment_status text default 'Unpaid',
+  payment_method text,
   created_at timestamptz not null default now(),
   primary key (event_id, staff_id)
 );
@@ -388,3 +390,5 @@ on conflict (key) do nothing;
 
 -- Keep existing installations compatible when this schema is reapplied.
 alter table staff add column if not exists gpay_number text;
+alter table event_staff add column if not exists payment_status text default 'Unpaid';
+alter table event_staff add column if not exists payment_method text;

@@ -150,6 +150,50 @@ ${validInvitationUrl ? `📎 *Invitation Attachment:*\n${validInvitationUrl}\n\n
     }, 500);
   };
 
+  const handleStaffPaymentSubmit = async (method: "Cash" | "GPay") => {
+    try {
+      const amount = parseFloat(paymentAmount);
+      if (method === 'GPay') {
+          if (!amount || amount <= 0) {
+            alert("Please enter a valid amount.");
+            return;
+          }
+          if (!selectedStaffForPayment.gpay_number) {
+            alert("This staff member does not have a GPay / UPI ID saved in their profile.");
+            return;
+          }
+      }
+
+      // Update in database
+      const { error } = await supabase
+        .from('event_staff')
+        .update({ payment_status: 'Paid', payment_method: method })
+        .eq('event_id', event?.id)
+        .eq('staff_id', selectedStaffForPayment.id);
+
+      if (error) throw error;
+
+      // Update local state
+      setStaff(staff.map(s => 
+        s.id === selectedStaffForPayment.id 
+          ? { ...s, payment_status: 'Paid', payment_method: method }
+          : s
+      ));
+
+      if (method === 'GPay') {
+          const pa = encodeURIComponent(selectedStaffForPayment.gpay_number);
+          const pn = encodeURIComponent(selectedStaffForPayment.name);
+          const am = amount.toFixed(2);
+          const upiLink = `upi://pay?pa=${pa}&pn=${pn}&am=${am}&cu=INR`;
+          window.location.href = upiLink;
+      }
+      
+      setSelectedStaffForPayment(null);
+    } catch (err: any) {
+      alert("Failed to record payment: " + err.message);
+    }
+  };
+
   const handleCancelClick = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     event.stopPropagation();
@@ -228,6 +272,8 @@ ${validInvitationUrl ? `📎 *Invitation Attachment:*\n${validInvitationUrl}\n\n
             vehicles (name, registration_number),
             event_staff (
               assigned_role,
+              payment_status,
+              payment_method,
               staff (id, name, role, mobile, gpay_number, avatar_seed)
             )
           `)
@@ -261,7 +307,9 @@ ${validInvitationUrl ? `📎 *Invitation Attachment:*\n${validInvitationUrl}\n\n
           mobile: s.staff.mobile,
           gpay_number: s.staff.gpay_number,
           avatar_seed: s.staff.avatar_seed,
-          assigned_role: s.assigned_role
+          assigned_role: s.assigned_role,
+          payment_status: s.payment_status,
+          payment_method: s.payment_method
         })) || []);
       } catch (err) {
         console.error("Error fetching event details:", err);
@@ -410,8 +458,13 @@ ${validInvitationUrl ? `📎 *Invitation Attachment:*\n${validInvitationUrl}\n\n
                           <img src={imageSrc} alt={member.name} className="w-full h-full object-cover" />
                         </div>
                         <div>
-                          <p className="text-sm font-bold text-gray-900">
+                          <p className="text-sm font-bold text-gray-900 flex items-center gap-2">
                             {member.name} {member.role && member.role.toLowerCase() !== 'helper' && <span className="font-medium text-gray-500">{member.role.toLowerCase()}</span>}
+                            {member.payment_status === 'Paid' && (
+                              <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider">
+                                Paid ({member.payment_method})
+                              </span>
+                            )}
                           </p>
                           {member.assigned_role && (
                             <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide">({member.assigned_role})</p>
@@ -524,9 +577,9 @@ ${validInvitationUrl ? `📎 *Invitation Attachment:*\n${validInvitationUrl}\n\n
 
       {/* Staff Payment Modal */}
       {selectedStaffForPayment && (
-        <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setSelectedStaffForPayment(null)}>
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setSelectedStaffForPayment(null)}>
           <div 
-            className="bg-white rounded-t-[2rem] p-6 w-full max-w-sm shadow-2xl animate-in slide-in-from-bottom-full duration-300 relative overflow-hidden"
+            className="bg-white rounded-[2rem] p-6 w-full max-w-sm shadow-2xl animate-in zoom-in-95 duration-200 relative overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center gap-4 mb-6">
@@ -543,10 +596,12 @@ ${validInvitationUrl ? `📎 *Invitation Attachment:*\n${validInvitationUrl}\n\n
                 <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">{selectedStaffForPayment.role}</p>
               </div>
             </div>
-            
+
             <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Payment Amount</label>
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
+                  Payment Amount
+                </label>
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-lg">₹</span>
                   <input 
@@ -561,29 +616,13 @@ ${validInvitationUrl ? `📎 *Invitation Attachment:*\n${validInvitationUrl}\n\n
 
               <div className="grid grid-cols-2 gap-3 pt-2">
                 <button 
-                  onClick={() => setSelectedStaffForPayment(null)}
+                  onClick={() => handleStaffPaymentSubmit('Cash')}
                   className="w-full py-4 bg-gray-100 text-gray-700 rounded-2xl font-black text-sm uppercase tracking-widest active:scale-95 transition-transform"
                 >
                   Pay Cash
                 </button>
                 <button 
-                  onClick={() => {
-                    const amount = parseFloat(paymentAmount);
-                    if (!amount || amount <= 0) {
-                      alert("Please enter a valid amount.");
-                      return;
-                    }
-                    if (!selectedStaffForPayment.gpay_number) {
-                      alert("This staff member does not have a GPay / UPI ID saved in their profile.");
-                      return;
-                    }
-                    const pa = encodeURIComponent(selectedStaffForPayment.gpay_number);
-                    const pn = encodeURIComponent(selectedStaffForPayment.name);
-                    const am = amount.toFixed(2);
-                    const upiLink = `upi://pay?pa=${pa}&pn=${pn}&am=${am}&cu=INR`;
-                    window.location.href = upiLink;
-                    setTimeout(() => setSelectedStaffForPayment(null), 1000);
-                  }}
+                  onClick={() => handleStaffPaymentSubmit('GPay')}
                   className="w-full py-4 bg-blue-500 text-white rounded-2xl font-black text-sm uppercase tracking-widest active:scale-95 transition-transform shadow-lg shadow-blue-500/30"
                 >
                   Pay GPay
