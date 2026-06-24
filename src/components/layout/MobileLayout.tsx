@@ -14,20 +14,25 @@ export default function MobileLayout({ children }: { children: React.ReactNode }
   const pathname = usePathname();
   const router = useRouter();
 
+  const handleSplashComplete = () => {
+    setShowSplash(false);
+    sessionStorage.setItem("hasSeenSplash", "true");
+  };
+
   useEffect(() => {
     if (!showSplash) {
       return;
     }
 
+    // Fallback timer just in case the video fails to load or play
     const timer = setTimeout(() => {
-      setShowSplash(false);
-      sessionStorage.setItem("hasSeenSplash", "true");
-    }, 8500); // Extended for cinematic entrance animation
+      handleSplashComplete();
+    }, 10000); // 10 seconds fallback
     return () => clearTimeout(timer);
   }, [showSplash]);
 
   if (showSplash) {
-    return <SplashScreen />;
+    return <SplashScreen onComplete={handleSplashComplete} />;
   }
 
   const isAuthPage = pathname === "/login";
