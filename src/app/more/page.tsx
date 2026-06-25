@@ -26,6 +26,7 @@ export default function MorePage() {
   const router = useRouter();
   const [profile, setProfile] = useState({ name: "Akash Sharma", role: "Super Admin", avatar: "" });
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     const localProfile = localStorage.getItem("admin_profile");
@@ -41,7 +42,12 @@ export default function MorePage() {
         console.error("Failed to parse local profile");
       }
     }
+    setIsLoaded(true);
   }, []);
+
+  if (!isLoaded) {
+    return <div className="flex flex-col min-h-screen bg-white"></div>;
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-white pb-20 relative">

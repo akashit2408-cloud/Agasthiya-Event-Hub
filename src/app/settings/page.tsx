@@ -15,6 +15,7 @@ export default function SettingsPage() {
     password: ""
   });
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -33,6 +34,7 @@ export default function SettingsPage() {
         console.error("Failed to parse local profile");
       }
     }
+    setIsLoaded(true);
   }, []);
 
   const handleSave = async () => {
@@ -90,6 +92,10 @@ export default function SettingsPage() {
     };
     reader.readAsDataURL(file);
   };
+
+  if (!isLoaded) {
+    return <div className="flex flex-col min-h-screen bg-gray-50 pb-20"></div>;
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 pb-20">

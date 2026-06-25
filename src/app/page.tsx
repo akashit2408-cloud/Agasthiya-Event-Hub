@@ -18,6 +18,7 @@ export default function Dashboard() {
   });
   const [events, setEvents] = useState<any[]>([]);
   const [adminName, setAdminName] = useState("Akash");
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     // Fetch profile name
@@ -62,10 +63,16 @@ export default function Dashboard() {
         }
       } catch (err) {
         console.error("Error fetching dashboard:", err);
+      } finally {
+        setIsLoaded(true);
       }
     }
     fetchDashboard();
   }, []);
+
+  if (!isLoaded) {
+    return <div className="min-h-screen bg-gray-50/50"></div>;
+  }
 
   const nextEvent = events[0];
 
