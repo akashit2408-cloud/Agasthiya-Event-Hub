@@ -1,7 +1,7 @@
 {
-  "name": "DJ Eventer Chennai ERP",
-  "short_name": "DJ ERP",
-  "description": "Internal ERP for DJ Eventer Chennai",
+  "name": "AE",
+  "short_name": "AE",
+  "description": "Internal ERP for AE",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

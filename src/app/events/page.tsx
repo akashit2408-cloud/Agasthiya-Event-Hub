@@ -204,7 +204,7 @@ function EventCard({ event }: any) {
     const origin = typeof window !== 'undefined' && window.location.origin ? window.location.origin : 'https://agasthiya-event-hub.vercel.app';
     const previewUrl = event.invitation_url ? `${origin}/api/image/${event.id}` : null;
 
-    const message = `🎵 *DJ EVENTER CHENNAI*
+    const message = `🎵 *AE | AGASTHIYA EVENT*
 *${isRental ? 'NEW RENTAL ASSIGNMENT' : 'NEW EVENT ASSIGNMENT'}*
 
 ${isRental ? '📦' : '🎂'} *Event:* ${displayTitle}
@@ -233,7 +233,7 @@ ${crewList}
 
 ✅ Please confirm receipt of this assignment.
 
-${previewUrl ? `📎 *View Invitation:*\n${previewUrl}\n\n` : ''}*DJ Eventer Chennai | Agasthiya Events*`;
+${previewUrl ? `📎 *View Invitation:*\n${previewUrl}\n\n` : ''}*AE | Agasthiya Event*`;
 
     // Use direct WhatsApp deep link to bypass buggy Android OS Share Sheets completely.
     const whatsappUrl = `whatsapp://send?text=${encodeURIComponent(message)}`;

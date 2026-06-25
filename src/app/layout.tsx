@@ -6,7 +6,7 @@ import MobileLayout from "@/components/layout/MobileLayout";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "DJ Eventer Chennai ERP",
+  title: "AE",
   description: "Internal company operations and event planning",
   manifest: "/manifest.json",
 };
