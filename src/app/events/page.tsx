@@ -235,22 +235,7 @@ ${crewList}
 
 ${previewUrl ? `📎 *View Invitation:*\n${previewUrl}\n\n` : ''}*DJ Eventer Chennai | Agasthiya Events*`;
 
-    try {
-      const shareData: any = { text: message };
-
-      if (navigator.canShare && navigator.canShare(shareData)) {
-        await navigator.share(shareData);
-        return; 
-      } else if (navigator.share) {
-        await navigator.share({ text: message });
-        return;
-      }
-    } catch (err: any) {
-      console.error("Error sharing:", err);
-      if (err.name === 'AbortError') return;
-    }
-
-    navigator.clipboard.writeText(message).catch(e => console.error(e));
+    // Use direct WhatsApp deep link to bypass buggy Android OS Share Sheets completely.
     const whatsappUrl = `whatsapp://send?text=${encodeURIComponent(message)}`;
     window.location.href = whatsappUrl;
     

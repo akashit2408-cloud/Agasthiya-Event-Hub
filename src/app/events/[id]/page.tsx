@@ -108,23 +108,6 @@ ${crewList}
 
 ${previewUrl ? `📎 *View Invitation:*\n${previewUrl}\n\n` : ''}*DJ Eventer Chennai | Agasthiya Events*`;
 
-    try {
-      const shareData: any = { text: message };
-
-      if (navigator.canShare && navigator.canShare(shareData)) {
-        await navigator.share(shareData);
-        return; // Success!
-      } else if (navigator.share) {
-        // Fallback for browsers that support share but maybe not canShare or files
-        await navigator.share({ text: message });
-        return;
-      }
-    } catch (err: any) {
-      console.error("Error sharing:", err);
-      // If user aborted, do nothing
-      if (err.name === 'AbortError') return;
-    }
-
     navigator.clipboard.writeText(message).catch(e => console.error(e));
     const whatsappUrl = `whatsapp://send?text=${encodeURIComponent(message)}`;
     window.location.href = whatsappUrl;
