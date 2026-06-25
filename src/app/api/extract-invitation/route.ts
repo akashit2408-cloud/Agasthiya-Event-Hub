@@ -1,8 +1,6 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
 
-// Initialize Gemini API
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 
 export async function POST(req: Request) {
   try {
@@ -14,15 +12,10 @@ export async function POST(req: Request) {
     }
 
     // Check if API key is configured
-    if (!process.env.GEMINI_API_KEY) {
-      return NextResponse.json({ error: "Gemini API key not configured" }, { status: 500 });
+    const apiKey = process.env.GROQ_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json({ error: "Groq API key not configured" }, { status: 500 });
     }
-
-    // Extract base64 data and mime type
-    const base64Data = image.split(',')[1];
-    const mimeType = image.split(';')[0].split(':')[1] || 'image/jpeg';
-
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     const prompt = `
       You are an expert event data extraction assistant. I will provide an image of an event/wedding invitation.
@@ -48,18 +41,46 @@ export async function POST(req: Request) {
       }
     `;
 
-    const result = await model.generateContent([
-      prompt,
-      {
-        inlineData: {
-          data: base64Data,
-          mimeType: mimeType
-        }
-      }
-    ]);
+    // Call Groq API (OpenAI-compatible, completely free)
+    const response = await fetch(GROQ_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "llama-3.2-90b-vision-preview",
+        messages: [
+          {
+            role: "user",
+            content: [
+              { type: "text", text: prompt },
+              {
+                type: "image_url",
+                image_url: {
+                  url: image, // data:image/jpeg;base64,... format
+                },
+              },
+            ],
+          },
+        ],
+        temperature: 0.2,
+        max_tokens: 1024,
+      }),
+    });
 
-    const responseText = result.response.text();
-    
+    if (!response.ok) {
+      const errorData = await response.text();
+      console.error("Groq API error:", errorData);
+      return NextResponse.json(
+        { error: `AI service error: ${response.status}` },
+        { status: 500 }
+      );
+    }
+
+    const data = await response.json();
+    const responseText = data.choices?.[0]?.message?.content || "";
+
     // Clean up the response in case the model returns markdown code blocks
     let cleanedText = responseText.trim();
     if (cleanedText.startsWith('```json')) {
@@ -72,7 +93,7 @@ export async function POST(req: Request) {
     try {
       parsedData = JSON.parse(cleanedText);
     } catch (e) {
-      console.error("Failed to parse Gemini response as JSON:", cleanedText);
+      console.error("Failed to parse AI response as JSON:", cleanedText);
       return NextResponse.json({ error: "Failed to parse extracted data" }, { status: 500 });
     }
 
