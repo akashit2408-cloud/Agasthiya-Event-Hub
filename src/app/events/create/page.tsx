@@ -227,6 +227,7 @@ export default function CreateEventPage() {
       .insert({
         customer_id: customerId,
         title: String(form.get("title") || `${form.get("event_type")} Event`),
+        event_category: String(form.get("event_category") || "Own Event"),
         event_type: String(form.get("event_type") || "Event"),
         location: String(form.get("location") || ""),
         map_link: String(form.get("map_link") || "") || null,
@@ -285,6 +286,7 @@ export default function CreateEventPage() {
       <form onSubmit={handleSubmit} className="p-5 space-y-5">
         <InputField name="customer_name" label="Customer Name" icon={<User size={18} />} placeholder="Enter customer name" required />
         <InputField name="mobile" label="Mobile Number" icon={<Phone size={18} />} placeholder="Enter mobile number" required />
+        <SelectField id="select-event-category" name="event_category" label="Event Category" options={["Own Event", "Rental Event", "Others"]} />
         <InputField id="input-title" name="title" label="Event Title" icon={<Calendar size={18} />} placeholder="Wedding Event" required />
         <SelectField id="select-event-type" name="event_type" label="Event Type" options={["Wedding", "Reception", "Birthday", "Corporate", "School Event", "College Event", "Sangeet", "Baby Shower", "Rental", "Other"]} />
         <InputField id="input-location" name="location" label="Location" icon={<MapPin size={18} />} placeholder="Enter location" required />

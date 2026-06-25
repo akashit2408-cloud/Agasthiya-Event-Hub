@@ -224,7 +224,7 @@ ${previewUrl ? `📎 *View Invitation:*\n${previewUrl}\n\n` : ''}*AE | Agasthiya
         const { data: eventData, error } = await supabase
           .from("events")
           .select(`
-            id, title, event_type, location, map_link, event_date, event_time, status, notes, total_amount, invitation_url, remark, drop_sequence,
+            id, title, event_category, event_type, location, map_link, event_date, event_time, status, notes, total_amount, invitation_url, remark, drop_sequence,
             customers (name, mobile, address),
             event_setups (
               quantity,
@@ -309,7 +309,15 @@ ${previewUrl ? `📎 *View Invitation:*\n${previewUrl}\n\n` : ''}*AE | Agasthiya
           <div className="flex justify-between items-start relative z-10">
             <div>
               <h2 className="text-xl font-black">{event.title}</h2>
-              <div className="flex items-center gap-2 mt-2 opacity-90">
+              <div className="flex items-center gap-2 mt-2 opacity-90 flex-wrap">
+                <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded-full uppercase tracking-widest font-black">
+                  {event.event_category || 'Own Event'}
+                </span>
+                <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded-full uppercase tracking-widest font-black">
+                  {event.event_type || 'Event'}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 mt-3 opacity-90">
                 <Calendar size={14} />
                 <span className="text-xs font-bold uppercase tracking-wider">{formatEventDate(event.event_date, event.event_time)}</span>
               </div>
