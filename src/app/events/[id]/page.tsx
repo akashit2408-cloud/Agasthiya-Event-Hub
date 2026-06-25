@@ -443,7 +443,7 @@ ${validInvitationUrl ? `📎 *Invitation Attachment:*\n${validInvitationUrl}\n\n
                   return (
                     <button 
                       key={member.id || index} 
-                      onClick={() => { setSelectedStaffForPayment(member); setPaymentAmount(""); }}
+                      onClick={() => setSelectedStaffForPayment(member)}
                       className="flex items-center justify-between p-2 -mx-2 rounded-2xl hover:bg-gray-50 transition-colors w-full text-left"
                     >
                       <div className="flex items-center gap-3">
