@@ -10,14 +10,15 @@ import { formatEventDate } from "@/lib/demo-data";
 const tabs = ["All", "Today", "Upcoming", "Completed", "Cancelled"];
 
 export default function EventsPage() {
-  const [activeTab, setActiveTab] = useState("All");
+  const [activeTab, setActiveTab] = useState("Upcoming");
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchEvents() {
+      setLoading(true);
       try {
-        const { data, error } = await supabase
+        let query = supabase
           .from("events")
           .select(`
             id, title, event_type, location, map_link, event_date, event_time, status, drop_sequence, invitation_url, remark, notes,
@@ -31,9 +32,24 @@ export default function EventsPage() {
               assigned_role,
               staff (id, name, role, mobile, avatar_seed)
             )
-          `)
-          .order("event_date")
-          .order("event_time");
+          `);
+
+        const today = new Date().toISOString().slice(0, 10);
+
+        if (activeTab === "Today") {
+          query = query.eq("event_date", today).order("event_time", { ascending: true });
+        } else if (activeTab === "Upcoming") {
+          query = query.gte("event_date", today).not("status", "in", '("cancelled","canceled","completed")').order("event_date", { ascending: true }).order("event_time", { ascending: true });
+        } else if (activeTab === "Completed") {
+          query = query.eq("status", "completed").order("event_date", { ascending: false }).limit(50);
+        } else if (activeTab === "Cancelled") {
+          query = query.in("status", ["cancelled", "canceled"]).order("event_date", { ascending: false }).limit(50);
+        } else {
+          // "All" tab
+          query = query.order("event_date", { ascending: false }).limit(50);
+        }
+
+        const { data, error } = await query;
 
         if (error) throw error;
 
@@ -65,17 +81,9 @@ export default function EventsPage() {
       }
     }
     fetchEvents();
-  }, []);
+  }, [activeTab]);
 
-  const today = new Date().toISOString().slice(0, 10);
-  const filteredEvents = events.filter((event) => {
-    const status = event.status?.toLowerCase();
-    if (activeTab === "Today") return event.event_date === today;
-    if (activeTab === "Upcoming") return event.event_date > today && status !== "cancelled" && status !== "canceled";
-    if (activeTab === "Completed") return status === "completed";
-    if (activeTab === "Cancelled") return status === "cancelled" || status === "canceled";
-    return true;
-  });
+  const filteredEvents = events;
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
