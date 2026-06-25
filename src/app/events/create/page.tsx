@@ -31,13 +31,13 @@ export default function CreateEventPage() {
     const rawMessage = (message || "").toLowerCase();
     
     if (rawMessage.includes("api key not configured") || rawMessage.includes("key is invalid")) {
-      return "Setup Required: Please add your GEMINI_API_KEY to your Vercel Environment Variables!";
+      return "Setup Required: Please add your GROQ_API_KEY to your Vercel Environment Variables!";
     }
     if (status === 413 || rawMessage.includes("payload too large")) {
       return "Image is too large! Please crop it or compress it before uploading.";
     }
     if (status === 503 || rawMessage.includes("503") || rawMessage.includes("service unavailable") || rawMessage.includes("high demand")) {
-      return "Auto-fill is temporarily busy because Gemini is under high demand. Please try again after a minute.";
+      return "Auto-fill is temporarily busy. Please try again after a minute.";
     }
     if (status === 400) {
       return "Please upload a clear invitation image and try auto-fill again.";
