@@ -4,12 +4,39 @@ import { motion } from "framer-motion";
 import { Mail, Lock, Key, ChevronRight, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function LoginPage() {
   const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const handleLogin = (e: any) => {
     e.preventDefault();
+    
+    // Check credentials against local storage profile
+    const localProfile = localStorage.getItem("admin_profile");
+    let validEmail = "admin@djmaster.com";
+    let validPassword = ""; // Allow blank default if they haven't set one yet
+
+    if (localProfile) {
+      try {
+        const parsed = JSON.parse(localProfile);
+        if (parsed.email) validEmail = parsed.email;
+        if (parsed.password !== undefined) validPassword = parsed.password; // Allow empty password if they explicitly cleared it
+      } catch (err) {}
+    }
+
+    if (email !== validEmail) {
+      alert("Invalid email address.");
+      return;
+    }
+
+    if (validPassword && password !== validPassword) {
+      alert("Incorrect password.");
+      return;
+    }
+
     localStorage.setItem("isAuthenticated", "true");
     router.push("/");
   };
@@ -41,8 +68,11 @@ export default function LoginPage() {
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
               <input 
                 type="email" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email" 
-                className="w-full bg-gray-50 border-none rounded-2xl py-4 pl-12 pr-4 text-sm font-medium outline-none"
+                required
+                className="w-full bg-gray-50 border-none rounded-2xl py-4 pl-12 pr-4 text-sm font-medium outline-none focus:ring-2 focus:ring-primary/20 transition-all"
               />
            </div>
         </div>
@@ -53,8 +83,10 @@ export default function LoginPage() {
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
               <input 
                 type="password" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password" 
-                className="w-full bg-gray-50 border-none rounded-2xl py-4 pl-12 pr-12 text-sm font-medium outline-none"
+                className="w-full bg-gray-50 border-none rounded-2xl py-4 pl-12 pr-12 text-sm font-medium outline-none focus:ring-2 focus:ring-primary/20 transition-all"
               />
               <EyeOff className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
            </div>

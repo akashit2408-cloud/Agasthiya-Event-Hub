@@ -7,7 +7,13 @@ import { supabase } from "@/lib/supabase";
 
 export default function SettingsPage() {
   const router = useRouter();
-  const [profile, setProfile] = useState({ name: "Akash Sharma", role: "Super Admin", avatar: "" });
+  const [profile, setProfile] = useState({ 
+    name: "Akash Sharma", 
+    role: "Super Admin", 
+    avatar: "",
+    email: "admin@djmaster.com",
+    password: ""
+  });
   const [isSaving, setIsSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -19,7 +25,9 @@ export default function SettingsPage() {
         setProfile({
           name: parsed.name || "Akash Sharma",
           role: parsed.role || "Super Admin",
-          avatar: parsed.avatar || ""
+          avatar: parsed.avatar || "",
+          email: parsed.email || "admin@djmaster.com",
+          password: parsed.password || ""
         });
       } catch (e) {
         console.error("Failed to parse local profile");
@@ -156,6 +164,46 @@ export default function SettingsPage() {
             >
               <Save size={18} />
               {isSaving ? "Saving..." : "Save Profile"}
+            </button>
+          </div>
+        </section>
+
+        <section>
+          <h2 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-3 ml-2 mt-4">Account & Security</h2>
+          <div className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm space-y-4">
+            
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wide ml-1">Email Address</label>
+              <input 
+                type="email" 
+                value={profile.email}
+                onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+                className="w-full bg-gray-50 border-none rounded-2xl p-4 text-sm font-bold text-gray-900 focus:ring-2 focus:ring-primary/20 outline-none transition-all placeholder:text-gray-400 placeholder:font-medium"
+                placeholder="e.g. admin@djmaster.com"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wide ml-1">Change Password</label>
+              <input 
+                type="password" 
+                value={profile.password}
+                onChange={(e) => setProfile({ ...profile, password: e.target.value })}
+                className="w-full bg-gray-50 border-none rounded-2xl p-4 text-sm font-bold text-gray-900 focus:ring-2 focus:ring-primary/20 outline-none transition-all placeholder:text-gray-400 placeholder:font-medium"
+                placeholder="Enter new password..."
+              />
+              <p className="text-[10px] font-semibold text-gray-400 mt-1 ml-1">
+                Ensure your account uses a strong password for the login page
+              </p>
+            </div>
+
+            <button 
+              onClick={handleSave}
+              disabled={isSaving}
+              className="w-full mt-2 py-4 rounded-2xl flex items-center justify-center gap-2 bg-danger/10 text-danger font-bold text-sm transition-transform active:scale-[0.98] disabled:opacity-70"
+            >
+              <Save size={18} />
+              {isSaving ? "Saving..." : "Update Security"}
             </button>
           </div>
         </section>
