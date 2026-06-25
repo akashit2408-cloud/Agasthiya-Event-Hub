@@ -17,8 +17,21 @@ export default function Dashboard() {
     total_vehicles: 0,
   });
   const [events, setEvents] = useState<any[]>([]);
+  const [adminName, setAdminName] = useState("Akash");
 
   useEffect(() => {
+    // Fetch profile name
+    const localProfile = localStorage.getItem("admin_profile");
+    if (localProfile) {
+      try {
+        const parsed = JSON.parse(localProfile);
+        if (parsed.name) {
+          // Get the first name
+          setAdminName(parsed.name.split(' ')[0]);
+        }
+      } catch (e) {}
+    }
+
     async function fetchDashboard() {
       try {
         const [{ data: summaryData }, { data: eventData }] = await Promise.all([
@@ -99,7 +112,7 @@ export default function Dashboard() {
               <h1 className="text-[26px] font-extrabold text-white leading-tight">
                 {getGreeting()},
                 <br />
-                <span className="bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">Akash</span>
+                <span className="bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">{adminName}</span>
               </h1>
               <p className="text-[13px] text-blue-200/80 font-medium mt-1.5">
                 {new Intl.DateTimeFormat("en-IN", { weekday: "long", day: "2-digit", month: "long", year: "numeric" }).format(new Date())}
