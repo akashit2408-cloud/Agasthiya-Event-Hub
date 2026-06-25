@@ -33,8 +33,7 @@ export default function EventsPage() {
               staff (id, name, role, mobile, avatar_seed)
             )
           `)
-          .order("event_date")
-          .order("event_time");
+          .order("created_at", { ascending: false });
 
         if (error) throw error;
 
@@ -143,6 +142,23 @@ export default function EventsPage() {
       </Link>
     </div>
   );
+}
+
+function getRelativeTime(dateStr: string) {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  const now = new Date();
+  const diffInSeconds = Math.floor((now.getTime() - d.getTime()) / 1000);
+  
+  if (diffInSeconds < 60) return "Just now";
+  const diffInMinutes = Math.floor(diffInSeconds / 60);
+  if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+  const diffInHours = Math.floor(diffInMinutes / 60);
+  if (diffInHours < 24) return `${diffInHours}h ago`;
+  const diffInDays = Math.floor(diffInHours / 24);
+  if (diffInDays === 1) return "Yesterday";
+  if (diffInDays < 7) return `${diffInDays}d ago`;
+  return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
 }
 
 function EventCard({ event }: any) {
@@ -262,6 +278,11 @@ ${previewUrl ? `📎 *View Invitation:*\n${previewUrl}\n\n` : ''}*AE | Agasthiya
             <h3 className="font-extrabold text-gray-900 text-[17px] leading-tight truncate" title={event.title}>{event.title}</h3>
             {event.status?.toLowerCase() === 'cancelled' && (
               <span className="bg-red-100 text-red-600 px-2 py-0.5 rounded text-[10px] font-black uppercase">Cancelled</span>
+            )}
+            {event.created_at && (
+              <span className="text-[9px] font-bold text-gray-400 bg-gray-100/80 px-1.5 py-0.5 rounded-md whitespace-nowrap">
+                {getRelativeTime(event.created_at)}
+              </span>
             )}
             <div className={cn("mt-1 w-full flex")}>
               <div className={cn("inline-block px-3 py-1 text-[10px] font-bold rounded-md", event.staff_count > 0 ? "bg-green-50 text-[#00A859]" : "bg-orange-50 text-orange-600")}>
