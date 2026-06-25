@@ -35,8 +35,18 @@ export default function Dashboard() {
 
     async function fetchDashboard() {
       try {
-        const [{ data: summaryData }, { data: eventData }] = await Promise.all([
-          supabase.from("dashboard_summary").select("*").single(),
+        const todayStr = new Date().toISOString().slice(0, 10);
+        const [
+          { data: totalStaff },
+          { data: totalSetups },
+          { data: totalVehicles },
+          { data: todayEventsData },
+          { data: eventData }
+        ] = await Promise.all([
+          supabase.from("staff").select("id"),
+          supabase.from("setups").select("id"),
+          supabase.from("vehicles").select("id"),
+          supabase.from("events").select("id, vehicle_id, event_staff(staff_id), event_setups(setup_id)").eq("event_date", todayStr),
           supabase.from("events")
             .select(`
               id, title, event_type, location, map_link, event_date, event_time, status,
@@ -46,13 +56,37 @@ export default function Dashboard() {
               ),
               event_staff (staff (name))
             `)
-            .gte("event_date", new Date().toISOString().slice(0, 10))
+            .gte("event_date", todayStr)
             .order("event_date")
             .order("event_time")
             .limit(5),
         ]);
 
-        if (summaryData) setSummary(summaryData);
+        const totalStaffCount = totalStaff?.length || 0;
+        const totalSetupsCount = totalSetups?.length || 0;
+        const totalVehiclesCount = totalVehicles?.length || 0;
+
+        const assignedStaffIds = new Set();
+        const assignedSetupIds = new Set();
+        const assignedVehicleIds = new Set();
+
+        (todayEventsData || []).forEach(ev => {
+          if (ev.vehicle_id) assignedVehicleIds.add(ev.vehicle_id);
+          (ev.event_staff || []).forEach((s: any) => assignedStaffIds.add(s.staff_id));
+          (ev.event_setups || []).forEach((s: any) => assignedSetupIds.add(s.setup_id));
+        });
+
+        setSummary({
+          todays_events: todayEventsData?.length || 0,
+          total_staff: totalStaffCount,
+          available_staff: Math.max(0, totalStaffCount - assignedStaffIds.size),
+          total_setups: totalSetupsCount,
+          available_setups: Math.max(0, totalSetupsCount - assignedSetupIds.size),
+          total_vehicles: totalVehiclesCount,
+          available_vehicles: Math.max(0, totalVehiclesCount - assignedVehicleIds.size),
+        });
+
+
         if (eventData && eventData.length > 0) {
           const formattedEvents = eventData.map((e: any) => ({
             ...e,

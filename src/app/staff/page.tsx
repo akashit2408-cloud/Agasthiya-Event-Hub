@@ -15,9 +15,28 @@ export default function StaffPage() {
   useEffect(() => {
     async function fetchStaff() {
       try {
-        const { data, error } = await supabase.from("staff").select("*").order("role").order("name");
-        if (error) throw error;
-        setStaff(data || []);
+        const todayStr = new Date().toISOString().slice(0, 10);
+        const [
+          { data: staffData, error: staffError },
+          { data: todayEvents }
+        ] = await Promise.all([
+          supabase.from("staff").select("*").order("role").order("name"),
+          supabase.from("events").select("event_staff(staff_id)").eq("event_date", todayStr)
+        ]);
+
+        if (staffError) throw staffError;
+
+        const assignedStaffIds = new Set();
+        (todayEvents || []).forEach(ev => {
+          (ev.event_staff || []).forEach((s: any) => assignedStaffIds.add(s.staff_id));
+        });
+
+        const staffWithDynamicStatus = (staffData || []).map(s => ({
+          ...s,
+          status: assignedStaffIds.has(s.id) ? "Assigned" : "Available"
+        }));
+
+        setStaff(staffWithDynamicStatus);
       } catch (err) {
         console.error("Error fetching staff:", err);
         setStaff([]);
