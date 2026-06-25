@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, Filter, Calendar, MapPin, Plus, Eye, Clock } from "lucide-react";
+import { Search, Filter, Calendar, MapPin, Plus, Eye, Clock, Trash2, AlertTriangle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -13,6 +13,20 @@ export default function EventsPage() {
   const [activeTab, setActiveTab] = useState("All");
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isDeletingAll, setIsDeletingAll] = useState(false);
+
+  const handleClearAll = async () => {
+    if (confirm("🚨 ARE YOU SURE? This will permanently delete ALL events!")) {
+      setIsDeletingAll(true);
+      const { error } = await supabase.from('events').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      if (!error) {
+        setEvents([]);
+      } else {
+        console.error("Failed to delete all events", error);
+      }
+      setIsDeletingAll(false);
+    }
+  };
 
   useEffect(() => {
     async function fetchEvents() {
@@ -132,7 +146,27 @@ export default function EventsPage() {
                <h2 className="text-[13px] font-black text-gray-900 uppercase tracking-wide">Plan Details</h2>
                <span className="bg-green-50 text-[#00A859] px-2.5 py-1 rounded-md text-[10px] font-black uppercase">All Ready</span>
             </div>
-            {filteredEvents.map((event, index) => <EventCard key={event.id || index} event={event} />)}
+            {filteredEvents.map((event, index) => <EventCard key={event.id || index} event={event} onDelete={(id: string) => setEvents(events.filter(e => e.id !== id))} />)}
+            
+            {/* Danger Zone */}
+            {events.length > 0 && (
+              <div className="pt-8 pb-10">
+                <button 
+                  onClick={handleClearAll}
+                  disabled={isDeletingAll}
+                  className="w-full py-3.5 border-2 border-red-100 bg-red-50/50 text-red-500 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-red-50 transition-colors disabled:opacity-50"
+                >
+                  {isDeletingAll ? (
+                    <div className="w-5 h-5 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <AlertTriangle size={18} />
+                      CLEAR ALL EVENTS
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
           </>
         )}
       </div>
@@ -161,7 +195,7 @@ function getRelativeTime(dateStr: string) {
   return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
 }
 
-function EventCard({ event }: any) {
+function EventCard({ event, onDelete }: any) {
   const crewNames = event.staff_names || [];
   const crewInitials = crewNames.map((n: string) => n.substring(0, 2).toUpperCase());
   const setupName = event.setup_name || "NO SETUP";
@@ -290,12 +324,25 @@ ${previewUrl ? `📎 *View Invitation:*\n${previewUrl}\n\n` : ''}*AE | Agasthiya
               </div>
             </div>
          </div>
-         <span 
-           className={cn("px-3 py-1 text-[10px] font-bold rounded-md uppercase text-right shrink-0 max-w-[45%] truncate", event.setup_name ? "bg-indigo-50 text-indigo-600" : "bg-gray-50 text-gray-500")}
-           title={setupName}
-         >
-            {setupName}
-         </span>
+         <div className="flex flex-col items-end gap-2 shrink-0">
+           <span 
+             className={cn("px-3 py-1 text-[10px] font-bold rounded-md uppercase text-right max-w-[120px] truncate", event.setup_name ? "bg-indigo-50 text-indigo-600" : "bg-gray-50 text-gray-500")}
+             title={setupName}
+           >
+              {setupName}
+           </span>
+           <button 
+             onClick={async () => {
+               if (confirm('Are you sure you want to delete this event?')) {
+                 onDelete(event.id);
+                 await supabase.from('events').delete().eq('id', event.id);
+               }
+             }}
+             className="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center text-red-500 hover:bg-red-100 transition-colors"
+           >
+             <Trash2 size={14} />
+           </button>
+         </div>
       </div>
 
       {/* Details: Time and Location */}
