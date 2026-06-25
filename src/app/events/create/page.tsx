@@ -530,18 +530,15 @@ export default function CreateEventPage() {
               {selectedStaff.includes(member.id) && (
                 <div className="flex flex-col gap-2 mt-1">
                   {member.role === 'DJ Operator' && (
-                    <label className="flex items-center justify-between bg-purple-50/50 p-2.5 rounded-xl cursor-pointer">
+                    <div 
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); setPlayingDjStaff(prev => ({ ...prev, [member.id]: !prev[member.id] })); }}
+                      className="flex items-center justify-between bg-purple-50/50 p-2.5 rounded-xl cursor-pointer"
+                    >
                       <span className="text-[10px] font-bold text-purple-900 uppercase tracking-wider">Playing DJ?</span>
                       <div className={cn("w-10 h-6 rounded-full flex items-center p-1 transition-colors", playingDjStaff[member.id] ? "bg-purple-600" : "bg-gray-300")}>
                         <div className={cn("w-4 h-4 bg-white rounded-full shadow-sm transition-transform", playingDjStaff[member.id] ? "translate-x-4" : "translate-x-0")} />
                       </div>
-                      <input 
-                        type="checkbox" 
-                        className="hidden" 
-                        checked={playingDjStaff[member.id] || false}
-                        onChange={(e) => setPlayingDjStaff(prev => ({ ...prev, [member.id]: e.target.checked }))}
-                      />
-                    </label>
+                    </div>
                   )}
                   {showRemarkInputFor[member.id] || staffRemarks[member.id] ? (
                     <input 

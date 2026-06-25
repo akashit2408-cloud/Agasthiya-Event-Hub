@@ -97,7 +97,7 @@ export default function EditEventPage() {
             *,
             customers (name, mobile, address),
             event_setups (setup_id, quantity),
-            event_staff (staff_id, assigned_role, is_playing_dj)
+            event_staff (staff_id, assigned_role, is_playing_dj, payment_status, payment_method)
           `)
           .eq("id", eventId)
           .single();
@@ -225,16 +225,24 @@ export default function EditEventPage() {
          console.warn("Update may not have applied correctly. Check RLS policies.");
       }
 
+      // Preserve payment status before deleting
+      const { data: existingStaffData } = await supabase.from("event_staff").select("*").eq("event_id", params.id);
+
       const { error: staffDelErr } = await supabase.from("event_staff").delete().eq("event_id", params.id);
       if (staffDelErr) console.error("Error deleting old staff:", staffDelErr);
 
       if (selectedStaff.length > 0) {
-        const { error: staffInsErr } = await supabase.from("event_staff").insert(selectedStaff.map((staffId) => ({ 
-          event_id: params.id, 
-          staff_id: staffId,
-          assigned_role: staffRemarks[staffId] || null,
-          is_playing_dj: playingDjStaff[staffId] || false
-        })));
+        const { error: staffInsErr } = await supabase.from("event_staff").insert(selectedStaff.map((staffId) => {
+          const existing = existingStaffData?.find(es => es.staff_id === staffId);
+          return { 
+            event_id: params.id, 
+            staff_id: staffId,
+            assigned_role: staffRemarks[staffId] || null,
+            is_playing_dj: playingDjStaff[staffId] || false,
+            payment_status: existing?.payment_status || 'Unpaid',
+            payment_method: existing?.payment_method || null
+          };
+        }));
         if (staffInsErr) console.error("Error inserting staff:", staffInsErr);
       }
 
@@ -490,18 +498,15 @@ export default function EditEventPage() {
               {selectedStaff.includes(member.id) && (
                 <div className="flex flex-col gap-2 mt-1">
                   {member.role === 'DJ Operator' && (
-                    <label className="flex items-center justify-between bg-purple-50/50 p-2.5 rounded-xl cursor-pointer">
+                    <div 
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); setPlayingDjStaff(prev => ({ ...prev, [member.id]: !prev[member.id] })); }}
+                      className="flex items-center justify-between bg-purple-50/50 p-2.5 rounded-xl cursor-pointer"
+                    >
                       <span className="text-[10px] font-bold text-purple-900 uppercase tracking-wider">Playing DJ?</span>
                       <div className={cn("w-10 h-6 rounded-full flex items-center p-1 transition-colors", playingDjStaff[member.id] ? "bg-purple-600" : "bg-gray-300")}>
                         <div className={cn("w-4 h-4 bg-white rounded-full shadow-sm transition-transform", playingDjStaff[member.id] ? "translate-x-4" : "translate-x-0")} />
                       </div>
-                      <input 
-                        type="checkbox" 
-                        className="hidden" 
-                        checked={playingDjStaff[member.id] || false}
-                        onChange={(e) => setPlayingDjStaff(prev => ({ ...prev, [member.id]: e.target.checked }))}
-                      />
-                    </label>
+                    </div>
                   )}
                   {showRemarkInputFor[member.id] || staffRemarks[member.id] ? (
                     <input 
