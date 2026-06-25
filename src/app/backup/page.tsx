@@ -11,8 +11,10 @@ export default function BackupPage() {
   const [isBackingUp, setIsBackingUp] = useState(false);
 
   const fetchBackups = async () => {
-    const { data, error } = await supabase.from("backup_runs").select("*").order("created_at", { ascending: false });
-    if (!error && data) setBackups(data);
+    const saved = localStorage.getItem("djerp_backups");
+    if (saved) {
+      setBackups(JSON.parse(saved));
+    }
   };
 
   useEffect(() => {
@@ -24,14 +26,19 @@ export default function BackupPage() {
     // Simulate backup delay
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    // Create backup record
-    const { error } = await supabase.from("backup_runs").insert([
-      { status: "COMPLETED" }
-    ]);
+    // Create backup record locally
+    const newBackup = {
+      id: Date.now().toString(),
+      status: "COMPLETED",
+      created_at: new Date().toISOString()
+    };
     
-    if (!error) {
-      await fetchBackups();
-    }
+    const saved = localStorage.getItem("djerp_backups");
+    const currentBackups = saved ? JSON.parse(saved) : [];
+    const updatedBackups = [newBackup, ...currentBackups];
+    
+    localStorage.setItem("djerp_backups", JSON.stringify(updatedBackups));
+    setBackups(updatedBackups);
     setIsBackingUp(false);
   };
 
