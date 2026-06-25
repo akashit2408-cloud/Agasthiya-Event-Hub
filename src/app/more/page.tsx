@@ -1,5 +1,7 @@
 "use client";
 
+import { motion, AnimatePresence } from "framer-motion";
+
 import { 
   User, 
   Settings, 
@@ -23,6 +25,7 @@ import { useEffect, useState } from "react";
 export default function MorePage() {
   const router = useRouter();
   const [profile, setProfile] = useState({ name: "Akash Sharma", role: "Super Admin", avatar: "" });
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   useEffect(() => {
     const localProfile = localStorage.getItem("admin_profile");
@@ -41,7 +44,53 @@ export default function MorePage() {
   }, []);
 
   return (
-    <div className="flex flex-col min-h-screen bg-white pb-20">
+    <div className="flex flex-col min-h-screen bg-white pb-20 relative">
+      
+      <AnimatePresence>
+        {showLogoutConfirm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center px-6">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+              onClick={() => setShowLogoutConfirm(false)}
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-white rounded-[2rem] p-6 shadow-2xl relative w-full max-w-sm"
+            >
+              <div className="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center mb-4 mx-auto">
+                <LogOut size={28} className="text-danger" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 text-center mb-2">Logout?</h3>
+              <p className="text-sm text-gray-500 text-center mb-8">
+                Are you sure you want to log out of your account? You will need to log back in to access the dashboard.
+              </p>
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => setShowLogoutConfirm(false)}
+                  className="flex-1 py-4 bg-gray-100 text-gray-900 font-bold rounded-2xl text-sm active:scale-95 transition-all"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={() => {
+                    localStorage.removeItem("isAuthenticated");
+                    router.push('/login');
+                  }}
+                  className="flex-1 py-4 bg-danger text-white font-bold rounded-2xl text-sm active:scale-95 transition-all shadow-xl shadow-red-200"
+                >
+                  Yes, Logout
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* Profile Header */}
       <div className="p-8 bg-gray-50 flex flex-col items-center">
          <div className="w-24 h-24 rounded-3xl bg-white p-1 shadow-xl relative">
@@ -78,11 +127,8 @@ export default function MorePage() {
         </Section>
 
         <button 
-          onClick={() => {
-            localStorage.removeItem("isAuthenticated");
-            router.push('/login');
-          }}
-          className="w-full py-4 bg-red-50 text-danger rounded-2xl flex items-center justify-center gap-3 font-bold text-sm mt-4"
+          onClick={() => setShowLogoutConfirm(true)}
+          className="w-full py-4 bg-red-50 text-danger rounded-2xl flex items-center justify-center gap-3 font-bold text-sm mt-4 active:scale-95 transition-transform"
         >
           <LogOut size={18} />
           Logout
