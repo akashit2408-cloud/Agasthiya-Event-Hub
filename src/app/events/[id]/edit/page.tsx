@@ -234,11 +234,12 @@ export default function EditEventPage() {
       if (selectedStaff.length > 0) {
         const { error: staffInsErr } = await supabase.from("event_staff").insert(selectedStaff.map((staffId) => {
           const existing = existingStaffData?.find(es => es.staff_id === staffId);
+          const isPlayingStr = form.get(`playing_dj_${staffId}`);
           return { 
             event_id: params.id, 
             staff_id: staffId,
             assigned_role: staffRemarks[staffId] || null,
-            is_playing_dj: playingDjStaff[staffId] || false,
+            is_playing_dj: isPlayingStr === "true",
             payment_status: existing?.payment_status || 'Unpaid',
             payment_method: existing?.payment_method || null
           };
@@ -506,6 +507,7 @@ export default function EditEventPage() {
                       <div className={cn("w-10 h-6 rounded-full flex items-center p-1 transition-colors", playingDjStaff[member.id] ? "bg-purple-600" : "bg-gray-300")}>
                         <div className={cn("w-4 h-4 bg-white rounded-full shadow-sm transition-transform", playingDjStaff[member.id] ? "translate-x-4" : "translate-x-0")} />
                       </div>
+                      <input type="hidden" name={`playing_dj_${member.id}`} value={playingDjStaff[member.id] ? "true" : "false"} />
                     </div>
                   )}
                   {showRemarkInputFor[member.id] || staffRemarks[member.id] ? (

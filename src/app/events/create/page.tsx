@@ -252,12 +252,15 @@ export default function CreateEventPage() {
     }
 
     if (selectedStaff.length > 0) {
-      await supabase.from("event_staff").insert(selectedStaff.map((staffId) => ({ 
-        event_id: newEvent.id, 
-        staff_id: staffId,
-        assigned_role: staffRemarks[staffId] || null,
-        is_playing_dj: playingDjStaff[staffId] || false
-      })));
+      await supabase.from("event_staff").insert(selectedStaff.map((staffId) => {
+        const isPlayingStr = form.get(`playing_dj_${staffId}`);
+        return { 
+          event_id: newEvent.id, 
+          staff_id: staffId,
+          assigned_role: staffRemarks[staffId] || null,
+          is_playing_dj: isPlayingStr === "true"
+        };
+      }));
     }
 
     const setupEntries = Object.entries(selectedSetups);
@@ -538,6 +541,7 @@ export default function CreateEventPage() {
                       <div className={cn("w-10 h-6 rounded-full flex items-center p-1 transition-colors", playingDjStaff[member.id] ? "bg-purple-600" : "bg-gray-300")}>
                         <div className={cn("w-4 h-4 bg-white rounded-full shadow-sm transition-transform", playingDjStaff[member.id] ? "translate-x-4" : "translate-x-0")} />
                       </div>
+                      <input type="hidden" name={`playing_dj_${member.id}`} value={playingDjStaff[member.id] ? "true" : "false"} />
                     </div>
                   )}
                   {showRemarkInputFor[member.id] || staffRemarks[member.id] ? (
