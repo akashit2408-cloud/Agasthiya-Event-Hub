@@ -233,8 +233,12 @@ ${crewList}
 
 ${validInvitationUrl ? `📎 *Invitation Attachment:*\n${validInvitationUrl}\n\n` : ''}*DJ Eventer Chennai | Agasthiya Events*`;
 
+    // Always copy the full message to clipboard first
+    navigator.clipboard.writeText(message).catch(e => console.error(e));
+
     try {
-      const shareData: any = { text: message };
+      const shareData: any = {};
+      let hasFile = false;
       
       if (event.invitation_url && event.invitation_url.startsWith('data:image')) {
         const arr = event.invitation_url.split(',');
@@ -250,7 +254,15 @@ ${validInvitationUrl ? `📎 *Invitation Attachment:*\n${validInvitationUrl}\n\n
           const ext = mime.split('/')[1] || 'jpg';
           const file = new File([u8arr], `invitation.${ext}`, { type: mime });
           shareData.files = [file];
+          hasFile = true;
+          // Android Share Sheet "More" button freezes if you pass a massive text string AND an image file.
+          // We pass a tiny instruction text instead, and the user can paste the real details we copied above.
+          shareData.text = "✅ Full event details have been copied to your clipboard. Please PASTE them below!";
         }
+      }
+
+      if (!hasFile) {
+        shareData.text = message;
       }
 
       if (navigator.canShare && navigator.canShare(shareData)) {
