@@ -233,6 +233,7 @@ ${previewUrl ? `📎 *View Invitation:*\n${previewUrl}\n\n` : ''}*AE | Agasthiya
             vehicles (name, registration_number),
             event_staff (
               assigned_role,
+              is_playing_dj,
               payment_status,
               payment_method,
               staff (id, name, role, mobile, gpay_number, avatar_seed)
@@ -429,6 +430,11 @@ ${previewUrl ? `📎 *View Invitation:*\n${previewUrl}\n\n` : ''}*AE | Agasthiya
                         <div>
                           <p className="text-sm font-bold text-gray-900 flex items-center gap-2">
                             {member.name} {member.role && member.role.toLowerCase() !== 'helper' && <span className="font-medium text-gray-500">{member.role.toLowerCase()}</span>}
+                            {member.is_playing_dj && (
+                              <span className="bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider">
+                                Playing DJ
+                              </span>
+                            )}
                             {member.payment_status === 'Paid' && (
                               <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider">
                                 Paid ({member.payment_method})

@@ -13,6 +13,7 @@ export default function CreateEventPage() {
   const [staff, setStaff] = useState<any[]>([]);
   const [selectedStaff, setSelectedStaff] = useState<string[]>([]);
   const [staffRemarks, setStaffRemarks] = useState<Record<string, string>>({});
+  const [playingDjStaff, setPlayingDjStaff] = useState<Record<string, boolean>>({});
   const [showRemarkInputFor, setShowRemarkInputFor] = useState<Record<string, boolean>>({});
   const [dropSequence, setDropSequence] = useState<string>("None");
   const [customVehicleName, setCustomVehicleName] = useState<string>("");
@@ -254,7 +255,8 @@ export default function CreateEventPage() {
       await supabase.from("event_staff").insert(selectedStaff.map((staffId) => ({ 
         event_id: newEvent.id, 
         staff_id: staffId,
-        assigned_role: staffRemarks[staffId] || null
+        assigned_role: staffRemarks[staffId] || null,
+        is_playing_dj: playingDjStaff[staffId] || false
       })));
     }
 
@@ -526,23 +528,39 @@ export default function CreateEventPage() {
                 </div>
               </button>
               {selectedStaff.includes(member.id) && (
-                showRemarkInputFor[member.id] || staffRemarks[member.id] ? (
-                  <input 
-                    type="text" 
-                    placeholder="Add remark/assigned role..." 
-                    className="w-full bg-gray-50 border-none rounded-xl py-2 px-3 text-xs font-medium outline-none focus:ring-2 focus:ring-primary/10 transition-all mt-1"
-                    value={staffRemarks[member.id] || ""}
-                    onChange={(e) => setStaffRemarks(prev => ({ ...prev, [member.id]: e.target.value }))}
-                  />
-                ) : (
-                  <button 
-                    type="button" 
-                    onClick={() => setShowRemarkInputFor(prev => ({ ...prev, [member.id]: true }))}
-                    className="text-[10px] font-bold text-gray-400 bg-gray-50 px-3 py-1.5 rounded-lg text-left mt-1 w-fit ml-12 hover:bg-gray-100 transition-colors"
-                  >
-                    + Add Remark
-                  </button>
-                )
+                <div className="flex flex-col gap-2 mt-1">
+                  {member.role === 'DJ Operator' && (
+                    <label className="flex items-center justify-between bg-purple-50/50 p-2.5 rounded-xl cursor-pointer">
+                      <span className="text-[10px] font-bold text-purple-900 uppercase tracking-wider">Playing DJ?</span>
+                      <div className={cn("w-10 h-6 rounded-full flex items-center p-1 transition-colors", playingDjStaff[member.id] ? "bg-purple-600" : "bg-gray-300")}>
+                        <div className={cn("w-4 h-4 bg-white rounded-full shadow-sm transition-transform", playingDjStaff[member.id] ? "translate-x-4" : "translate-x-0")} />
+                      </div>
+                      <input 
+                        type="checkbox" 
+                        className="hidden" 
+                        checked={playingDjStaff[member.id] || false}
+                        onChange={(e) => setPlayingDjStaff(prev => ({ ...prev, [member.id]: e.target.checked }))}
+                      />
+                    </label>
+                  )}
+                  {showRemarkInputFor[member.id] || staffRemarks[member.id] ? (
+                    <input 
+                      type="text" 
+                      placeholder="Add remark/assigned role..." 
+                      className="w-full bg-gray-50 border-none rounded-xl py-2 px-3 text-xs font-medium outline-none focus:ring-2 focus:ring-primary/10 transition-all"
+                      value={staffRemarks[member.id] || ""}
+                      onChange={(e) => setStaffRemarks(prev => ({ ...prev, [member.id]: e.target.value }))}
+                    />
+                  ) : (
+                    <button 
+                      type="button" 
+                      onClick={() => setShowRemarkInputFor(prev => ({ ...prev, [member.id]: true }))}
+                      className="text-[10px] font-bold text-gray-400 bg-gray-50 px-3 py-1.5 rounded-lg text-left w-fit hover:bg-gray-100 transition-colors"
+                    >
+                      + Add Remark
+                    </button>
+                  )}
+                </div>
               )}
             </div>
           ))}
