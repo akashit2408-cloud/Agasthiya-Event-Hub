@@ -50,7 +50,7 @@ export default function MorePage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-white pb-20 relative">
+    <div className="flex flex-col min-h-screen bg-white relative">
       
       <AnimatePresence>
         {showLogoutConfirm && (
