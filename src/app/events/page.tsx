@@ -233,12 +233,8 @@ ${crewList}
 
 ${validInvitationUrl ? `📎 *Invitation Attachment:*\n${validInvitationUrl}\n\n` : ''}*DJ Eventer Chennai | Agasthiya Events*`;
 
-    // IMPORTANT: Copy the full message to clipboard FIRST.
-    navigator.clipboard.writeText(message).catch(e => console.error(e));
-
     try {
-      let shareText = message;
-      const shareData: any = { text: shareText };
+      const shareData: any = { text: message };
       
       if (event.invitation_url && event.invitation_url.startsWith('data:image')) {
         const arr = event.invitation_url.split(',');
@@ -254,13 +250,6 @@ ${validInvitationUrl ? `📎 *Invitation Attachment:*\n${validInvitationUrl}\n\n
           const ext = mime.split('/')[1] || 'jpg';
           const file = new File([u8arr], `invitation.${ext}`, { type: mime });
           shareData.files = [file];
-
-          // WhatsApp has a strict 1024 character limit for image captions.
-          // Truncate safely to prevent the "Read more" bug on Android.
-          if (shareText.length > 700) {
-             shareText = shareText.substring(0, 700) + "\n\n... [TEXT TOO LONG]\n✅ Full details are copied to your clipboard. Please PASTE them as a new message!";
-             shareData.text = shareText;
-          }
         }
       }
 
