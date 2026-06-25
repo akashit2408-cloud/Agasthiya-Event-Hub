@@ -236,22 +236,7 @@ ${validInvitationUrl ? `📎 *Invitation Attachment:*\n${validInvitationUrl}\n\n
     try {
       const shareData: any = { text: message };
       
-      if (event.invitation_url && event.invitation_url.startsWith('data:image')) {
-        const arr = event.invitation_url.split(',');
-        const mimeMatch = arr[0].match(/:(.*?);/);
-        if (mimeMatch) {
-          const mime = mimeMatch[1];
-          const bstr = atob(arr[1]);
-          let n = bstr.length;
-          const u8arr = new Uint8Array(n);
-          while (n--) {
-            u8arr[n] = bstr.charCodeAt(n);
-          }
-          const ext = mime.split('/')[1] || 'jpg';
-          const file = new File([u8arr], `invitation.${ext}`, { type: mime });
-          shareData.files = [file];
-        }
-      }
+
 
       if (navigator.canShare && navigator.canShare(shareData)) {
         await navigator.share(shareData);
