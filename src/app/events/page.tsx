@@ -18,6 +18,9 @@ export default function EventsPage() {
   const handleClearAll = async () => {
     if (confirm("🚨 ARE YOU SURE? This will permanently delete ALL events!")) {
       setIsDeletingAll(true);
+      // Delete child records first to satisfy foreign key constraints
+      await supabase.from('event_staff').delete().neq('event_id', '00000000-0000-0000-0000-000000000000');
+      await supabase.from('event_setups').delete().neq('event_id', '00000000-0000-0000-0000-000000000000');
       const { error } = await supabase.from('events').delete().neq('id', '00000000-0000-0000-0000-000000000000');
       if (!error) {
         setEvents([]);
@@ -335,6 +338,8 @@ ${previewUrl ? `📎 *View Invitation:*\n${previewUrl}\n\n` : ''}*AE | Agasthiya
              onClick={async () => {
                if (confirm('Are you sure you want to delete this event?')) {
                  onDelete(event.id);
+                 await supabase.from('event_staff').delete().eq('event_id', event.id);
+                 await supabase.from('event_setups').delete().eq('event_id', event.id);
                  await supabase.from('events').delete().eq('id', event.id);
                }
              }}
