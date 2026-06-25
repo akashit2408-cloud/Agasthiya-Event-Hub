@@ -72,6 +72,14 @@ export async function POST(req: Request) {
     if (!response.ok) {
       const errorData = await response.text();
       console.error("Groq API error:", errorData);
+
+      if (response.status === 401) {
+        return NextResponse.json(
+          { error: "API key is invalid. Please check your GROQ_API_KEY in Vercel Environment Variables." },
+          { status: 500 }
+        );
+      }
+
       return NextResponse.json(
         { error: `AI service error: ${response.status}` },
         { status: 500 }
