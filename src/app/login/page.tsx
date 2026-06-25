@@ -111,6 +111,7 @@ export default function LoginPage() {
             Login to continue your journey
           </p>
         </motion.div>
+        </motion.div>
 
         {/* Form */}
         <motion.form 
