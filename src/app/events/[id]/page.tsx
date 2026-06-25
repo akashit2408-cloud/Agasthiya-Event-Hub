@@ -444,9 +444,13 @@ ${previewUrl ? `📎 *View Invitation:*\n${previewUrl}\n\n` : ''}*AE | Agasthiya
                                 Playing DJ
                               </span>
                             )}
-                            {member.payment_status === 'Paid' && (
+                            {member.payment_status === 'Paid' ? (
                               <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider">
                                 Paid ({member.payment_method})
+                              </span>
+                            ) : (
+                              <span className="bg-red-50 text-red-600 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider">
+                                Unpaid
                               </span>
                             )}
                           </p>
