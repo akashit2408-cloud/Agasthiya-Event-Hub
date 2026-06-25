@@ -18,8 +18,21 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { useEffect, useState } from "react";
+
 export default function MorePage() {
   const router = useRouter();
+  const [profile, setProfile] = useState({ name: "Akash Sharma", role: "Super Admin" });
+
+  useEffect(() => {
+    async function fetchProfile() {
+      const { data } = await supabase.from("app_settings").select("value").eq("key", "admin_profile").single();
+      if (data?.value) {
+        setProfile(data.value);
+      }
+    }
+    fetchProfile();
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen bg-white pb-20">
@@ -27,12 +40,12 @@ export default function MorePage() {
       <div className="p-8 bg-gray-50 flex flex-col items-center">
          <div className="w-24 h-24 rounded-3xl bg-white p-1 shadow-xl relative">
             <div className="w-full h-full rounded-[1.25rem] overflow-hidden">
-               <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Akash" alt="profile" />
+               <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(profile.name)}`} alt="profile" />
             </div>
             <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-success border-4 border-white rounded-full"></div>
          </div>
-         <h2 className="mt-4 text-xl font-bold text-gray-900">Akash Sharma</h2>
-         <p className="text-xs font-bold text-primary uppercase tracking-widest mt-1">Super Admin</p>
+         <h2 className="mt-4 text-xl font-bold text-gray-900">{profile.name}</h2>
+         <p className="text-xs font-bold text-primary uppercase tracking-widest mt-1">{profile.role}</p>
       </div>
 
       <div className="p-5 space-y-6">
