@@ -80,47 +80,29 @@ export default function LoginPage() {
         )}
       </AnimatePresence>
 
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="mt-12 flex flex-col items-center relative z-10"
-      >
-        {/* Brand Name */}
+      <div className="flex-1 flex flex-col justify-center">
         <motion.div 
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="mb-6 relative"
+          className="flex flex-col items-center relative z-10"
         >
-          <motion.h1 
-            className="text-5xl md:text-6xl font-black tracking-tight"
-            whileHover={{ scale: 1.02 }}
-          >
-            <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-              Agasthiya
-            </span>
-            <br />
-            <span className="bg-gradient-to-r from-pink-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
-              Events
-            </span>
-          </motion.h1>
-          
-          {/* Decorative underline */}
+          {/* Brand Logo */}
           <motion.div 
-            initial={{ width: 0 }}
-            animate={{ width: "100%" }}
-            transition={{ delay: 0.3, duration: 0.5 }}
-            className="h-1 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-full mt-2"
-          />
-        </motion.div>
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3 }}
+            className="mb-6 relative"
+          >
+            <img src="/login logo.png" alt="App Logo" className="w-48 md:w-56 h-auto object-contain" />
+          </motion.div>
         
         {/* Welcome text */}
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.1, duration: 0.3 }}
-          className="mt-8 text-center"
+          className="mt-4 text-center"
         >
           <h2 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-blue-900 bg-clip-text text-transparent flex items-center justify-center gap-2">
             Welcome Back 👋
@@ -129,16 +111,15 @@ export default function LoginPage() {
             Login to continue your journey
           </p>
         </motion.div>
-      </motion.div>
 
-      {/* Form */}
-      <motion.form 
-        onSubmit={handleLogin}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.2, duration: 0.3 }}
-        className="mt-12 space-y-5 relative z-10"
-      >
+        {/* Form */}
+        <motion.form 
+          onSubmit={handleLogin}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.3 }}
+          className="mt-10 space-y-5 relative z-10 w-full"
+        >
         {/* Email field */}
         <div className="space-y-2">
           <label className="text-xs font-bold text-gray-600 ml-1">
@@ -221,7 +202,8 @@ export default function LoginPage() {
 
           <div className="absolute inset-0 bg-gradient-to-r from-pink-600 via-purple-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         </motion.button>
-      </motion.form>
+        </motion.form>
+      </div>
 
       {/* Footer */}
       <motion.div 
