@@ -278,6 +278,7 @@ ${previewUrl ? `📎 *View Invitation:*\n${previewUrl}\n\n` : ''}*AE | Agasthiya
           gpay_number: s.staff.gpay_number,
           avatar_seed: s.staff.avatar_seed,
           assigned_role: s.assigned_role,
+          is_playing_dj: s.is_playing_dj,
           payment_status: s.payment_status,
           payment_method: s.payment_method
         })) || []);
