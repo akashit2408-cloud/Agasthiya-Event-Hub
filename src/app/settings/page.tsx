@@ -7,7 +7,7 @@ import { supabase } from "@/lib/supabase";
 
 export default function SettingsPage() {
   const router = useRouter();
-  const [profile, setProfile] = useState({ name: "", role: "" });
+  const [profile, setProfile] = useState({ name: "Akash Sharma", role: "Super Admin" });
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
