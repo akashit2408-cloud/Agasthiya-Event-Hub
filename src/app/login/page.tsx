@@ -203,8 +203,8 @@ export default function LoginPage() {
 
           <div className="absolute inset-0 bg-gradient-to-r from-pink-600 via-purple-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         </motion.button>
-        </motion.form>
-      </div>
+      </motion.form>
+    </div>
 
       {/* Footer */}
       <motion.div 
