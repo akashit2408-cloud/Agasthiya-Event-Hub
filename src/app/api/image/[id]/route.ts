@@ -1,16 +1,16 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const { data, error } = await supabase
       .from('events')
       .select('invitation_url')
       .eq('id', id)
       .single();
 
-    if (error || !data || !data.invitation_url || !data.invitation_url.startsWith('data:image')) {
+    if (error || !data || !data.invitation_url) {
       return new NextResponse('Image not found', { status: 404 });
     }
 
