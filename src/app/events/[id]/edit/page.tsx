@@ -232,7 +232,7 @@ export default function EditEventPage() {
       if (staffDelErr) console.error("Error deleting old staff:", staffDelErr);
 
       if (selectedStaff.length > 0) {
-        const { error: staffInsErr } = await supabase.from("event_staff").insert(selectedStaff.map((staffId) => {
+        const { error: staffInsErr } = await supabase.from("event_staff").upsert(selectedStaff.map((staffId) => {
           const existing = existingStaffData?.find(es => es.staff_id === staffId);
           const isPlayingStr = form.get(`playing_dj_${staffId}`);
           return { 
@@ -244,7 +244,7 @@ export default function EditEventPage() {
             payment_method: existing?.payment_method || null
           };
         }));
-        if (staffInsErr) console.error("Error inserting staff:", staffInsErr);
+        if (staffInsErr) console.error("Error upserting staff:", staffInsErr);
       }
 
       const { error: setupDelErr } = await supabase.from("event_setups").delete().eq("event_id", params.id);
@@ -252,10 +252,10 @@ export default function EditEventPage() {
 
       const setupEntries = Object.entries(selectedSetups);
       if (setupEntries.length > 0) {
-        const { error: setupInsErr } = await supabase.from("event_setups").insert(
+        const { error: setupInsErr } = await supabase.from("event_setups").upsert(
           setupEntries.map(([setupId, quantity]) => ({ event_id: params.id, setup_id: setupId, quantity }))
         );
-        if (setupInsErr) console.error("Error inserting setups:", setupInsErr);
+        if (setupInsErr) console.error("Error upserting setups:", setupInsErr);
       }
 
       setSaving(false);
