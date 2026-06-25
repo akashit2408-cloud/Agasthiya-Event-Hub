@@ -22,7 +22,7 @@ export async function POST(req: Request) {
     const base64Data = image.split(',')[1];
     const mimeType = image.split(';')[0].split(':')[1] || 'image/jpeg';
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     const prompt = `
       You are an expert event data extraction assistant. I will provide an image of an event/wedding invitation.
