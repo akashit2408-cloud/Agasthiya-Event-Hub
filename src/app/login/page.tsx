@@ -1,7 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Mail, Lock, Key, ChevronRight, EyeOff } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Mail, Lock, Key, ChevronRight, EyeOff, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -10,6 +10,7 @@ export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
   const handleLogin = (e: any) => {
     e.preventDefault();
@@ -28,12 +29,14 @@ export default function LoginPage() {
     }
 
     if (email !== validEmail) {
-      alert("Invalid email address.");
+      setError("Invalid email address.");
+      setTimeout(() => setError(""), 3000);
       return;
     }
 
     if (validPassword && password !== validPassword) {
-      alert("Incorrect password.");
+      setError("Incorrect password.");
+      setTimeout(() => setError(""), 3000);
       return;
     }
 
@@ -42,7 +45,27 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-white p-8">
+    <div className="flex flex-col min-h-screen bg-white p-8 relative overflow-hidden">
+      
+      <AnimatePresence>
+        {error && (
+          <motion.div 
+            initial={{ opacity: 0, y: -50, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+            className="absolute top-10 left-1/2 -translate-x-1/2 w-[90%] max-w-sm bg-red-50 border border-red-200 p-4 rounded-2xl shadow-xl shadow-red-100 flex items-center gap-3 z-50"
+          >
+            <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+              <AlertCircle size={20} className="text-red-500" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-red-700">Login Failed</h3>
+              <p className="text-xs font-medium text-red-500 mt-0.5">{error}</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="mt-12 flex flex-col items-center">
         <div className="flex gap-3 mb-6 scale-125">
           <span className="text-3xl">🎵</span>
