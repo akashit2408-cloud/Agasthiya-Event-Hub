@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, Calendar, MapPin, Users, Truck, Layers, ExternalLink, Edit2, Info, ImageIcon, ChevronRight } from "lucide-react";
+import { ChevronLeft, Calendar, MapPin, Users, Truck, Layers, ExternalLink, Edit2, Info, ImageIcon, ChevronRight, Phone } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState, type MouseEvent } from "react";
 import { cn } from "@/lib/utils";
@@ -431,40 +431,59 @@ ${previewUrl ? `📎 *View Invitation:*\n${previewUrl}\n\n` : ''}*AE | Agasthiya
                     : `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=random&font-size=0.35&rounded=true&bold=true`;
                   
                   return (
-                    <button 
+                    <div 
                       key={member.id || index} 
-                      onClick={() => setSelectedStaffForPayment(member)}
-                      className="flex items-center justify-between p-2 -mx-2 rounded-2xl hover:bg-gray-50 transition-colors w-full text-left"
+                      className="flex items-center justify-between p-2 -mx-2 rounded-2xl hover:bg-gray-50 transition-colors w-full"
                     >
-                      <div className="flex items-center gap-3">
+                      <button 
+                        onClick={() => setSelectedStaffForPayment(member)}
+                        className="flex items-center gap-3 flex-1 text-left"
+                      >
                         <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden shadow-sm shrink-0">
                           <img src={imageSrc} alt={member.name} className="w-full h-full object-cover" />
                         </div>
                         <div>
-                          <p className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                          <p className="text-sm font-bold text-gray-900 flex items-center gap-2 flex-wrap">
                             {member.name} {member.role && member.role.toLowerCase() !== 'helper' && <span className="font-medium text-gray-500">{member.role.toLowerCase()}</span>}
                             {member.is_playing_dj && (
-                              <span className="bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider">
+                              <span className="bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider shrink-0">
                                 Playing DJ
                               </span>
                             )}
                             {member.payment_status === 'Paid' ? (
-                              <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider">
+                              <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider shrink-0">
                                 Paid ({member.payment_method})
                               </span>
                             ) : (
-                              <span className="bg-red-50 text-red-600 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider">
+                              <span className="bg-red-50 text-red-600 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider shrink-0">
                                 Unpaid
                               </span>
                             )}
                           </p>
                           {member.assigned_role && (
-                            <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide">({member.assigned_role})</p>
+                            <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide mt-0.5">({member.assigned_role})</p>
                           )}
                         </div>
+                      </button>
+                      
+                      <div className="flex items-center gap-1 pl-2 shrink-0">
+                        {member.mobile && (
+                          <a 
+                            href={`tel:${member.mobile}`}
+                            className="p-2 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors active:scale-95"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Phone size={15} fill="currentColor" />
+                          </a>
+                        )}
+                        <button 
+                          onClick={() => setSelectedStaffForPayment(member)}
+                          className="p-2 rounded-full text-gray-400 hover:bg-gray-100 transition-colors active:scale-95 hidden sm:flex"
+                        >
+                          <ChevronRight size={18} />
+                        </button>
                       </div>
-                      <ChevronRight className="text-gray-300" size={18} />
-                    </button>
+                    </div>
                   );
                 })}
               </div>
