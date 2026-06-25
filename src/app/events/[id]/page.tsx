@@ -127,13 +127,6 @@ ${previewUrl ? `📎 *View Invitation:*\n${previewUrl}\n\n` : ''}*AE | Agasthiya
 
   const handleStaffPaymentSubmit = async (method: "Cash" | "GPay") => {
     try {
-      if (method === 'GPay') {
-          if (!selectedStaffForPayment.gpay_number) {
-            alert("This staff member does not have a GPay / UPI ID saved in their profile.");
-            return;
-          }
-      }
-
       // Update in database
       const { error } = await supabase
         .from('event_staff')
@@ -151,10 +144,21 @@ ${previewUrl ? `📎 *View Invitation:*\n${previewUrl}\n\n` : ''}*AE | Agasthiya
       ));
 
       if (method === 'GPay') {
-          const pa = encodeURIComponent(selectedStaffForPayment.gpay_number);
-          const pn = encodeURIComponent(selectedStaffForPayment.name);
-          const upiLink = `upi://pay?pa=${pa}&pn=${pn}&cu=INR`;
-          window.location.href = upiLink;
+          const upiId = selectedStaffForPayment.gpay_number?.trim();
+          if (upiId && upiId.includes('@')) {
+            const pa = encodeURIComponent(upiId);
+            const pn = encodeURIComponent(selectedStaffForPayment.name);
+            
+            // Try GPay specific intent first
+            window.location.href = `gpay://upi/pay?pa=${pa}&pn=${pn}&cu=INR`;
+            
+            // Fallback to standard UPI intent if GPay scheme fails
+            setTimeout(() => {
+                window.location.href = `upi://pay?pa=${pa}&pn=${pn}&cu=INR`;
+            }, 300);
+          } else {
+            alert(`✅ Marked as Paid via GPay!\n\nPro Tip: To make the Google Pay app open automatically next time, go to the Staff tab and save their exact UPI ID (e.g., 9876543210@ptsbi) instead of just their phone number!`);
+          }
       }
       
       setSelectedStaffForPayment(null);
