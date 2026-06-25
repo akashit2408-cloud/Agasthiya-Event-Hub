@@ -12,27 +12,29 @@ export default function SettingsPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    async function fetchSettings() {
-      const { data, error } = await supabase.from("app_settings").select("value").eq("key", "admin_profile").single();
-      if (!error && data?.value) {
-        setProfile({ 
-          name: data.value.name || "", 
-          role: data.value.role || "",
-          avatar: data.value.avatar || ""
+    const localProfile = localStorage.getItem("admin_profile");
+    if (localProfile) {
+      try {
+        const parsed = JSON.parse(localProfile);
+        setProfile({
+          name: parsed.name || "Akash Sharma",
+          role: parsed.role || "Super Admin",
+          avatar: parsed.avatar || ""
         });
+      } catch (e) {
+        console.error("Failed to parse local profile");
       }
     }
-    fetchSettings();
   }, []);
 
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      const { error } = await supabase.from("app_settings").upsert({
-        key: "admin_profile",
-        value: profile
-      });
-      if (error) throw error;
+      localStorage.setItem("admin_profile", JSON.stringify(profile));
+      
+      // Simulate network delay for better UX
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
       alert("Profile updated successfully!");
     } catch (err) {
       console.error("Error saving profile:", err);

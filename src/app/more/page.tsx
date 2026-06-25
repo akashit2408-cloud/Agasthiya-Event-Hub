@@ -25,13 +25,19 @@ export default function MorePage() {
   const [profile, setProfile] = useState({ name: "Akash Sharma", role: "Super Admin", avatar: "" });
 
   useEffect(() => {
-    async function fetchProfile() {
-      const { data } = await supabase.from("app_settings").select("value").eq("key", "admin_profile").single();
-      if (data?.value) {
-        setProfile(data.value);
+    const localProfile = localStorage.getItem("admin_profile");
+    if (localProfile) {
+      try {
+        const parsed = JSON.parse(localProfile);
+        setProfile({
+          name: parsed.name || "Akash Sharma",
+          role: parsed.role || "Super Admin",
+          avatar: parsed.avatar || ""
+        });
+      } catch (e) {
+        console.error("Failed to parse local profile");
       }
     }
-    fetchProfile();
   }, []);
 
   return (
