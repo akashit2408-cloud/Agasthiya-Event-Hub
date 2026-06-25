@@ -94,7 +94,7 @@ export default function LoginPage() {
             transition={{ duration: 0.3 }}
             className="mb-6 relative"
           >
-            <img src="/login logo.png" alt="App Logo" className="w-48 md:w-56 h-auto object-contain" />
+            <img src="/login logo.png" alt="App Logo" className="w-64 md:w-80 h-auto object-contain" />
           </motion.div>
         
         {/* Welcome text */}

@@ -55,7 +55,7 @@ export default function MobileLayout({ children }: { children: React.ReactNode }
 
   return (
     <div className="mobile-container flex flex-col min-h-screen bg-white">
-      <main className="flex-1 pb-20">
+      <main className={`flex-1 ${!isAuthPage ? 'pb-20' : ''}`}>
         {children}
       </main>
       {!isAuthPage && <BottomNav />}
