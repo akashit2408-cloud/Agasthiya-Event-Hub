@@ -29,6 +29,7 @@ export default function EventsPage() {
             vehicles (name, registration_number),
             event_staff (
               assigned_role,
+              is_playing_dj,
               staff (id, name, role, mobile, avatar_seed)
             )
           `)
@@ -52,7 +53,8 @@ export default function EventsPage() {
             role: s.staff?.role,
             mobile: s.staff?.mobile,
             avatar_seed: s.staff?.avatar_seed,
-            assigned_role: s.assigned_role
+            assigned_role: s.assigned_role,
+            is_playing_dj: s.is_playing_dj
           })) || []
         }));
 
@@ -158,7 +160,15 @@ function EventCard({ event }: any) {
     const staff = event.staff || [];
     const crewList = staff.length > 0 
       ? staff.map((s: any) => {
-          const rolePart = s.role && s.role.toLowerCase() !== 'helper' ? ` (${s.role.split(' ').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ')})` : '';
+          let rolePart = '';
+          const isDJOperator = s.role && s.role.toLowerCase() === 'dj operator';
+          if (s.role && s.role.toLowerCase() !== 'helper') {
+            if (isDJOperator) {
+              if (s.is_playing_dj) rolePart = ' (Playing DJ)';
+            } else {
+              rolePart = ` (${s.role.split(' ').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ')})`;
+            }
+          }
           const remarkPart = s.assigned_role ? ` - ${s.assigned_role}` : '';
           return `• ${s.name}${rolePart}${remarkPart}`;
         }).join('\n') 

@@ -30,7 +30,15 @@ export default function EventDetailsPage() {
       
     const crewList = staff.length > 0 
       ? staff.map(s => {
-          const rolePart = s.role && s.role.toLowerCase() !== 'helper' ? ` (${s.role.split(' ').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ')})` : '';
+          let rolePart = '';
+          const isDJOperator = s.role && s.role.toLowerCase() === 'dj operator';
+          if (s.role && s.role.toLowerCase() !== 'helper') {
+            if (isDJOperator) {
+              if (s.is_playing_dj) rolePart = ' (Playing DJ)';
+            } else {
+              rolePart = ` (${s.role.split(' ').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ')})`;
+            }
+          }
           const remarkPart = s.assigned_role ? ` - ${s.assigned_role}` : '';
           return `• ${s.name}${rolePart}${remarkPart}`;
         }).join('\n') 
