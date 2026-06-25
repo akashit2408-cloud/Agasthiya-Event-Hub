@@ -22,7 +22,7 @@ import { useEffect, useState } from "react";
 
 export default function MorePage() {
   const router = useRouter();
-  const [profile, setProfile] = useState({ name: "Akash Sharma", role: "Super Admin" });
+  const [profile, setProfile] = useState({ name: "Akash Sharma", role: "Super Admin", avatar: "" });
 
   useEffect(() => {
     async function fetchProfile() {
@@ -40,7 +40,11 @@ export default function MorePage() {
       <div className="p-8 bg-gray-50 flex flex-col items-center">
          <div className="w-24 h-24 rounded-3xl bg-white p-1 shadow-xl relative">
             <div className="w-full h-full rounded-[1.25rem] overflow-hidden">
-               <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(profile.name)}`} alt="profile" />
+               {profile.avatar ? (
+                 <img src={profile.avatar} alt="profile" className="w-full h-full object-cover" />
+               ) : (
+                 <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(profile.name)}`} alt="profile" className="w-full h-full object-cover" />
+               )}
             </div>
             <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-success border-4 border-white rounded-full"></div>
          </div>

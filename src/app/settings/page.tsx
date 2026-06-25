@@ -1,20 +1,25 @@
 "use client";
 
-import { ChevronLeft, Save, User } from "lucide-react";
+import { ChevronLeft, Save, User, Camera } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 
 export default function SettingsPage() {
   const router = useRouter();
-  const [profile, setProfile] = useState({ name: "Akash Sharma", role: "Super Admin" });
+  const [profile, setProfile] = useState({ name: "Akash Sharma", role: "Super Admin", avatar: "" });
   const [isSaving, setIsSaving] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     async function fetchSettings() {
       const { data, error } = await supabase.from("app_settings").select("value").eq("key", "admin_profile").single();
       if (!error && data?.value) {
-        setProfile({ name: data.value.name || "", role: data.value.role || "" });
+        setProfile({ 
+          name: data.value.name || "", 
+          role: data.value.role || "",
+          avatar: data.value.avatar || ""
+        });
       }
     }
     fetchSettings();
@@ -37,6 +42,45 @@ export default function SettingsPage() {
     }
   };
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const MAX_WIDTH = 256;
+        const MAX_HEIGHT = 256;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx?.drawImage(img, 0, 0, width, height);
+        
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
+        setProfile({ ...profile, avatar: dataUrl });
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 pb-20">
       <div className="bg-white p-5 flex items-center justify-between border-b border-gray-100 sticky top-0 z-10">
@@ -53,16 +97,31 @@ export default function SettingsPage() {
           <div className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm space-y-4">
             
             <div className="flex items-center gap-4 mb-2">
-              <div className="w-16 h-16 rounded-2xl bg-gray-50 flex items-center justify-center overflow-hidden border border-gray-100">
-                {profile.name ? (
-                  <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(profile.name)}`} alt="Avatar" />
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                onChange={handleImageUpload} 
+                accept="image/*" 
+                className="hidden" 
+              />
+              <button 
+                onClick={() => fileInputRef.current?.click()}
+                className="w-16 h-16 rounded-2xl bg-gray-50 flex items-center justify-center overflow-hidden border border-gray-100 relative group"
+              >
+                {profile.avatar ? (
+                  <img src={profile.avatar} alt="Avatar" className="w-full h-full object-cover" />
+                ) : profile.name ? (
+                  <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(profile.name)}`} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
                   <User className="text-gray-300" size={32} />
                 )}
-              </div>
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Camera className="text-white" size={20} />
+                </div>
+              </button>
               <div>
-                <h3 className="text-sm font-bold text-gray-900">Avatar</h3>
-                <p className="text-xs text-gray-500 mt-0.5">Updates automatically based on your name</p>
+                <h3 className="text-sm font-bold text-gray-900">Profile Image</h3>
+                <p className="text-xs text-gray-500 mt-0.5">Click the image to upload a custom photo</p>
               </div>
             </div>
 
