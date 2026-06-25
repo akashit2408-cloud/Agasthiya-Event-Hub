@@ -10,6 +10,7 @@ export default function LoginPage() {
 
   const handleLogin = (e: any) => {
     e.preventDefault();
+    localStorage.setItem("isAuthenticated", "true");
     router.push("/");
   };
 

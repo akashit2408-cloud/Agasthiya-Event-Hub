@@ -72,7 +72,10 @@ export default function MorePage() {
         </Section>
 
         <button 
-          onClick={() => router.push('/login')}
+          onClick={() => {
+            localStorage.removeItem("isAuthenticated");
+            router.push('/login');
+          }}
           className="w-full py-4 bg-red-50 text-danger rounded-2xl flex items-center justify-center gap-3 font-bold text-sm mt-4"
         >
           <LogOut size={18} />

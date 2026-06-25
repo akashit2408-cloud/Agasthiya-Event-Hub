@@ -10,7 +10,8 @@ export default function MobileLayout({ children }: { children: React.ReactNode }
     if (typeof window === "undefined") return true;
     return !sessionStorage.getItem("hasSeenSplash");
   });
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(true); // Assume true initially to prevent flash, then check
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const pathname = usePathname();
   const router = useRouter();
 
@@ -32,7 +33,21 @@ export default function MobileLayout({ children }: { children: React.ReactNode }
     return () => clearTimeout(timer);
   }, [showSplash]);
 
-  if (showSplash) {
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const auth = localStorage.getItem("isAuthenticated") === "true";
+      setIsAuthenticated(auth);
+      setIsCheckingAuth(false);
+      
+      if (!auth && pathname !== "/login") {
+        router.push("/login");
+      } else if (auth && pathname === "/login") {
+        router.push("/");
+      }
+    }
+  }, [pathname, router]);
+
+  if (showSplash || isCheckingAuth) {
     return <SplashScreen onComplete={handleSplashComplete} />;
   }
 
