@@ -38,7 +38,7 @@ export default function WhatsAppPage() {
                 <p className="text-[10px] font-black text-primary uppercase">{template.audience}</p>
               </div>
             </div>
-            <p className="text-xs text-gray-500 whitespace-pre-line">{template.body}</p>
+            <p className="text-xs text-gray-500 whitespace-pre-line">{template.body?.replace(/\\n/g, '\n')}</p>
           </div>
         ))}
       </div>
