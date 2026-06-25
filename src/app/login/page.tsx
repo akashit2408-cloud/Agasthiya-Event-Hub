@@ -66,63 +66,65 @@ export default function LoginPage() {
         )}
       </AnimatePresence>
 
-      <div className="mt-12 flex flex-col items-center">
-        <div className="mb-6">
-          <img src="/logo.png" alt="App Logo" className="w-48 h-auto object-contain" />
+      <div className="flex-1 flex flex-col justify-center">
+        <div className="flex flex-col items-center">
+          <div className="mb-6">
+            <img src="/logo.png" alt="App Logo" className="w-48 h-auto object-contain" />
+          </div>
+          
+          <div className="mt-6 text-center">
+             <h2 className="text-2xl font-bold text-gray-900">Welcome Back 👋</h2>
+             <p className="text-sm text-gray-400 font-medium mt-1">Login to continue</p>
+          </div>
         </div>
-        
-        <div className="mt-10 text-center">
-           <h2 className="text-xl font-bold text-gray-900">Welcome Back 👋</h2>
-           <p className="text-sm text-gray-400 font-medium mt-1">Login to continue</p>
-        </div>
+
+        <form onSubmit={handleLogin} className="mt-10 space-y-5">
+          <div className="space-y-1.5">
+             <label className="text-xs font-bold text-gray-500 ml-1">Email</label>
+             <div className="relative">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                <input 
+                  type="email" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email" 
+                  required
+                  className="w-full bg-gray-50 border-none rounded-2xl py-4 pl-12 pr-4 text-sm font-medium outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+                />
+             </div>
+          </div>
+
+          <div className="space-y-1.5">
+             <label className="text-xs font-bold text-gray-500 ml-1">Password</label>
+             <div className="relative">
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                <input 
+                  type={showPassword ? "text" : "password"} 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password" 
+                  className="w-full bg-gray-50 border-none rounded-2xl py-4 pl-12 pr-12 text-sm font-medium outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+                />
+                <button 
+                  type="button" 
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
+                </button>
+             </div>
+          </div>
+
+          <button 
+            type="submit"
+            className="w-full py-4 bg-primary text-white rounded-2xl font-bold mt-8 shadow-xl shadow-blue-100 active:scale-[0.98] transition-all"
+          >
+            LOGIN
+          </button>
+        </form>
       </div>
 
-      <form onSubmit={handleLogin} className="mt-12 space-y-5">
-        <div className="space-y-1.5">
-           <label className="text-xs font-bold text-gray-500 ml-1">Email</label>
-           <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-              <input 
-                type="email" 
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email" 
-                required
-                className="w-full bg-gray-50 border-none rounded-2xl py-4 pl-12 pr-4 text-sm font-medium outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
-              />
-           </div>
-        </div>
-
-        <div className="space-y-1.5">
-           <label className="text-xs font-bold text-gray-500 ml-1">Password</label>
-           <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-              <input 
-                type={showPassword ? "text" : "password"} 
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password" 
-                className="w-full bg-gray-50 border-none rounded-2xl py-4 pl-12 pr-12 text-sm font-medium outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
-              />
-              <button 
-                type="button" 
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
-              </button>
-           </div>
-        </div>
-
-        <button 
-          type="submit"
-          className="w-full py-4 bg-primary text-white rounded-2xl font-bold mt-8 shadow-xl shadow-blue-100 active:scale-[0.98] transition-all"
-        >
-          LOGIN
-        </button>
-      </form>
-
-      <div className="mt-auto pt-10 pb-4 text-center">
+      <div className="mt-auto pt-6 pb-4 text-center">
          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Version 1.0.0</p>
       </div>
     </div>
