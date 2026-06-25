@@ -29,15 +29,21 @@ export default function CreateEventPage() {
 
   const getExtractionErrorMessage = (message?: string, status?: number) => {
     const rawMessage = (message || "").toLowerCase();
+    
+    if (rawMessage.includes("api key not configured") || rawMessage.includes("key is invalid")) {
+      return "Setup Required: Please add your GEMINI_API_KEY to your Vercel Environment Variables!";
+    }
+    if (status === 413 || rawMessage.includes("payload too large")) {
+      return "Image is too large! Please crop it or compress it before uploading.";
+    }
     if (status === 503 || rawMessage.includes("503") || rawMessage.includes("service unavailable") || rawMessage.includes("high demand")) {
       return "Auto-fill is temporarily busy because Gemini is under high demand. Please try again after a minute.";
     }
-
     if (status === 400) {
       return "Please upload a clear invitation image and try auto-fill again.";
     }
 
-    return "Auto-fill could not extract the details now. Please try again or enter the details manually.";
+    return message ? `Error: ${message}` : "Auto-fill could not extract the details now. Please try again or enter the details manually.";
   };
 
   const handleExtract = async (imageData: string) => {
