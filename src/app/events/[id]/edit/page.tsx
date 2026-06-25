@@ -156,6 +156,11 @@ export default function EditEventPage() {
 
       if (existingCustomer) {
         customerId = existingCustomer.id;
+        // Update existing customer details in case they changed their name or address
+        await supabase.from("customers").update({
+          name: customerName,
+          address: String(form.get("location") || "")
+        }).eq("id", customerId);
       } else {
         const { data: newCustomer, error: customerError } = await supabase
           .from("customers")
