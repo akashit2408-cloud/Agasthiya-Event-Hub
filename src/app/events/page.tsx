@@ -41,7 +41,7 @@ export default function EventsPage() {
             customers (name, mobile),
             event_setups (
               quantity,
-              setups (name)
+              setups (name, category)
             ),
             vehicles (name, registration_number),
             event_staff (
@@ -58,7 +58,10 @@ export default function EventsPage() {
           ...e,
           customer_name: e.customers?.name,
           customer_mobile: e.customers?.mobile,
-          setup_name: e.event_setups?.map((es: any) => `${es.setups?.name} (${es.quantity})`).join(', ') || null,
+          setup_name: e.event_setups?.map((es: any) => {
+            const isSetup = (es.setups?.category || "Setup") === "Setup";
+            return isSetup ? es.setups?.name : `${es.setups?.name} (${es.quantity})`;
+          }).join(', ') || null,
           vehicle_name: e.vehicles?.name,
           vehicle_number: e.vehicles?.registration_number,
           staff_count: e.event_staff?.length || 0,

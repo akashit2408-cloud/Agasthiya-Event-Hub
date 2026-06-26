@@ -265,7 +265,7 @@ ${previewUrl ? `📎 *View Invitation:*\n${previewUrl}\n\n` : ''}*AE | Agasthiya
           customer_address: (eventData as any).customers?.address,
           setup_name: (eventData as any).event_setups
             ?.filter((es: any) => (es.setups?.category || "Setup") === "Setup")
-            .map((es: any) => `${es.setups?.name} (${es.quantity})`).join(', ') || null,
+            .map((es: any) => es.setups?.name).join(', ') || null,
           equipment_name: (eventData as any).event_setups
             ?.filter((es: any) => es.setups?.category === "Equipment")
             .map((es: any) => `${es.setups?.name} (${es.quantity})`).join(', ') || null,
