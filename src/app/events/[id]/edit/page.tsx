@@ -452,7 +452,7 @@ export default function EditEventPage() {
                 </div>
               </button>
 
-              {selectedSetups[setup.id] && (
+              {selectedSetups[setup.id] && (setup.category || "Setup") !== "Setup" && (
                 <div className="flex items-center gap-2">
                   <button type="button" onClick={() => setSelectedSetups(prev => ({...prev, [setup.id]: Math.max(1, prev[setup.id] - 1)}))} className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-lg text-gray-600 font-bold">-</button>
                   <span className="text-sm font-bold w-4 text-center">{selectedSetups[setup.id]}</span>
