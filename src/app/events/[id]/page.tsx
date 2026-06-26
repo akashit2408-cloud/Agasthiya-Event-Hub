@@ -24,8 +24,9 @@ export default function EventDetailsPage() {
   const handleShare = async () => {
     if (!event) return;
     
-    const setupName = event.setup_name 
-      ? event.setup_name.split(', ').map((s: string) => `• ${s}`).join('\n') 
+    const combinedSetups = [event.setup_name, event.equipment_name].filter(Boolean).join(', ');
+    const setupName = combinedSetups 
+      ? combinedSetups.split(', ').map((s: string) => `• ${s}`).join('\n') 
       : "• No setup";
       
     const crewList = staff.length > 0 
@@ -72,10 +73,10 @@ export default function EventDetailsPage() {
     let finalMapLink = '';
     if (event.map_link) {
       if (event.map_link.includes('http')) {
-        finalMapLink = `Map: ${event.map_link}\n`;
+        finalMapLink = `Map: ${event.map_link.replace(/^https?:\/\//, '')}\n`;
       } else {
         const cleanQuery = encodeURIComponent(event.map_link).replace(/%20/g, '+');
-        finalMapLink = `Map: https://www.google.com/maps/search/?api=1&query=${cleanQuery}\n`;
+        finalMapLink = `Map: www.google.com/maps/search/?api=1&query=${cleanQuery}\n`;
       }
     }
 
