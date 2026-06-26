@@ -21,6 +21,8 @@ export default function CreateEventPage() {
   const [selectedSetups, setSelectedSetups] = useState<Record<string, number>>({});
   const [resourceCategory, setResourceCategory] = useState<"Setup" | "Equipment">("Setup");
   const [saving, setSaving] = useState(false);
+  const [eventDate, setEventDate] = useState("");
+  const [assignedStaffIds, setAssignedStaffIds] = useState<Set<string>>(new Set());
   const [isExtracting, setIsExtracting] = useState(false);
   const [extractionProgress, setExtractionProgress] = useState(0);
   const [extractionError, setExtractionError] = useState("");
@@ -73,8 +75,9 @@ export default function CreateEventPage() {
       const typeEl = document.getElementById('select-event-type') as HTMLSelectElement;
       if (typeEl && event_type) typeEl.value = event_type;
 
-      const dateEl = document.getElementById('input-date') as HTMLInputElement;
-      if (dateEl && event_date && !dateEl.value) dateEl.value = event_date;
+      if (event_date && !eventDate) {
+        setEventDate(event_date);
+      }
 
       const timeEl = document.getElementById('input-time') as HTMLInputElement;
       if (timeEl && event_time && !timeEl.value) timeEl.value = event_time;
@@ -172,6 +175,27 @@ export default function CreateEventPage() {
     }
     fetchResources().catch((err) => console.error("Error loading event resources:", err));
   }, []);
+
+  useEffect(() => {
+    if (!eventDate) {
+      setAssignedStaffIds(new Set());
+      return;
+    }
+    async function fetchAssignedStaff() {
+      const { data: eventsOnDate } = await supabase
+        .from("events")
+        .select("id, event_staff(staff_id)")
+        .eq("event_date", eventDate)
+        .not("status", "in", '("cancelled", "canceled")');
+
+      const assigned = new Set<string>();
+      (eventsOnDate || []).forEach(ev => {
+        (ev.event_staff || []).forEach((s: any) => assigned.add(s.staff_id));
+      });
+      setAssignedStaffIds(assigned);
+    }
+    fetchAssignedStaff();
+  }, [eventDate]);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -375,7 +399,7 @@ export default function CreateEventPage() {
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <InputField id="input-date" name="event_date" label="Date" type="date" icon={<Calendar size={18} />} required />
+          <InputField id="input-date" name="event_date" label="Date" type="date" icon={<Calendar size={18} />} value={eventDate} onChange={(e: any) => setEventDate(e.target.value)} required />
           <InputField id="input-time" name="event_time" label="Time" type="time" icon={<Calendar size={18} />} defaultValue="17:00" required />
         </div>
 
@@ -510,27 +534,33 @@ export default function CreateEventPage() {
               {showAllStaff ? "Show Selected" : "Show All Staff"}
             </button>
           </div>
-          {(showAllStaff ? staff : staff.filter(m => selectedStaff.includes(m.id))).map((member) => (
-            <div key={member.id} className="w-full flex flex-col gap-2 p-3 bg-card border border-gray-50 rounded-2xl">
+          {(showAllStaff ? staff : staff.filter(m => selectedStaff.includes(m.id))).map((member) => {
+            const isAssignedToOther = assignedStaffIds.has(member.id);
+            return (
+            <div key={member.id} className={cn("w-full flex flex-col gap-2 p-3 bg-card border border-gray-50 rounded-2xl", isAssignedToOther && "opacity-60")}>
               <button
                 type="button"
+                disabled={isAssignedToOther}
                 onClick={() => toggleStaff(member.id)}
                 className="w-full flex items-center justify-between"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden">
+                  <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden relative">
                     <img src={member.avatar_seed && member.avatar_seed.startsWith('data:image/') ? member.avatar_seed : `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=random&font-size=0.35&rounded=true&bold=true`} alt={member.name} className="w-full h-full object-cover" />
                   </div>
                   <div className="text-left">
                     <p className="text-xs font-bold text-gray-900">{member.name}</p>
-                    <p className="text-[10px] text-gray-400 font-medium">{member.role}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-[10px] text-gray-400 font-medium">{member.role}</p>
+                      {isAssignedToOther && <span className="text-[9px] font-bold bg-red-100 text-red-600 px-1.5 py-0.5 rounded uppercase tracking-wider">Booked</span>}
+                    </div>
                   </div>
                 </div>
-                <div className={cn("w-5 h-5 rounded flex items-center justify-center transition-colors", selectedStaff.includes(member.id) ? "bg-primary" : "border-2 border-gray-200")}>
+                <div className={cn("w-5 h-5 rounded flex items-center justify-center transition-colors", selectedStaff.includes(member.id) ? "bg-primary" : "border-2 border-gray-200", isAssignedToOther && "bg-gray-200 border-gray-200")}>
                   {selectedStaff.includes(member.id) && <div className="w-2 h-2 bg-white rounded-sm" />}
                 </div>
               </button>
-              {selectedStaff.includes(member.id) && (
+              {selectedStaff.includes(member.id) && !isAssignedToOther && (
                 <div className="flex flex-col gap-2 mt-1">
                   {member.role === 'DJ Operator' && (
                     <div 
@@ -564,7 +594,7 @@ export default function CreateEventPage() {
                 </div>
               )}
             </div>
-          ))}
+          )})}
         </div>
 
         <button disabled={saving} className="w-full py-4 bg-primary text-white rounded-2xl font-bold mt-4 shadow-lg active:scale-95 transition-transform disabled:opacity-60">

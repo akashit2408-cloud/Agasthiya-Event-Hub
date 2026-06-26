@@ -24,6 +24,8 @@ export default function EditEventPage() {
   const [selectedSetups, setSelectedSetups] = useState<Record<string, number>>({});
   const [resourceCategory, setResourceCategory] = useState<"Setup" | "Equipment">("Setup");
   const [saving, setSaving] = useState(false);
+  const [eventDate, setEventDate] = useState("");
+  const [assignedStaffIds, setAssignedStaffIds] = useState<Set<string>>(new Set());
   const [invitationImage, setInvitationImage] = useState<string | null>(null);
   const [remark, setRemark] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -104,6 +106,7 @@ export default function EditEventPage() {
 
         if (eData) {
           setEventData(eData);
+          if (eData.event_date) setEventDate(eData.event_date);
           if (eData.invitation_url) setInvitationImage(eData.invitation_url);
           if (eData.remark) setRemark(eData.remark);
           if (eData.drop_sequence) setDropSequence(eData.drop_sequence);
@@ -140,7 +143,29 @@ export default function EditEventPage() {
       setIsFetchingEvent(false);
     }
     fetchResources().catch((err) => console.error("Error loading event resources:", err));
-  }, []);
+  }, [params.id]);
+
+  useEffect(() => {
+    if (!eventDate || !params.id) {
+      setAssignedStaffIds(new Set());
+      return;
+    }
+    async function fetchAssignedStaff() {
+      const { data: eventsOnDate } = await supabase
+        .from("events")
+        .select("id, event_staff(staff_id)")
+        .eq("event_date", eventDate)
+        .neq("id", params.id)
+        .not("status", "in", '("cancelled", "canceled")');
+
+      const assigned = new Set<string>();
+      (eventsOnDate || []).forEach(ev => {
+        (ev.event_staff || []).forEach((s: any) => assigned.add(s.staff_id));
+      });
+      setAssignedStaffIds(assigned);
+    }
+    fetchAssignedStaff();
+  }, [eventDate, params.id]);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -339,7 +364,7 @@ export default function EditEventPage() {
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <InputField name="event_date" label="Date" type="date" icon={<Calendar size={18} />} defaultValue={eventData?.event_date || ""} required />
+          <InputField name="event_date" label="Date" type="date" icon={<Calendar size={18} />} value={eventDate} onChange={(e: any) => setEventDate(e.target.value)} required />
           <InputField name="event_time" label="Time" type="time" icon={<Calendar size={18} />} defaultValue={eventData?.event_time || "17:00"} required />
         </div>
 
@@ -481,27 +506,33 @@ export default function EditEventPage() {
               {showAllStaff ? "Show Selected" : "Show All Staff"}
             </button>
           </div>
-          {(showAllStaff ? staff : staff.filter(m => selectedStaff.includes(m.id))).map((member) => (
-            <div key={member.id} className="w-full flex flex-col gap-2 p-3 bg-card border border-gray-50 rounded-2xl">
+          {(showAllStaff ? staff : staff.filter(m => selectedStaff.includes(m.id))).map((member) => {
+            const isAssignedToOther = assignedStaffIds.has(member.id);
+            return (
+            <div key={member.id} className={cn("w-full flex flex-col gap-2 p-3 bg-card border border-gray-50 rounded-2xl", isAssignedToOther && "opacity-60")}>
               <button
                 type="button"
+                disabled={isAssignedToOther}
                 onClick={() => toggleStaff(member.id)}
                 className="w-full flex items-center justify-between"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden">
+                  <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden relative">
                     <img src={member.avatar_seed && member.avatar_seed.startsWith('data:image/') ? member.avatar_seed : `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=random&font-size=0.35&rounded=true&bold=true`} alt={member.name} className="w-full h-full object-cover" />
                   </div>
                   <div className="text-left">
                     <p className="text-xs font-bold text-gray-900">{member.name}</p>
-                    <p className="text-[10px] text-gray-400 font-medium">{member.role}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-[10px] text-gray-400 font-medium">{member.role}</p>
+                      {isAssignedToOther && <span className="text-[9px] font-bold bg-red-100 text-red-600 px-1.5 py-0.5 rounded uppercase tracking-wider">Booked</span>}
+                    </div>
                   </div>
                 </div>
-                <div className={cn("w-5 h-5 rounded flex items-center justify-center transition-colors", selectedStaff.includes(member.id) ? "bg-primary" : "border-2 border-gray-200")}>
+                <div className={cn("w-5 h-5 rounded flex items-center justify-center transition-colors", selectedStaff.includes(member.id) ? "bg-primary" : "border-2 border-gray-200", isAssignedToOther && "bg-gray-200 border-gray-200")}>
                   {selectedStaff.includes(member.id) && <div className="w-2 h-2 bg-white rounded-sm" />}
                 </div>
               </button>
-              {selectedStaff.includes(member.id) && (
+              {selectedStaff.includes(member.id) && !isAssignedToOther && (
                 <div className="flex flex-col gap-2 mt-1">
                   {member.role === 'DJ Operator' && (
                     <div 
@@ -535,7 +566,7 @@ export default function EditEventPage() {
                 </div>
               )}
             </div>
-          ))}
+          )})}
         </div>
 
         <div className="pt-6">
