@@ -203,7 +203,7 @@ export default function SetupsPage() {
   );
 }
 
-function SetupCard({ name, quantity, status }: any) {
+function SetupCard({ name, quantity, status, category }: any) {
   const statusStyles: any = {
     Available: "bg-green-100 text-success",
     Booked: "bg-red-100 text-danger",
@@ -218,7 +218,9 @@ function SetupCard({ name, quantity, status }: any) {
         </div>
         <div>
           <h4 className="font-bold text-gray-900 text-sm">{name}</h4>
-          <p className="text-[11px] text-gray-500 font-bold uppercase mt-0.5">Quantity: {quantity}</p>
+          {category !== "Setup" && (
+            <p className="text-[11px] text-gray-500 font-bold uppercase mt-0.5">Quantity: {quantity}</p>
+          )}
         </div>
       </div>
       <span className={cn("px-2.5 py-1 text-[9px] font-black rounded-full uppercase", statusStyles[status])}>
