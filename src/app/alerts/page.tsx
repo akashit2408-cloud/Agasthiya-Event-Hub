@@ -45,8 +45,10 @@ export default function AlertsPage() {
             .eq("status", "Maintenance"),
           supabase
             .from("event_staff")
-            .select("*", { count: "exact", head: true })
+            .select("*, events!inner(event_date, status)", { count: "exact", head: true })
             .eq("payment_status", "Unpaid")
+            .lte("events.event_date", todayStr)
+            .not("events.status", "eq", "Cancelled")
         ]);
 
         const newAlerts: DynamicAlert[] = [];
