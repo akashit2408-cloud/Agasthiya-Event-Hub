@@ -93,9 +93,9 @@ export default function LoginPage() {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.3 }}
-            className="mb-6 relative"
+            className="mb-6 mt-12 relative"
           >
-            <img src="/login logo.png" alt="App Logo" className="w-64 md:w-80 h-auto object-contain" />
+            <img src="/login logo.png" alt="App Logo" className="w-80 md:w-96 h-auto object-contain" />
           </motion.div>
         
         {/* Welcome text */}
@@ -105,10 +105,10 @@ export default function LoginPage() {
           transition={{ delay: 0.1, duration: 0.3 }}
           className="mt-4 text-center"
         >
-          <h2 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-blue-900 bg-clip-text text-transparent flex items-center justify-center gap-2">
+          <h2 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-blue-900 bg-clip-text text-transparent flex items-center justify-center gap-2">
             Welcome Back 👋
           </h2>
-          <p className="text-sm text-gray-500 font-medium mt-2">
+          <p className="text-xs text-gray-500 font-medium mt-1.5">
             Login to continue your journey
           </p>
         </motion.div>
