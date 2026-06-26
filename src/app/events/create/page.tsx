@@ -524,13 +524,13 @@ export default function CreateEventPage() {
 
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-bold text-primary uppercase tracking-wider">Select Staff ({selectedStaff.length})</h2>
+            <h2 className="text-sm font-bold text-primary uppercase tracking-wider">Select Crew ({selectedStaff.length})</h2>
             <button 
               type="button" 
               onClick={() => setShowAllStaff(!showAllStaff)}
               className="text-xs font-bold text-primary bg-primary/10 px-3 py-1 rounded-full"
             >
-              {showAllStaff ? "Show Selected" : "Show All Staff"}
+              {showAllStaff ? "Show Selected" : "Show All Crew"}
             </button>
           </div>
           {(showAllStaff ? staff : staff.filter(m => selectedStaff.includes(m.id))).map((member) => {

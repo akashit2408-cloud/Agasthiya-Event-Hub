@@ -247,7 +247,7 @@ export default function CalendarPage() {
                       </div>
                       <div className="flex items-center gap-1.5">
                         <Users size={12} className="text-primary" />
-                        <span className="text-[12px] font-bold text-primary">{event.staff_count || 0} Staff</span>
+                        <span className="text-[12px] font-bold text-primary">{event.staff_count || 0} Crew</span>
                       </div>
                     </div>
                     {event.location && (

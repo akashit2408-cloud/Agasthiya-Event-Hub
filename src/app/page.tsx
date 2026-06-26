@@ -184,7 +184,7 @@ export default function Dashboard() {
             delay="0"
           />
           <StatCard
-            label="Available Staff"
+            label="Available Crew"
             value={`${summary.available_staff ?? 0}/${summary.total_staff ?? 0}`}
             icon={<Users size={18} />}
             accentColor="border-l-emerald-500"
@@ -260,7 +260,7 @@ export default function Dashboard() {
                     </div>
                     <div className="flex items-center gap-1.5">
                       <Users size={12} className="text-primary" />
-                      <span className="text-[12px] font-bold text-primary">{nextEvent.staff_count || 0} Staff</span>
+                      <span className="text-[12px] font-bold text-primary">{nextEvent.staff_count || 0} Crew</span>
                     </div>
                   </div>
                   {nextEvent.location && (

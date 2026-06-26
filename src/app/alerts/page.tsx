@@ -68,7 +68,7 @@ export default function AlertsPage() {
         if (unpaidCount && unpaidCount > 0) {
           newAlerts.push({
             id: "unpaid-staff",
-            title: "Unpaid Staff Assignments",
+            title: "Unpaid Crew Assignments",
             body: `There are ${unpaidCount} crew assignments marked as 'Unpaid'. Please settle payments.`,
             severity: "danger",
             href: "/events",

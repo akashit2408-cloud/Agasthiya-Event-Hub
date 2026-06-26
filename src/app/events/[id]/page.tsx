@@ -422,7 +422,7 @@ ${previewUrl ? `📎 *View Invitation:*\n${previewUrl}\n\n` : ''}*AE | Agasthiya
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-3">
                   <Users className="text-primary" size={20} />
-                  <span className="text-sm font-bold text-gray-600">Staff ({staff.length})</span>
+                  <span className="text-sm font-bold text-gray-600">Crew ({staff.length})</span>
                 </div>
               </div>
               <div className="flex flex-col gap-3 mt-3">

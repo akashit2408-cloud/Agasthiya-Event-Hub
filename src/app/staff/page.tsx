@@ -68,13 +68,13 @@ export default function StaffPage() {
   return (
     <div className="flex flex-col min-h-screen bg-white pb-20">
       <div className="p-5 space-y-4">
-        <h1 className="text-xl font-bold text-gray-900">Staff Directory</h1>
+        <h1 className="text-xl font-bold text-gray-900">Crew Directory</h1>
         
         <div className="relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
           <input 
             type="text" 
-            placeholder="Search staff..." 
+            placeholder="Search crew..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-gray-50 border-none rounded-2xl py-3.5 pl-12 pr-4 text-sm font-medium outline-none focus:ring-2 focus:ring-primary/20 transition-all"
@@ -105,7 +105,7 @@ export default function StaffPage() {
 
       <div className="px-5 space-y-3">
         {loading ? (
-          <p className="py-10 text-center text-sm font-medium text-gray-500">Loading staff...</p>
+          <p className="py-10 text-center text-sm font-medium text-gray-500">Loading crew...</p>
         ) : (
           filteredStaff.map((member, index) => <StaffCard key={member.id || index} {...member} />)
         )}
