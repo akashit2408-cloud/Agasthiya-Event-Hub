@@ -13,6 +13,7 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
+  const [rememberMe, setRememberMe] = useState(true);
 
   const handleLogin = async (e: any) => {
     e.preventDefault();
@@ -174,6 +175,30 @@ export default function LoginPage() {
               {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
             </button>
           </div>
+        </div>
+
+        {/* Remember Me & Forgot Password */}
+        <div className="flex items-center justify-between mt-2 mb-2">
+          <label className="flex items-center gap-2 cursor-pointer group">
+            <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${rememberMe ? 'bg-blue-500 border-blue-500' : 'border-gray-300 group-hover:border-blue-400'}`}>
+              {rememberMe && <svg viewBox="0 0 14 14" fill="none" className="w-3 h-3 text-white"><path d="M3 7.5L5.5 10L11 4.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+            </div>
+            <input 
+              type="checkbox" 
+              className="hidden" 
+              checked={rememberMe}
+              onChange={() => setRememberMe(!rememberMe)}
+            />
+            <span className="text-xs font-semibold text-gray-500 select-none">Remember me</span>
+          </label>
+          
+          <button 
+            type="button" 
+            onClick={() => alert("Please contact the administrator to reset your password.")}
+            className="text-xs font-bold text-blue-600 hover:text-purple-600 transition-colors"
+          >
+            Forgot Password?
+          </button>
         </div>
 
         {/* Submit button */}
