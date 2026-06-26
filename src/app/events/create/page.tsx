@@ -185,8 +185,7 @@ export default function CreateEventPage() {
       const { data: eventsOnDate } = await supabase
         .from("events")
         .select("id, event_staff(staff_id)")
-        .eq("event_date", eventDate)
-        .not("status", "in", '("cancelled", "canceled")');
+        .eq("event_date", eventDate);
 
       const assigned = new Set<string>();
       (eventsOnDate || []).forEach(ev => {

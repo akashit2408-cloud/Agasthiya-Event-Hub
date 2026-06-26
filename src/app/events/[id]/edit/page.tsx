@@ -155,8 +155,7 @@ export default function EditEventPage() {
         .from("events")
         .select("id, event_staff(staff_id)")
         .eq("event_date", eventDate)
-        .neq("id", params.id)
-        .not("status", "in", '("cancelled", "canceled")');
+        .neq("id", params.id);
 
       const assigned = new Set<string>();
       (eventsOnDate || []).forEach(ev => {
