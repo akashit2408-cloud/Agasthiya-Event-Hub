@@ -129,7 +129,7 @@ export default function AlertsPage() {
               return (
                 <Link key={alert.id} href={alert.href} className="block active:scale-[0.98] transition-transform">
                   <div className={cn("p-4 rounded-[20px] border shadow-sm flex gap-4", alert.colorClass)}>
-                    <div className="mt-0.5 shrink-0 bg-white/60 p-2.5 rounded-full shadow-sm backdrop-blur-sm">
+                    <div className="mt-1 w-11 h-11 shrink-0 bg-white/60 rounded-full shadow-sm backdrop-blur-sm flex items-center justify-center">
                       <Icon size={22} className="currentColor" />
                     </div>
                     <div>
