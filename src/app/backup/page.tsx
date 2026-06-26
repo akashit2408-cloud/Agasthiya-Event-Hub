@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, Database } from "lucide-react";
+import { ChevronLeft, Database, Download } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
@@ -40,6 +40,26 @@ export default function BackupPage() {
     localStorage.setItem("djerp_backups", JSON.stringify(updatedBackups));
     setBackups(updatedBackups);
     setIsBackingUp(false);
+  };
+
+  const handleDownload = (backup: any) => {
+    const mockData = {
+      app_name: "DJERP System",
+      backup_id: backup.id,
+      timestamp: backup.created_at,
+      status: backup.status,
+      data: {
+        events: [],
+        staff: [],
+        setups: [],
+        vehicles: []
+      }
+    };
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(mockData, null, 2));
+    const dlAnchorElem = document.createElement('a');
+    dlAnchorElem.setAttribute("href", dataStr);
+    dlAnchorElem.setAttribute("download", `djerp_backup_${new Date(backup.created_at).getTime()}.json`);
+    dlAnchorElem.click();
   };
 
   return (
@@ -86,8 +106,12 @@ export default function BackupPage() {
                 </span>
               </div>
             </div>
-            <button className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center hover:bg-blue-50 hover:text-blue-600 transition-colors">
-              <Database size={16} />
+            <button 
+              onClick={() => handleDownload(backup)}
+              title="Download Backup Data"
+              className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center hover:bg-blue-50 hover:text-blue-600 transition-colors"
+            >
+              <Download size={16} />
             </button>
           </div>
         ))}
