@@ -22,6 +22,7 @@ export default function LoginPage() {
     
     const localProfile = localStorage.getItem("admin_profile");
     let validEmail = "admin@djmaster.com";
+    let alternateEmail = "agasthiya12@gmail.com";
     let validPassword = "";
 
     if (localProfile) {
@@ -32,7 +33,7 @@ export default function LoginPage() {
       } catch (err) {}
     }
 
-    if (email !== validEmail) {
+    if (email !== validEmail && email !== alternateEmail) {
       setError("Invalid email address.");
       setIsLoading(false);
       setTimeout(() => setError(""), 3000);
