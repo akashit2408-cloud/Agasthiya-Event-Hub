@@ -37,7 +37,7 @@ export default function EventsPage() {
         const { data, error } = await supabase
           .from("events")
           .select(`
-            id, title, event_type, location, map_link, event_date, event_time, status, drop_sequence, invitation_url, remark, notes, created_at,
+            id, title, event_category, event_type, location, map_link, event_date, event_time, status, drop_sequence, invitation_url, remark, notes, created_at,
             customers (name, mobile),
             event_setups (
               quantity,
