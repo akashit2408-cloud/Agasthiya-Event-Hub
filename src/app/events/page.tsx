@@ -265,7 +265,7 @@ function EventCard({ event, onDelete }: any) {
       }
     }
 
-    const isRental = event.event_type?.toLowerCase() === 'rental';
+    const isRental = event.event_category?.toLowerCase() === 'rental event' || event.event_category?.toLowerCase() === 'rental' || event.event_type?.toLowerCase() === 'rental';
     const displayTitle = isRental && event.customer_name ? `Setup for ${event.customer_name}` : event.title;
     const origin = typeof window !== 'undefined' && window.location.origin ? window.location.origin : 'https://agasthiya-event-hub.vercel.app';
     const previewUrl = event.invitation_url ? `${origin}/api/image/${event.id}` : null;

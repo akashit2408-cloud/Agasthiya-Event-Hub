@@ -326,7 +326,7 @@ export default function EditEventPage() {
         <InputField name="mobile" label="Mobile Number" icon={<Phone size={18} />} placeholder="Enter mobile number" defaultValue={eventData?.customers?.mobile || ""} />
         <SelectField name="event_category" label="Event Category" options={["Own Event", "Rental Event", "Others"]} defaultValue={eventData?.event_category || "Own Event"} />
         <InputField name="title" label="Event Title" icon={<Calendar size={18} />} placeholder="Wedding Event" defaultValue={eventData?.title || ""} required />
-        <SelectField name="event_type" label="Event Type" options={["Wedding", "Reception", "Birthday", "Corporate", "School Event", "College Event", "Sangeet", "Baby Shower", "Rental", "Other"]} defaultValue={eventData?.event_type || ""} />
+        <SelectField name="event_type" label="Event Type" options={["Wedding", "Reception", "Birthday", "Corporate", "School Event", "College Event", "Sangeet", "Baby Shower", "Other"]} defaultValue={eventData?.event_type || ""} />
         <InputField name="location" label="Location" icon={<MapPin size={18} />} placeholder="Enter location" defaultValue={eventData?.location || ""} required />
         <InputField name="map_link" label="Google Map Link" icon={<LinkIcon size={18} />} placeholder="Paste google map link" defaultValue={eventData?.map_link || ""} />
 
