@@ -172,36 +172,43 @@ export default function EditEventPage() {
 
     try {
       const form = new FormData(event.currentTarget);
-      const mobile = String(form.get("mobile") || "");
-      const customerName = String(form.get("customer_name") || "");
+      const mobile = String(form.get("mobile") || "").trim();
+      const customerName = String(form.get("customer_name") || "").trim();
 
       let customerId: string | null = null;
-      const { data: existingCustomer } = await supabase.from("customers").select("id").eq("mobile", mobile).maybeSingle();
-
-      if (existingCustomer) {
-        customerId = existingCustomer.id;
-        // Update existing customer details in case they changed their name or address
-        await supabase.from("customers").update({
-          name: customerName,
-          address: String(form.get("location") || "")
-        }).eq("id", customerId);
-      } else {
-        const { data: newCustomer, error: customerError } = await supabase
-          .from("customers")
-          .insert({
-            name: customerName,
-            mobile,
-            address: String(form.get("location") || ""),
-          })
-          .select("id");
-
-        if (customerError) {
-          setSaving(false);
-          alert("Error saving customer: " + customerError.message);
-          return;
+      
+      if (mobile || customerName) {
+        if (mobile) {
+          const { data: existingCustomer } = await supabase.from("customers").select("id").eq("mobile", mobile).maybeSingle();
+          
+          if (existingCustomer) {
+            customerId = existingCustomer.id;
+            // Update existing customer details in case they changed their name or address
+            await supabase.from("customers").update({
+              name: customerName || "Unknown Customer",
+              address: String(form.get("location") || "")
+            }).eq("id", customerId);
+          }
         }
-        if (newCustomer && newCustomer.length > 0) {
-          customerId = newCustomer[0].id;
+
+        if (!customerId) {
+          const { data: newCustomer, error: customerError } = await supabase
+            .from("customers")
+            .insert({
+              name: customerName || "Unknown Customer",
+              mobile: mobile || null,
+              address: String(form.get("location") || ""),
+            })
+            .select("id");
+
+          if (customerError) {
+            setSaving(false);
+            alert("Error saving customer: " + customerError.message);
+            return;
+          }
+          if (newCustomer && newCustomer.length > 0) {
+            customerId = newCustomer[0].id;
+          }
         }
       }
 
@@ -315,8 +322,8 @@ export default function EditEventPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="p-5 space-y-5">
-        <InputField name="customer_name" label="Customer Name" icon={<User size={18} />} placeholder="Enter customer name" defaultValue={eventData?.customers?.name || ""} required />
-        <InputField name="mobile" label="Mobile Number" icon={<Phone size={18} />} placeholder="Enter mobile number" defaultValue={eventData?.customers?.mobile || ""} required />
+        <InputField name="customer_name" label="Customer Name" icon={<User size={18} />} placeholder="Enter customer name" defaultValue={eventData?.customers?.name || ""} />
+        <InputField name="mobile" label="Mobile Number" icon={<Phone size={18} />} placeholder="Enter mobile number" defaultValue={eventData?.customers?.mobile || ""} />
         <SelectField name="event_category" label="Event Category" options={["Own Event", "Rental Event", "Others"]} defaultValue={eventData?.event_category || "Own Event"} />
         <InputField name="title" label="Event Title" icon={<Calendar size={18} />} placeholder="Wedding Event" defaultValue={eventData?.title || ""} required />
         <SelectField name="event_type" label="Event Type" options={["Wedding", "Reception", "Birthday", "Corporate", "School Event", "College Event", "Sangeet", "Baby Shower", "Rental", "Other"]} defaultValue={eventData?.event_type || ""} />

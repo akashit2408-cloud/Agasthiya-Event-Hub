@@ -201,31 +201,39 @@ export default function CreateEventPage() {
     setSaving(true);
 
     const form = new FormData(event.currentTarget);
-    const mobile = String(form.get("mobile") || "");
-    const customerName = String(form.get("customer_name") || "");
+    const mobile = String(form.get("mobile") || "").trim();
+    const customerName = String(form.get("customer_name") || "").trim();
 
     let customerId: string | null = null;
-    const { data: existingCustomer } = await supabase.from("customers").select("id").eq("mobile", mobile).maybeSingle();
-
-    if (existingCustomer) {
-      customerId = existingCustomer.id;
-    } else {
-      const { data: newCustomer, error: customerError } = await supabase
-        .from("customers")
-        .insert({
-          name: customerName,
-          mobile,
-          address: String(form.get("location") || ""),
-        })
-        .select("id")
-        .single();
-
-      if (customerError) {
-        setSaving(false);
-        alert(customerError.message);
-        return;
+    
+    if (mobile || customerName) {
+      if (mobile) {
+        const { data: existingCustomer } = await supabase.from("customers").select("id").eq("mobile", mobile).maybeSingle();
+        if (existingCustomer) {
+          customerId = existingCustomer.id;
+        }
       }
-      customerId = newCustomer.id;
+
+      if (!customerId) {
+        const { data: newCustomer, error: customerError } = await supabase
+          .from("customers")
+          .insert({
+            name: customerName || "Unknown Customer",
+            mobile: mobile || null,
+            address: String(form.get("location") || ""),
+          })
+          .select("id")
+          .single();
+
+        if (customerError) {
+          setSaving(false);
+          alert(customerError.message);
+          return;
+        }
+        if (newCustomer) {
+          customerId = newCustomer.id;
+        }
+      }
     }
 
     const form_vehicle_id = String(form.get("vehicle_id") || "");
@@ -312,8 +320,8 @@ export default function CreateEventPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="p-5 space-y-5">
-        <InputField name="customer_name" label="Customer Name" icon={<User size={18} />} placeholder="Enter customer name" required />
-        <InputField name="mobile" label="Mobile Number" icon={<Phone size={18} />} placeholder="Enter mobile number" required />
+        <InputField name="customer_name" label="Customer Name" icon={<User size={18} />} placeholder="Enter customer name" />
+        <InputField name="mobile" label="Mobile Number" icon={<Phone size={18} />} placeholder="Enter mobile number" />
         <SelectField id="select-event-category" name="event_category" label="Event Category" options={["Own Event", "Rental Event", "Others"]} />
         <InputField id="input-title" name="title" label="Event Title" icon={<Calendar size={18} />} placeholder="Wedding Event" required />
         <SelectField id="select-event-type" name="event_type" label="Event Type" options={["Wedding", "Reception", "Birthday", "Corporate", "School Event", "College Event", "Sangeet", "Baby Shower", "Rental", "Other"]} />
