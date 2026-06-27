@@ -320,6 +320,9 @@ ${previewUrl ? `📎 *View Invitation:*\n${previewUrl}\n\n` : ''}*AE | Agasthiya
             {event.status?.toLowerCase() === 'cancelled' && (
               <span className="bg-red-100 text-red-600 px-2 py-0.5 rounded text-[10px] font-black uppercase">Cancelled</span>
             )}
+            {(event.event_category?.toLowerCase() === 'rental event' || event.event_category?.toLowerCase() === 'rental' || event.event_type?.toLowerCase() === 'rental') && (
+              <span className="bg-blue-100 text-blue-600 px-2 py-0.5 rounded text-[10px] font-black uppercase whitespace-nowrap">Rental Event</span>
+            )}
             {event.created_at && (
               <span className="text-[9px] font-bold text-gray-400 bg-gray-100/80 px-1.5 py-0.5 rounded-md whitespace-nowrap">
                 {getRelativeTime(event.created_at)}
