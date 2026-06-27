@@ -97,7 +97,7 @@ export default function EditVehiclePage() {
           <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
         </div>
       ) : (
-        <div className="p-5 space-y-6 flex-1">
+        <div className="p-5 space-y-6">
           <div className="space-y-4">
             <div className="space-y-3">
               <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
@@ -157,7 +157,7 @@ export default function EditVehiclePage() {
       )}
 
       {!isLoading && (
-        <div className="p-5 bg-white border-t border-gray-100 sticky bottom-0 z-10 shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.05)]">
+        <div className="p-5 bg-white border-t border-gray-100">
           <button
             onClick={handleSubmit}
             disabled={!isFormValid || isSubmitting}

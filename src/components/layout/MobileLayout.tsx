@@ -52,13 +52,15 @@ export default function MobileLayout({ children }: { children: React.ReactNode }
   }
 
   const isAuthPage = pathname === "/login";
+  const isTopLevelPage = ["/", "/events", "/setups", "/staff", "/more"].includes(pathname);
+  const showBottomNav = isTopLevelPage && !isAuthPage;
 
   return (
     <div className="mobile-container flex flex-col min-h-screen bg-white">
-      <main className={`flex-1 ${!isAuthPage ? 'pb-20' : ''}`}>
+      <main className={`flex-1 ${showBottomNav ? 'pb-20' : ''}`}>
         {children}
       </main>
-      {!isAuthPage && <BottomNav />}
+      {showBottomNav && <BottomNav />}
     </div>
   );
 }
