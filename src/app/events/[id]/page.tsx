@@ -365,6 +365,28 @@ ${previewUrl ? `📎 *View Invitation:*\n${previewUrl}\n\n` : ''}*AE | Agasthiya
           </div>
         </div>
 
+        {event.customer_name && (
+          <div className="bg-card p-4 rounded-3xl border border-gray-50 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
+                <Users size={18} className="text-blue-500" />
+              </div>
+              <div>
+                <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-0.5">Customer</p>
+                <h4 className="text-sm font-bold text-gray-900">{event.customer_name}</h4>
+              </div>
+            </div>
+            {event.customer_mobile && (
+              <a 
+                href={`tel:${event.customer_mobile}`}
+                className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center shrink-0 hover:scale-105 active:scale-95 transition-transform shadow-sm"
+              >
+                <Phone size={18} className="text-green-600" />
+              </a>
+            )}
+          </div>
+        )}
+
         {event.remark && (
           <div className="bg-orange-50 p-4 rounded-3xl border border-orange-100 flex items-start gap-3">
             <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center shrink-0">
