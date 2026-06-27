@@ -107,8 +107,8 @@ export default function EditVehiclePage() {
           <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
         </div>
       ) : (
-        <div className="flex-1 flex flex-col justify-center">
-          <div className="p-5 space-y-6 mb-4">
+        <div>
+          <div className="p-5 space-y-6">
             <div className="space-y-4">
               {/* Vehicle Name */}
               <div className="space-y-3">
