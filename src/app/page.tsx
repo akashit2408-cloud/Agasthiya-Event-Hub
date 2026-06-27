@@ -17,7 +17,7 @@ export default function Dashboard() {
     total_vehicles: 0,
   });
   const [events, setEvents] = useState<any[]>([]);
-  const [adminName, setAdminName] = useState("Akash");
+  const [adminName, setAdminName] = useState("Mari");
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {

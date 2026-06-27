@@ -8,7 +8,7 @@ import { supabase } from "@/lib/supabase";
 export default function SettingsPage() {
   const router = useRouter();
   const [profile, setProfile] = useState({ 
-    name: "Akash Sharma", 
+    name: "Mari", 
     role: "Super Admin", 
     avatar: "",
     email: "admin@djmaster.com",
@@ -24,7 +24,7 @@ export default function SettingsPage() {
       try {
         const parsed = JSON.parse(localProfile);
         setProfile({
-          name: parsed.name || "Akash Sharma",
+          name: parsed.name || "Mari",
           role: parsed.role || "Super Admin",
           avatar: parsed.avatar || "",
           email: parsed.email || "admin@djmaster.com",
@@ -148,7 +148,7 @@ export default function SettingsPage() {
                 value={profile.name}
                 onChange={(e) => setProfile({ ...profile, name: e.target.value })}
                 className="w-full bg-gray-50 border-none rounded-2xl p-4 text-sm font-bold text-gray-900 focus:ring-2 focus:ring-primary/20 outline-none transition-all placeholder:text-gray-400 placeholder:font-medium"
-                placeholder="e.g. Akash Sharma"
+                placeholder="e.g. Mari"
               />
             </div>
 

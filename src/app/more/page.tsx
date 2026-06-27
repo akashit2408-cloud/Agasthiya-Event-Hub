@@ -24,7 +24,7 @@ import { useEffect, useState } from "react";
 
 export default function MorePage() {
   const router = useRouter();
-  const [profile, setProfile] = useState({ name: "Akash Sharma", role: "Super Admin", avatar: "" });
+  const [profile, setProfile] = useState({ name: "Mari", role: "Super Admin", avatar: "" });
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -34,7 +34,7 @@ export default function MorePage() {
       try {
         const parsed = JSON.parse(localProfile);
         setProfile({
-          name: parsed.name || "Akash Sharma",
+          name: parsed.name || "Mari",
           role: parsed.role || "Super Admin",
           avatar: parsed.avatar || ""
         });
