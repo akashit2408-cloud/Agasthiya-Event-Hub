@@ -154,8 +154,9 @@ export default function EditVehiclePage() {
               <p className="text-[10px] text-gray-400 font-medium ml-1">Note: &quot;Available&quot; means it will automatically change to &quot;Booked&quot; when assigned to an event.</p>
             </div>
           </div>
-          
-          <div className="p-5">
+        </div>
+        
+        <div className="p-5">
             <button
               onClick={handleSubmit}
               disabled={!isFormValid || isSubmitting}
