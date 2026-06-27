@@ -37,6 +37,7 @@ export default function EditVehiclePage() {
           .single();
 
         if (error) throw error;
+        
         if (data) {
           setFormData({
             name: data.name || "",
@@ -60,11 +61,14 @@ export default function EditVehiclePage() {
     setIsSubmitting(true);
     
     try {
-      const { error } = await supabase.from('vehicles').update({
-        name: formData.name,
-        registration_number: formData.registration_number,
-        status: formData.status
-      }).eq('id', vehicleId);
+      const { error } = await supabase
+        .from('vehicles')
+        .update({
+          name: formData.name,
+          registration_number: formData.registration_number,
+          status: formData.status
+        })
+        .eq('id', vehicleId);
       
       if (error) throw error;
       
@@ -81,6 +85,7 @@ export default function EditVehiclePage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
+      {/* Header */}
       <div className="bg-white p-5 flex items-center justify-between border-b border-gray-100 sticky top-0 z-10 shadow-sm">
         <button 
           onClick={() => router.back()} 
@@ -88,10 +93,15 @@ export default function EditVehiclePage() {
         >
           <ChevronLeft size={20} className="text-gray-900" />
         </button>
-        <h1 className="text-base font-extrabold text-gray-900">Edit Vehicle</h1>
+        
+        <h1 className="text-base font-extrabold text-gray-900">
+          Edit Vehicle
+        </h1>
+        
         <div className="w-9"></div>
       </div>
 
+      {/* Content */}
       {isLoading ? (
         <div className="flex-1 flex items-center justify-center">
           <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
@@ -100,63 +110,74 @@ export default function EditVehiclePage() {
         <div className="flex-1 flex flex-col justify-center">
           <div className="p-5 space-y-6 mb-4">
             <div className="space-y-4">
-            <div className="space-y-3">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
-                Vehicle Name
-              </label>
-              <div className="relative">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                  <Truck size={18} />
+              {/* Vehicle Name */}
+              <div className="space-y-3">
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
+                  Vehicle Name
+                </label>
+                
+                <div className="relative">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                    <Truck size={18} />
+                  </div>
+                  
+                  <input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="w-full pl-11 pr-4 py-4 bg-white border border-gray-100 rounded-2xl text-sm font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-shadow placeholder:font-medium shadow-sm"
+                    placeholder="e.g. Tata Ace"
+                  />
                 </div>
+              </div>
+
+              {/* Registration Number */}
+              <div className="space-y-3">
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
+                  Registration Number
+                </label>
+                
                 <input
                   type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  className="w-full pl-11 pr-4 py-4 bg-white border border-gray-100 rounded-2xl text-sm font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-shadow placeholder:font-medium shadow-sm"
-                  placeholder="e.g. Tata Ace"
+                  value={formData.registration_number}
+                  onChange={(e) => setFormData({ ...formData, registration_number: e.target.value.toUpperCase() })}
+                  className="w-full px-4 py-4 bg-white border border-gray-100 rounded-2xl text-sm font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-shadow placeholder:font-medium shadow-sm"
+                  placeholder="e.g. TN-00-DJ-0000"
                 />
               </div>
-            </div>
 
-            <div className="space-y-3">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
-                Registration Number
-              </label>
-              <input
-                type="text"
-                value={formData.registration_number}
-                onChange={(e) => setFormData({...formData, registration_number: e.target.value.toUpperCase()})}
-                className="w-full px-4 py-4 bg-white border border-gray-100 rounded-2xl text-sm font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-shadow placeholder:font-medium shadow-sm"
-                placeholder="e.g. TN-00-DJ-0000"
-              />
-            </div>
-
-            <div className="space-y-3">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
-                Override Status
-              </label>
-              <div className="grid grid-cols-2 gap-3">
-                {["Available", "Maintenance"].map((status) => (
-                  <button
-                    key={status}
-                    type="button"
-                    onClick={() => setFormData({...formData, status})}
-                    className={`py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all border ${
-                      formData.status === status
-                        ? "bg-primary text-white border-primary shadow-md shadow-primary/20"
-                        : "bg-white text-gray-500 border-gray-100 hover:border-gray-200"
-                    }`}
-                  >
-                    {status}
-                  </button>
-                ))}
+              {/* Status */}
+              <div className="space-y-3">
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
+                  Override Status
+                </label>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  {["Available", "Maintenance"].map((status) => (
+                    <button
+                      key={status}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, status })}
+                      className={`py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all border ${
+                        formData.status === status
+                          ? "bg-primary text-white border-primary shadow-md shadow-primary/20"
+                          : "bg-white text-gray-500 border-gray-100 hover:border-gray-200"
+                      }`}
+                    >
+                      {status}
+                    </button>
+                  ))}
+                </div>
+                
+                <p className="text-[10px] text-gray-400 font-medium ml-1">
+                  Note: &quot;Available&quot; means it will automatically change to &quot;Booked&quot; when assigned to an event.
+                </p>
               </div>
-              <p className="text-[10px] text-gray-400 font-medium ml-1">Note: &quot;Available&quot; means it will automatically change to &quot;Booked&quot; when assigned to an event.</p>
             </div>
           </div>
-        </div>
-        
-        <div className="p-5">
+          
+          {/* Submit Button */}
+          <div className="p-5">
             <button
               onClick={handleSubmit}
               disabled={!isFormValid || isSubmitting}
@@ -171,7 +192,9 @@ export default function EditVehiclePage() {
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                   Saving...
                 </div>
-              ) : "Save Changes"}
+              ) : (
+                "Save Changes"
+              )}
             </button>
           </div>
         </div>
