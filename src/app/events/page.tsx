@@ -282,6 +282,7 @@ ${isRental ? '📦' : '🎂'} *Event:* ${displayTitle}
 📍 *Location:* ${event.location?.split(',')[0] || event.location}
 🗺️ *Venue:* ${event.location}
 ${finalMapLink}
+${event.customer_name ? `👤 *Customer:* ${event.customer_name}\n📞 *Contact:* ${event.customer_mobile}\n` : ''}
 🎵 *Setup Requirements:*
 ${setupName}
 
