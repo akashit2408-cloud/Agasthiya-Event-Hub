@@ -1,6 +1,7 @@
 "use client";
 
-import { ChevronLeft, Truck } from "lucide-react";
+import { ChevronLeft, Truck, Pencil } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
@@ -14,9 +15,28 @@ export default function VehiclesPage() {
   useEffect(() => {
     async function fetchVehicles() {
       try {
-        const { data, error } = await supabase.from("vehicles").select("*").order("name");
-        if (error) throw error;
-        setVehicles(data || []);
+        const todayStr = new Date().toISOString().slice(0, 10);
+        const [
+          { data: vehicleData, error: vehicleError },
+          { data: todayEvents }
+        ] = await Promise.all([
+          supabase.from("vehicles").select("*").order("name"),
+          supabase.from("events").select("vehicle_id").eq("event_date", todayStr)
+        ]);
+
+        if (vehicleError) throw vehicleError;
+
+        const assignedVehicleIds = new Set();
+        (todayEvents || []).forEach(ev => {
+          if (ev.vehicle_id) assignedVehicleIds.add(ev.vehicle_id);
+        });
+
+        const vehiclesWithDynamicStatus = (vehicleData || []).map(v => ({
+          ...v,
+          status: v.status === "Maintenance" ? "Maintenance" : (assignedVehicleIds.has(v.id) ? "Booked" : "Available")
+        }));
+
+        setVehicles(vehiclesWithDynamicStatus);
       } catch (err) {
         console.error("Error fetching vehicles:", err);
         setVehicles([]);
@@ -47,7 +67,7 @@ export default function VehiclesPage() {
   );
 }
 
-function VehicleCard({ name, registration_number, status }: any) {
+function VehicleCard({ id, name, registration_number, status }: any) {
   const statusStyles: any = {
     Available: "bg-green-100 text-success",
     Booked: "bg-red-100 text-danger",
@@ -66,9 +86,14 @@ function VehicleCard({ name, registration_number, status }: any) {
           <p className="text-[11px] text-gray-500 font-bold uppercase mt-0.5">{registration_number || "No registration"}</p>
         </div>
       </div>
-      <span className={cn("px-2.5 py-1 text-[9px] font-black rounded-full uppercase", statusStyles[status] || "bg-gray-100 text-gray-500")}>
-        {status}
-      </span>
+      <div className="flex items-center gap-2">
+        <span className={cn("px-2.5 py-1 text-[9px] font-black rounded-full uppercase", statusStyles[status] || "bg-gray-100 text-gray-500")}>
+          {status}
+        </span>
+        <Link href={`/vehicles/${id}/edit`} className="p-2 bg-gray-50 rounded-xl shadow-none border border-gray-100 active:scale-95 transition-transform">
+          <Pencil size={14} className="text-gray-600" />
+        </Link>
+      </div>
     </div>
   );
 }
