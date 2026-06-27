@@ -97,8 +97,9 @@ export default function EditVehiclePage() {
           <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
         </div>
       ) : (
-        <div className="p-5 space-y-6">
-          <div className="space-y-4">
+        <div className="flex-1 flex flex-col justify-center">
+          <div className="p-5 space-y-6 mb-4">
+            <div className="space-y-4">
             <div className="space-y-3">
               <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
                 Vehicle Name
@@ -153,27 +154,25 @@ export default function EditVehiclePage() {
               <p className="text-[10px] text-gray-400 font-medium ml-1">Note: &quot;Available&quot; means it will automatically change to &quot;Booked&quot; when assigned to an event.</p>
             </div>
           </div>
-        </div>
-      )}
-
-      {!isLoading && (
-        <div className="p-5 bg-white border-t border-gray-100">
-          <button
-            onClick={handleSubmit}
-            disabled={!isFormValid || isSubmitting}
-            className={`w-full py-4 rounded-2xl font-bold text-sm shadow-xl transition-all ${
-              isFormValid 
-                ? "bg-primary text-white shadow-primary/30 hover:bg-primary/90 active:scale-95" 
-                : "bg-gray-100 text-gray-400 shadow-none"
-            }`}
-          >
-            {isSubmitting ? (
-              <div className="flex items-center justify-center gap-2">
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                Saving...
-              </div>
-            ) : "Save Changes"}
-          </button>
+          
+          <div className="p-5">
+            <button
+              onClick={handleSubmit}
+              disabled={!isFormValid || isSubmitting}
+              className={`w-full py-4 rounded-2xl font-bold text-sm shadow-xl transition-all ${
+                isFormValid 
+                  ? "bg-primary text-white shadow-primary/30 hover:bg-primary/90 active:scale-95" 
+                  : "bg-gray-100 text-gray-400 shadow-none"
+              }`}
+            >
+              {isSubmitting ? (
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  Saving...
+                </div>
+              ) : "Save Changes"}
+            </button>
+          </div>
         </div>
       )}
     </div>
