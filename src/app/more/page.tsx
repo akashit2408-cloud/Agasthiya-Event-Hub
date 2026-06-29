@@ -104,7 +104,7 @@ export default function MorePage() {
                {profile.avatar ? (
                  <img src={profile.avatar} alt="profile" className="w-full h-full object-cover" />
                ) : (
-                 <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(profile.name)}`} alt="profile" className="w-full h-full object-cover" />
+                 <img src={`https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(profile.name)}`} alt="profile" className="w-full h-full object-cover" />
                )}
             </div>
             <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-success border-4 border-white rounded-full"></div>

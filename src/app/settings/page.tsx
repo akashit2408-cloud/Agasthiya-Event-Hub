@@ -127,7 +127,7 @@ export default function SettingsPage() {
                 {profile.avatar ? (
                   <img src={profile.avatar} alt="Avatar" className="w-full h-full object-cover" />
                 ) : profile.name ? (
-                  <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(profile.name)}`} alt="Avatar" className="w-full h-full object-cover" />
+                  <img src={`https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(profile.name)}`} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
                   <User className="text-gray-300" size={32} />
                 )}
