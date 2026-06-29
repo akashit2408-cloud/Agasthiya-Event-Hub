@@ -11,6 +11,7 @@ const tabs = ["All", "Today", "Upcoming", "Completed", "Cancelled"];
 
 export default function EventsPage() {
   const [activeTab, setActiveTab] = useState("All");
+  const [searchQuery, setSearchQuery] = useState("");
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDeletingAll, setIsDeletingAll] = useState(false);
@@ -90,6 +91,16 @@ export default function EventsPage() {
 
   const today = new Date().toISOString().slice(0, 10);
   const filteredEvents = events.filter((event) => {
+    // 1. Search Filter
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      const matchesTitle = event.title?.toLowerCase().includes(q);
+      const matchesLocation = event.location?.toLowerCase().includes(q);
+      const matchesCustomer = event.customer_name?.toLowerCase().includes(q);
+      if (!matchesTitle && !matchesLocation && !matchesCustomer) return false;
+    }
+
+    // 2. Tab Filter
     const status = event.status?.toLowerCase();
     if (activeTab === "Today") return event.event_date === today;
     if (activeTab === "Upcoming") return event.event_date > today && status !== "cancelled" && status !== "canceled";
@@ -110,9 +121,19 @@ export default function EventsPage() {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
           <input
             type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search events..."
             className="w-full bg-gray-50 border-none rounded-2xl py-3.5 pl-12 pr-4 text-sm font-medium focus:ring-2 focus:ring-primary/20 transition-all outline-none"
           />
+          {searchQuery && (
+            <button 
+              onClick={() => setSearchQuery("")}
+              className="absolute right-12 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 font-black text-[10px]"
+            >
+              CLEAR
+            </button>
+          )}
           <button className="absolute right-4 top-1/2 -translate-y-1/2">
             <Filter size={18} className="text-primary" />
           </button>
