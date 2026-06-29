@@ -92,12 +92,24 @@ export default function EventsPage() {
   const today = new Date().toISOString().slice(0, 10);
   const filteredEvents = events.filter((event) => {
     // 1. Search Filter
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
       const matchesTitle = event.title?.toLowerCase().includes(q);
       const matchesLocation = event.location?.toLowerCase().includes(q);
       const matchesCustomer = event.customer_name?.toLowerCase().includes(q);
-      if (!matchesTitle && !matchesLocation && !matchesCustomer) return false;
+      const matchesSetup = event.setup_name?.toLowerCase().includes(q);
+      const matchesStaff = event.staff_names?.some((name: string) => name.toLowerCase().includes(q));
+      
+      let matchesDate = false;
+      if (event.event_date) {
+        try {
+          const d = new Date(event.event_date);
+          const formatted = d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }).toLowerCase();
+          matchesDate = formatted.includes(q) || event.event_date.includes(q);
+        } catch(e) {}
+      }
+      
+      if (!matchesTitle && !matchesLocation && !matchesCustomer && !matchesSetup && !matchesStaff && !matchesDate) return false;
     }
 
     // 2. Tab Filter
