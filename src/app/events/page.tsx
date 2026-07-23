@@ -15,22 +15,44 @@ export default function EventsPage() {
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDeletingAll, setIsDeletingAll] = useState(false);
+  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; type: 'all' | 'single'; event?: any }>({ isOpen: false, type: 'single' });
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
 
-  const handleClearAll = async () => {
-    if (confirm("🚨 ARE YOU SURE? This will permanently delete ALL events, including all crew assignments, setups, and associated payments!")) {
-      setIsDeletingAll(true);
-      // Delete child records first to satisfy foreign key constraints
-      await supabase.from('event_staff').delete().neq('event_id', '00000000-0000-0000-0000-000000000000');
-      await supabase.from('event_setups').delete().neq('event_id', '00000000-0000-0000-0000-000000000000');
-      await supabase.from('payments').delete().neq('event_id', '00000000-0000-0000-0000-000000000000');
-      const { error } = await supabase.from('events').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-      if (!error) {
-        setEvents([]);
-      } else {
-        console.error("Failed to delete all events", error);
-        alert("Failed to delete events: " + error.message);
+  const handleConfirmDelete = async () => {
+    setIsDeletingAll(true);
+    try {
+      if (deleteModal.type === 'all') {
+        // Delete child records first to satisfy foreign key constraints
+        await supabase.from('event_staff').delete().neq('event_id', '00000000-0000-0000-0000-000000000000');
+        await supabase.from('event_setups').delete().neq('event_id', '00000000-0000-0000-0000-000000000000');
+        await supabase.from('payments').delete().neq('event_id', '00000000-0000-0000-0000-000000000000');
+        const { error } = await supabase.from('events').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+        if (!error) {
+          setEvents([]);
+        } else {
+          console.error("Failed to delete all events", error);
+          alert("Failed to delete events: " + error.message);
+        }
+      } else if (deleteModal.type === 'single' && deleteModal.event) {
+        const eventId = deleteModal.event.id;
+        await supabase.from('event_staff').delete().eq('event_id', eventId);
+        await supabase.from('event_setups').delete().eq('event_id', eventId);
+        await supabase.from('payments').delete().eq('event_id', eventId);
+        
+        const { error } = await supabase.from('events').delete().eq('id', eventId);
+        if (error) {
+          console.error("Failed to delete event", error);
+          alert("Failed to delete event: " + error.message);
+        } else {
+          setEvents(events.filter(e => e.id !== eventId));
+        }
       }
+    } catch (err: any) {
+      alert("Failed to delete: " + err.message);
+    } finally {
       setIsDeletingAll(false);
+      setDeleteModal({ isOpen: false, type: 'single' });
+      setDeleteConfirmText("");
     }
   };
 
@@ -187,30 +209,81 @@ export default function EventsPage() {
                <h2 className="text-[13px] font-black text-gray-900 uppercase tracking-wide">Plan Details</h2>
                <span className="bg-green-50 text-[#00A859] px-2.5 py-1 rounded-md text-[10px] font-black uppercase">All Ready</span>
             </div>
-            {filteredEvents.map((event, index) => <EventCard key={event.id || index} event={event} onDelete={(id: string) => setEvents(events.filter(e => e.id !== id))} />)}
+            {filteredEvents.map((event, index) => <EventCard key={event.id || index} event={event} onRequestDelete={() => { setDeleteModal({ isOpen: true, type: 'single', event }); setDeleteConfirmText(""); }} />)}
             
             {/* Danger Zone */}
             {events.length > 0 && (
               <div className="pt-8 pb-10">
                 <button 
-                  onClick={handleClearAll}
+                  onClick={() => {
+                    setDeleteModal({ isOpen: true, type: 'all' });
+                    setDeleteConfirmText("");
+                  }}
                   disabled={isDeletingAll}
                   className="w-full py-3.5 border-2 border-red-100 bg-red-50/50 text-red-500 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-red-50 transition-colors disabled:opacity-50"
                 >
-                  {isDeletingAll ? (
-                    <div className="w-5 h-5 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <>
-                      <AlertTriangle size={18} />
-                      CLEAR ALL EVENTS
-                    </>
-                  )}
+                  <AlertTriangle size={18} />
+                  CLEAR ALL EVENTS
                 </button>
               </div>
             )}
           </>
         )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteModal.isOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 bg-black/40 backdrop-blur-sm modal-overlay">
+          <div className="bg-white rounded-[32px] p-6 w-full max-w-sm shadow-2xl modal-content">
+            <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <AlertTriangle size={32} />
+            </div>
+            <h3 className="text-xl font-black text-center text-gray-900 mb-2">
+              {deleteModal.type === 'all' ? 'Clear All Events?' : 'Delete Event?'}
+            </h3>
+            <p className="text-[13px] text-gray-500 text-center mb-6 font-medium leading-relaxed">
+              {deleteModal.type === 'all' 
+                ? 'This will permanently delete ALL events, including all crew assignments, setups, and payments.'
+                : 'This will permanently delete this event and its associated crew, setups, and payments.'}
+              <br/><br/>
+              <span className="text-red-500 font-bold">This action cannot be undone.</span>
+            </p>
+            
+            <div className="mb-6">
+              <label className="block text-[11px] font-black text-gray-400 mb-2 text-center uppercase tracking-wider">
+                Type <span className="text-red-500 select-none">DELETE</span> to confirm
+              </label>
+              <input
+                type="text"
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value.toUpperCase())}
+                placeholder="DELETE"
+                className="w-full bg-gray-50 border-2 border-gray-100 rounded-xl py-3.5 px-4 text-center font-black text-gray-900 focus:border-red-500 focus:ring-0 outline-none transition-colors uppercase tracking-widest placeholder:text-gray-300"
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setDeleteModal({ isOpen: false, type: 'single' });
+                  setDeleteConfirmText("");
+                }}
+                className="flex-1 py-3.5 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition-colors"
+                disabled={isDeletingAll}
+              >
+                Cancel
+              </button>
+              <button
+                disabled={deleteConfirmText !== 'DELETE' || isDeletingAll}
+                onClick={handleConfirmDelete}
+                className="flex-1 py-3.5 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              >
+                {isDeletingAll ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> : 'Confirm'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Link href="/events/create" className="fixed bottom-24 right-6 w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center shadow-xl active:scale-95 transition-transform z-10">
         <Plus size={28} />
@@ -236,7 +309,7 @@ function getRelativeTime(dateStr: string) {
   return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
 }
 
-function EventCard({ event, onDelete }: any) {
+function EventCard({ event, onRequestDelete }: any) {
   const crewNames = event.staff_names || [];
   const crewInitials = crewNames.map((n: string) => n.substring(0, 2).toUpperCase());
   const setupName = event.setup_name || "NO SETUP";
@@ -377,22 +450,7 @@ ${previewUrl ? `📎 *View Invitation:*\n${previewUrl}\n\n` : ''}*AE | Agasthiya
               {setupName}
            </span>
            <button 
-             onClick={async () => {
-               if (confirm('Are you sure you want to delete this event? This will also remove associated crew, setups, and payments.')) {
-                 // Delete child records first
-                 await supabase.from('event_staff').delete().eq('event_id', event.id);
-                 await supabase.from('event_setups').delete().eq('event_id', event.id);
-                 await supabase.from('payments').delete().eq('event_id', event.id);
-                 
-                 const { error } = await supabase.from('events').delete().eq('id', event.id);
-                 if (error) {
-                   console.error("Failed to delete event", error);
-                   alert("Failed to delete event: " + error.message);
-                 } else {
-                   onDelete(event.id);
-                 }
-               }
-             }}
+             onClick={() => onRequestDelete(event)}
              className="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center text-red-500 hover:bg-red-100 transition-colors"
            >
              <Trash2 size={14} />
