@@ -39,10 +39,13 @@ export default function EventsPage() {
         await supabase.from('event_setups').delete().eq('event_id', eventId);
         await supabase.from('payments').delete().eq('event_id', eventId);
         
-        const { error } = await supabase.from('events').delete().eq('id', eventId);
+        const { data, error } = await supabase.from('events').delete().eq('id', eventId).select();
         if (error) {
           console.error("Failed to delete event", error);
           alert("Failed to delete event: " + error.message);
+        } else if (!data || data.length === 0) {
+          console.error("RLS prevented deletion");
+          alert("Failed to delete event: Row Level Security (RLS) is preventing deletion. Please check your Supabase policies.");
         } else {
           setEvents(events.filter(e => e.id !== eventId));
         }
