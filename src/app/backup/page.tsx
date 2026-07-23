@@ -154,7 +154,8 @@ export default function BackupPage() {
         "Staff ID": s.id,
         "Name": s.name,
         "Role": s.role || "Technician",
-        "Phone": s.phone || "N/A",
+        "Phone": s.mobile || s.phone || s.phone_number || "N/A",
+        "GPay Number": s.gpay_number || "N/A",
         "Default Salary (₹)": s.default_salary || 0,
         "Status": s.status || "Active",
         "Created At": s.created_at ? new Date(s.created_at).toLocaleDateString("en-IN") : ""
