@@ -89,12 +89,20 @@ export async function POST(req: Request) {
     const data = await response.json();
     const responseText = data.choices?.[0]?.message?.content || "";
 
+    // Remove <think>...</think> tags if the model is a reasoning model
+    let cleanedText = responseText.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+
     // Clean up the response in case the model returns markdown code blocks
-    let cleanedText = responseText.trim();
     if (cleanedText.startsWith('```json')) {
       cleanedText = cleanedText.replace(/^```json/, '').replace(/```$/, '').trim();
     } else if (cleanedText.startsWith('```')) {
       cleanedText = cleanedText.replace(/^```/, '').replace(/```$/, '').trim();
+    }
+    
+    // Fallback: If it's still not clean, extract the first JSON object
+    const jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      cleanedText = jsonMatch[0];
     }
 
     let parsedData;
