@@ -17,16 +17,18 @@ export default function EventsPage() {
   const [isDeletingAll, setIsDeletingAll] = useState(false);
 
   const handleClearAll = async () => {
-    if (confirm("🚨 ARE YOU SURE? This will permanently delete ALL events!")) {
+    if (confirm("🚨 ARE YOU SURE? This will permanently delete ALL events, including all crew assignments, setups, and associated payments!")) {
       setIsDeletingAll(true);
       // Delete child records first to satisfy foreign key constraints
       await supabase.from('event_staff').delete().neq('event_id', '00000000-0000-0000-0000-000000000000');
       await supabase.from('event_setups').delete().neq('event_id', '00000000-0000-0000-0000-000000000000');
+      await supabase.from('payments').delete().neq('event_id', '00000000-0000-0000-0000-000000000000');
       const { error } = await supabase.from('events').delete().neq('id', '00000000-0000-0000-0000-000000000000');
       if (!error) {
         setEvents([]);
       } else {
         console.error("Failed to delete all events", error);
+        alert("Failed to delete events: " + error.message);
       }
       setIsDeletingAll(false);
     }
@@ -376,11 +378,19 @@ ${previewUrl ? `📎 *View Invitation:*\n${previewUrl}\n\n` : ''}*AE | Agasthiya
            </span>
            <button 
              onClick={async () => {
-               if (confirm('Are you sure you want to delete this event?')) {
-                 onDelete(event.id);
+               if (confirm('Are you sure you want to delete this event? This will also remove associated crew, setups, and payments.')) {
+                 // Delete child records first
                  await supabase.from('event_staff').delete().eq('event_id', event.id);
                  await supabase.from('event_setups').delete().eq('event_id', event.id);
-                 await supabase.from('events').delete().eq('id', event.id);
+                 await supabase.from('payments').delete().eq('event_id', event.id);
+                 
+                 const { error } = await supabase.from('events').delete().eq('id', event.id);
+                 if (error) {
+                   console.error("Failed to delete event", error);
+                   alert("Failed to delete event: " + error.message);
+                 } else {
+                   onDelete(event.id);
+                 }
                }
              }}
              className="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center text-red-500 hover:bg-red-100 transition-colors"
