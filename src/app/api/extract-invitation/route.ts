@@ -49,7 +49,7 @@ export async function POST(req: Request) {
         "Authorization": `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "qwen/qwen3.6-27b",
+        model: process.env.GROQ_VISION_MODEL || "qwen/qwen3.6-27b",
         messages: [
           {
             role: "user",
