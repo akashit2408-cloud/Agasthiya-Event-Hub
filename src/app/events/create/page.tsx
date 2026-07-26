@@ -1,13 +1,16 @@
 "use client";
 
+import { Suspense, useEffect, useState, useRef } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ChevronLeft, Calendar, MapPin, Phone, User, Link as LinkIcon, Layers, Camera, X, ImageIcon, MessageSquare, Truck } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 
-export default function CreateEventPage() {
+function CreateEventFormContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const dateParam = searchParams.get("date");
+
   const [setups, setSetups] = useState<any[]>([]);
   const [vehicles, setVehicles] = useState<any[]>([]);
   const [staff, setStaff] = useState<any[]>([]);
@@ -30,14 +33,10 @@ export default function CreateEventPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      const urlDate = params.get("date");
-      if (urlDate) {
-        setEventDate(urlDate);
-      }
+    if (dateParam) {
+      setEventDate(dateParam);
     }
-  }, []);
+  }, [dateParam]);
 
   const getExtractionErrorMessage = (message?: string, status?: number) => {
     const rawMessage = (message || "").toLowerCase();
@@ -653,5 +652,17 @@ function SelectRows({ label, name, rows, emptyLabel }: any) {
         {rows.map((row: any) => <option key={row.id} value={row.id}>{row.name}</option>)}
       </select>
     </label>
+  );
+}
+
+export default function CreateEventPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    }>
+      <CreateEventFormContent />
+    </Suspense>
   );
 }
