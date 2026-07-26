@@ -17,6 +17,7 @@ export default function Dashboard() {
     total_vehicles: 0,
   });
   const [events, setEvents] = useState<any[]>([]);
+  const [tomorrowEventsCount, setTomorrowEventsCount] = useState(0);
   const [adminName, setAdminName] = useState("Mari");
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -36,17 +37,23 @@ export default function Dashboard() {
     async function fetchDashboard() {
       try {
         const todayStr = new Date().toISOString().slice(0, 10);
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const tomorrowStr = tomorrow.toISOString().slice(0, 10);
+        
         const [
           { data: totalStaff },
           { data: totalSetups },
           { data: totalVehicles },
           { data: todayEventsData },
+          { data: tomorrowEventsData },
           { data: eventData }
         ] = await Promise.all([
           supabase.from("staff").select("id"),
           supabase.from("setups").select("id"),
           supabase.from("vehicles").select("id"),
           supabase.from("events").select("id, vehicle_id, event_staff(staff_id), event_setups(setup_id)").eq("event_date", todayStr),
+          supabase.from("events").select("id, title, event_type, event_time, location").eq("event_date", tomorrowStr),
           supabase.from("events")
             .select(`
               id, title, event_type, location, map_link, event_date, event_time, status,
@@ -85,6 +92,8 @@ export default function Dashboard() {
           total_vehicles: totalVehiclesCount,
           available_vehicles: Math.max(0, totalVehiclesCount - assignedVehicleIds.size),
         });
+
+        setTomorrowEventsCount(tomorrowEventsData?.length || 0);
 
 
         if (eventData && eventData.length > 0) {
@@ -212,6 +221,26 @@ export default function Dashboard() {
 
       {/* ── Content Area ── */}
       <div className="px-4 pt-5 pb-4 space-y-5">
+        {/* Admin Reminder Banner */}
+        {tomorrowEventsCount > 0 && (
+          <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-orange-200 rounded-2xl p-4 shadow-sm animate-[pulse_3s_ease-in-out_infinite]">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-400 to-amber-500 text-white flex items-center justify-center shrink-0 shadow-sm mt-0.5">
+                <Bell size={20} className="animate-[wiggle_1s_ease-in-out_infinite]" />
+              </div>
+              <div>
+                <h3 className="text-[15px] font-extrabold text-orange-900 leading-tight">Admin Reminder!</h3>
+                <p className="text-[13px] font-medium text-orange-800 mt-1">
+                  You have <span className="font-extrabold text-orange-600">{tomorrowEventsCount} event{tomorrowEventsCount !== 1 ? 's' : ''}</span> scheduled for tomorrow. Make sure crew and transport are ready.
+                </p>
+                <Link href="/events" className="inline-flex items-center gap-1 mt-2 text-[12px] font-bold text-orange-700 bg-orange-100/50 hover:bg-orange-100 px-3 py-1.5 rounded-lg transition-colors">
+                  Check Details <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* New Event Button */}
         <Link href="/events/create" className="gradient-btn flex items-center justify-center gap-2.5 w-full py-4 rounded-2xl font-bold text-white text-[15px] active:scale-[0.97] transition-all duration-200">
           <div className="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center">
