@@ -26,9 +26,18 @@ export default function CreateEventPage() {
   const [isExtracting, setIsExtracting] = useState(false);
   const [extractionProgress, setExtractionProgress] = useState(0);
   const [extractionError, setExtractionError] = useState("");
-  const [invitationImage, setInvitationImage] = useState<string | null>(null);
   const [remark, setRemark] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const urlDate = params.get("date");
+      if (urlDate) {
+        setEventDate(urlDate);
+      }
+    }
+  }, []);
 
   const getExtractionErrorMessage = (message?: string, status?: number) => {
     const rawMessage = (message || "").toLowerCase();

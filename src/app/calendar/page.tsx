@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, Calendar as CalendarIcon, Layers, Clock, Users, MapPin, ChevronRight } from "lucide-react";
+import { ChevronLeft, Calendar as CalendarIcon, Layers, Clock, Users, MapPin, ChevronRight, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/lib/supabase";
@@ -108,15 +108,25 @@ export default function CalendarPage() {
     });
   }, [events, selectedDate]);
 
+  const createEventUrl = selectedDate
+    ? `/events/create?date=${format(selectedDate, "yyyy-MM-dd")}`
+    : "/events/create";
+
   return (
-    <div className="min-h-screen bg-gray-50/50 pb-20">
-      {/* Old Simple Header */}
-      <div className="bg-white border-b border-gray-100 p-5 flex items-center justify-between sticky top-0 z-10">
+    <div className="min-h-screen bg-gray-50/50 pb-28">
+      {/* Header with Create Event button */}
+      <div className="bg-white border-b border-gray-100 p-4 px-5 flex items-center justify-between sticky top-0 z-20 shadow-xs">
         <button onClick={() => router.back()} className="p-2 -ml-2 hover:bg-gray-50 rounded-xl transition-colors">
           <ChevronLeft size={24} className="text-gray-900" />
         </button>
         <h1 className="text-lg font-bold text-gray-900">Calendar View</h1>
-        <div className="w-10" />
+        <Link 
+          href={createEventUrl}
+          className="p-2 bg-primary text-white hover:bg-blue-700 rounded-xl font-bold flex items-center gap-1 text-xs transition-colors shadow-xs"
+        >
+          <Plus size={18} />
+          <span>New</span>
+        </Link>
       </div>
 
       <div className="p-4 space-y-6">
@@ -263,6 +273,15 @@ export default function CalendarPage() {
           )}
         </div>
       </div>
+
+      {/* Floating '+' Create Event FAB Button */}
+      <Link 
+        href={createEventUrl}
+        className="fixed bottom-24 right-6 w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center shadow-xl shadow-blue-500/30 hover:scale-105 active:scale-95 transition-all duration-200 z-30"
+        title="Create New Event"
+      >
+        <Plus size={28} />
+      </Link>
     </div>
   );
 }
