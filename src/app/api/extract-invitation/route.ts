@@ -78,6 +78,13 @@ export async function POST(req: Request) {
           { status: 500 }
         );
       }
+      
+      if (response.status === 429) {
+        return NextResponse.json(
+          { error: "AI is currently busy (Rate Limit Reached). Please wait 15 seconds and try again." },
+          { status: 429 }
+        );
+      }
 
       return NextResponse.json(
         { error: `AI service error: ${response.status}` },

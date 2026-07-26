@@ -56,6 +56,9 @@ function CreateEventFormContent() {
     if (status === 400) {
       return "Please upload a clear invitation image and try auto-fill again.";
     }
+    if (status === 429 || rawMessage.includes("rate limit") || rawMessage.includes("429")) {
+      return "AI is currently busy (Rate Limit). Please wait 15-30 seconds and try again.";
+    }
 
     return message ? `Error: ${message}` : "Auto-fill could not extract the details now. Please try again or enter the details manually.";
   };
