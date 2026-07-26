@@ -78,17 +78,13 @@ function CreateEventFormContent() {
         return;
       }
 
-      const { title, event_type, event_date, event_time, location, map_link } = result.data;
+      const { title, event_type, event_time, location, map_link } = result.data;
       
       const titleEl = document.getElementById('input-title') as HTMLInputElement;
       if (titleEl && title && !titleEl.value) titleEl.value = title;
       
       const typeEl = document.getElementById('select-event-type') as HTMLSelectElement;
       if (typeEl && event_type) typeEl.value = event_type;
-
-      if (event_date && !eventDate) {
-        setEventDate(event_date);
-      }
 
       const timeEl = document.getElementById('input-time') as HTMLInputElement;
       if (timeEl && event_time && !timeEl.value) timeEl.value = event_time;

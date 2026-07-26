@@ -24,7 +24,6 @@ export async function POST(req: Request) {
       Extract the following information from the image and return it strictly as a JSON object:
       - title: The name of the event or the couple's names (e.g., "Rahul & Priya Wedding", "John's 1st Birthday"). Keep it short.
       - event_type: Categorize it into EXACTLY ONE of these: "Wedding", "Reception", "Birthday", "Corporate", or "Other".
-      - event_date: The date of the event in "YYYY-MM-DD" format. If no year is specified, assume the current year.
       - event_time: The starting time of the event in 24-hour format "HH:MM". If not found, return null.
       - location: The short name of the venue, hall, or city (e.g., "Ashoka Thirumana Mandabam" or "Chennai").
       - map_link: The full, detailed street address of the venue if available on the invitation. If only the city is present, leave this null.
@@ -34,7 +33,6 @@ export async function POST(req: Request) {
       {
         "title": "Rahul & Priya Wedding",
         "event_type": "Wedding",
-        "event_date": "2024-12-15",
         "event_time": "18:30",
         "location": "Leela Palace, Chennai",
         "map_link": "Adyar Seaface, MRC Nagar, Chennai, Tamil Nadu 600028"
