@@ -28,7 +28,8 @@ export async function POST(req: Request) {
       - location: The short name of the venue, hall, or city (e.g., "Ashoka Thirumana Mandabam" or "Chennai").
       - map_link: The full, detailed street address of the venue if available on the invitation. If only the city is present, leave this null.
 
-      Return ONLY the raw JSON object. Do not include any markdown formatting, code blocks, or conversational text.
+      CRITICAL: You MUST return ONLY a raw, valid JSON object. Do NOT include any markdown formatting like \`\`\`json. Do NOT include any conversational text, explanations, or thoughts. Just the raw { ... } JSON.
+      If you cannot read the image or find no details, return {"error": "Could not read details"}.
       Example response format:
       {
         "title": "Rahul & Priya Wedding",
@@ -107,8 +108,14 @@ export async function POST(req: Request) {
     try {
       parsedData = JSON.parse(cleanedText);
     } catch (e) {
-      console.error("Failed to parse AI response as JSON:", cleanedText);
-      return NextResponse.json({ error: "Failed to parse extracted data" }, { status: 500 });
+      console.error("Failed to parse AI response as JSON. Raw response:", responseText);
+      // Let's attempt to return an empty structured object instead of crashing completely
+      // so the user can still proceed manually
+      return NextResponse.json({ error: "The AI couldn't find a clear format in the image. Please fill details manually." }, { status: 400 });
+    }
+
+    if (parsedData.error) {
+       return NextResponse.json({ error: parsedData.error }, { status: 400 });
     }
 
     return NextResponse.json({ data: parsedData });
