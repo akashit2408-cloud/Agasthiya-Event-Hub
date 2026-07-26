@@ -32,6 +32,7 @@ function CreateEventFormContent() {
   const [extractionProgress, setExtractionProgress] = useState(0);
   const [extractionError, setExtractionError] = useState("");
   const [remark, setRemark] = useState("");
+  const [invitationImage, setInvitationImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
