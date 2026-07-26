@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { Suspense, useEffect, useState, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ChevronLeft, Calendar, MapPin, Phone, User, Link as LinkIcon, Layers, Camera, X, ImageIcon, MessageSquare, Truck } from "lucide-react";
