@@ -12,7 +12,7 @@ export default function SetupsPage() {
   const [setups, setSetups] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [newSetup, setNewSetup] = useState({ name: "", category: "Setup", quantity: 1, status: "Available" });
+  const [newSetup, setNewSetup] = useState<any>({ name: "", category: "Setup", quantity: 1, status: "Available", id: null });
   const [isSaving, setIsSaving] = useState(false);
 
   const fetchSetups = async () => {
@@ -33,18 +33,29 @@ export default function SetupsPage() {
     fetchSetups();
   }, []);
 
-  const handleAddSetup = async () => {
+  const handleSaveSetup = async () => {
     if (!newSetup.name) return;
     setIsSaving(true);
     try {
-      const { error } = await supabase.from("setups").insert(newSetup);
-      if (error) throw error;
+      if (newSetup.id) {
+        const { error } = await supabase.from("setups").update({
+          name: newSetup.name,
+          category: newSetup.category,
+          quantity: newSetup.quantity,
+          status: newSetup.status
+        }).eq("id", newSetup.id);
+        if (error) throw error;
+      } else {
+        const { id, ...insertData } = newSetup;
+        const { error } = await supabase.from("setups").insert(insertData);
+        if (error) throw error;
+      }
       setShowAddModal(false);
-      setNewSetup({ name: "", category: activeCategory, quantity: 1, status: "Available" });
+      setNewSetup({ name: "", category: activeCategory, quantity: 1, status: "Available", id: null });
       await fetchSetups();
     } catch (err: any) {
       console.error(err);
-      alert("Error adding setup: " + (err.message || "Unknown error"));
+      alert("Error saving setup: " + (err.message || "Unknown error"));
     } finally {
       setIsSaving(false);
     }
@@ -52,13 +63,18 @@ export default function SetupsPage() {
 
   const filteredSetups = setups.filter((setup) => {
     const matchesCategory = (setup.category || "Setup") === activeCategory;
-    const matchesStatus = activeTab === "All" || setup.status === activeTab;
+    const matchesStatus = activeTab === "All" || (setup.status || "").toLowerCase() === activeTab.toLowerCase();
     const matchesSearch = setup.name.toLowerCase().includes(searchQuery.trim().toLowerCase());
     return matchesCategory && matchesStatus && matchesSearch;
   });
 
   const openAddModal = () => {
-    setNewSetup({ name: "", category: activeCategory, quantity: 1, status: "Available" });
+    setNewSetup({ name: "", category: activeCategory, quantity: 1, status: "Available", id: null });
+    setShowAddModal(true);
+  };
+
+  const openEditModal = (setup: any) => {
+    setNewSetup(setup);
     setShowAddModal(true);
   };
 
@@ -116,7 +132,7 @@ export default function SetupsPage() {
           <p className="py-10 text-center text-sm font-medium text-gray-500">Loading setups...</p>
         ) : (
           filteredSetups.length > 0 ? (
-            filteredSetups.map((setup, index) => <SetupCard key={setup.id || index} {...setup} />)
+            filteredSetups.map((setup, index) => <SetupCard key={setup.id || index} setup={setup} onEdit={() => openEditModal(setup)} />)
           ) : (
             <p className="py-10 text-center text-sm font-medium text-gray-500">
               No {activeCategory === "Setup" ? "setups" : "equipment"} found.
@@ -142,7 +158,7 @@ export default function SetupsPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center">
-              <h3 className="text-xl font-black text-gray-900">Add {activeCategory}</h3>
+              <h3 className="text-xl font-black text-gray-900">{newSetup.id ? "Edit" : "Add"} {activeCategory}</h3>
               <button onClick={() => setShowAddModal(false)} className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
                 <X size={16} />
               </button>
@@ -190,11 +206,11 @@ export default function SetupsPage() {
             </div>
 
             <button 
-              onClick={handleAddSetup}
+              onClick={handleSaveSetup}
               disabled={isSaving || !newSetup.name}
               className="w-full bg-primary text-white py-4 rounded-xl font-bold active:scale-95 transition-transform disabled:opacity-50"
             >
-              {isSaving ? "Saving..." : `Save ${activeCategory}`}
+              {isSaving ? "Saving..." : `${newSetup.id ? "Update" : "Save"} ${activeCategory}`}
             </button>
           </div>
         </div>
@@ -203,12 +219,17 @@ export default function SetupsPage() {
   );
 }
 
-function SetupCard({ name, quantity, status, category }: any) {
+function SetupCard({ setup, onEdit }: any) {
+  const { name, quantity, status, category } = setup;
   const statusStyles: any = {
     Available: "bg-green-100 text-success",
     Booked: "bg-red-100 text-danger",
     Maintenance: "bg-orange-100 text-warning",
   };
+  
+  // Find the right style key regardless of case
+  const safeStatus = status || "Available";
+  const matchedKey = Object.keys(statusStyles).find(k => k.toLowerCase() === safeStatus.toLowerCase()) || "Available";
 
   return (
     <div className="bg-card p-4 rounded-3xl border border-gray-50 flex items-center justify-between">
@@ -223,9 +244,17 @@ function SetupCard({ name, quantity, status, category }: any) {
           )}
         </div>
       </div>
-      <span className={cn("px-2.5 py-1 text-[9px] font-black rounded-full uppercase", statusStyles[status])}>
-        {status}
-      </span>
+      <div className="flex items-center gap-3">
+        <span className={cn("px-2.5 py-1 text-[9px] font-black rounded-full uppercase", statusStyles[matchedKey])}>
+          {safeStatus}
+        </span>
+        <button 
+          onClick={onEdit} 
+          className="w-8 h-8 flex items-center justify-center bg-gray-100 text-gray-600 rounded-full active:scale-90 transition-transform"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+        </button>
+      </div>
     </div>
   );
 }
