@@ -668,7 +668,6 @@ function ResourceItem({ icon, label, value }: any) {
           <p className="text-sm font-bold text-gray-900">{value}</p>
         </div>
       </div>
-      <ChevronLeft className="rotate-180 text-gray-300" size={20} />
     </div>
   );
 }
