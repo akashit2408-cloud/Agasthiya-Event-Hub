@@ -177,19 +177,21 @@ export default function SetupsPage() {
               </div>
               
               <div className="flex gap-4">
-                <div className="flex-1">
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 block">Quantity</label>
-                  <input 
-                    type="number" 
-                    min="1"
-                    value={newSetup.quantity}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      setNewSetup({...newSetup, quantity: val === "" ? ("" as any) : parseInt(val)});
-                    }}
-                    className="w-full bg-gray-50 border-none rounded-xl p-4 text-sm font-bold text-gray-900 outline-none focus:ring-2 focus:ring-primary/20"
-                  />
-                </div>
+                {activeCategory === "Equipment" && (
+                  <div className="flex-1">
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 block">Quantity</label>
+                    <input 
+                      type="number" 
+                      min="1"
+                      value={newSetup.quantity}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setNewSetup({...newSetup, quantity: val === "" ? ("" as any) : parseInt(val)});
+                      }}
+                      className="w-full bg-gray-50 border-none rounded-xl p-4 text-sm font-bold text-gray-900 outline-none focus:ring-2 focus:ring-primary/20"
+                    />
+                  </div>
+                )}
                 <div className="flex-1">
                   <label className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 block">Status</label>
                   <select 
