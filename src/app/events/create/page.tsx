@@ -197,13 +197,13 @@ function CreateEventFormContent() {
     async function fetchAssignedStaff() {
       const { data: eventsOnDate } = await supabase
         .from("events")
-        .select("id, event_staff(staff_id), event_setups(setup_id)")
-        .eq("event_date", eventDate)
-        .in("status", ["Planned", "Upcoming", "Ongoing"]);
+        .select("id, status, event_staff(staff_id), event_setups(setup_id)")
+        .eq("event_date", eventDate);
 
       const assigned = new Set<string>();
       const assignedSetups = new Set<string>();
       (eventsOnDate || []).forEach(ev => {
+        if (ev.status === "Cancelled" || ev.status === "Completed") return;
         (ev.event_staff || []).forEach((s: any) => assigned.add(s.staff_id));
         (ev.event_setups || []).forEach((s: any) => assignedSetups.add(s.setup_id));
       });

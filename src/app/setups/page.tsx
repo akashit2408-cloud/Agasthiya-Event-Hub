@@ -26,14 +26,14 @@ export default function SetupsPage() {
       const today = new Date().toLocaleDateString("en-CA");
       const { data: todayEvents, error: evError } = await supabase
         .from("events")
-        .select("id, event_setups(setup_id)")
-        .eq("event_date", today)
-        .in("status", ["Planned", "Upcoming", "Ongoing"]);
+        .select("id, status, event_setups(setup_id)")
+        .eq("event_date", today);
 
       if (!evError && todayEvents) {
         const booked = new Set<string>();
         todayEvents.forEach(ev => {
-          (ev.event_setups || []).forEach((s: any) => booked.add(s.setup_id));
+          if (ev.status === "Cancelled" || ev.status === "Completed") return;
+          (ev.event_setups || []).forEach((es: any) => booked.add(es.setup_id));
         });
         setBookedSetupIds(booked);
       }
