@@ -208,6 +208,17 @@ function CreateEventFormContent() {
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (Object.keys(selectedSetups).length === 0) {
+      alert("Please select at least one setup requirement.");
+      return;
+    }
+
+    if (selectedStaff.length === 0) {
+      alert("Please assign at least one crew member.");
+      return;
+    }
+
     setSaving(true);
 
     const form = new FormData(event.currentTarget);
