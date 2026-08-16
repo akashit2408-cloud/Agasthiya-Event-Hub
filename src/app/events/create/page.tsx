@@ -81,7 +81,7 @@ function CreateEventFormContent() {
         return;
       }
 
-      const { title, event_type, event_time, location, map_link } = result.data;
+      const { title, event_type, event_time, location, full_address } = result.data;
       
       const titleEl = document.getElementById('input-title') as HTMLInputElement;
       if (titleEl && title && !titleEl.value) titleEl.value = title;
@@ -96,7 +96,7 @@ function CreateEventFormContent() {
       if (locEl && location && !locEl.value) locEl.value = location;
 
       const mapLinkEl = document.getElementById('input-map-link') as HTMLInputElement;
-      if (mapLinkEl && map_link && !mapLinkEl.value) mapLinkEl.value = map_link;
+      if (mapLinkEl && full_address && !mapLinkEl.value) mapLinkEl.value = full_address;
     } catch (err: any) {
       console.error(err);
       setExtractionError(getExtractionErrorMessage(err.message));

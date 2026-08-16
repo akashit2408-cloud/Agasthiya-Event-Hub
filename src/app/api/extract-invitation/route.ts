@@ -26,7 +26,7 @@ export async function POST(req: Request) {
       - event_type: Categorize it into EXACTLY ONE of these: "Wedding", "Reception", "Birthday", "Corporate", or "Other".
       - event_time: The starting time of the event in 24-hour format "HH:MM". If not found, return null.
       - location: The short name of the venue, hall, or city (e.g., "Ashoka Thirumana Mandabam" or "Chennai").
-      - map_link: The full, detailed street address of the venue if available on the invitation. If only the city is present, leave this null.
+      - full_address: The full, detailed street address of the venue if available on the invitation. If only the city is present, leave this null.
 
       CRITICAL: You MUST return ONLY a raw, valid JSON object. Do NOT include any markdown formatting like \`\`\`json. Do NOT include any conversational text, explanations, or thoughts. Just the raw { ... } JSON.
       If you cannot read the image or find no details, return {"error": "Could not read details"}.
@@ -36,7 +36,7 @@ export async function POST(req: Request) {
         "event_type": "Wedding",
         "event_time": "18:30",
         "location": "Leela Palace, Chennai",
-        "map_link": "Adyar Seaface, MRC Nagar, Chennai, Tamil Nadu 600028"
+        "full_address": "Adyar Seaface, MRC Nagar, Chennai, Tamil Nadu 600028"
       }
     `;
 
