@@ -199,7 +199,7 @@ function CreateEventFormContent() {
         .from("events")
         .select("id, event_staff(staff_id), event_setups(setup_id)")
         .eq("event_date", eventDate)
-        .in("status", ["Upcoming", "Ongoing"]);
+        .in("status", ["Planned", "Upcoming", "Ongoing"]);
 
       const assigned = new Set<string>();
       const assignedSetups = new Set<string>();

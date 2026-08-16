@@ -28,7 +28,7 @@ export default function SetupsPage() {
         .from("events")
         .select("id, event_setups(setup_id)")
         .eq("event_date", today)
-        .in("status", ["Upcoming", "Ongoing"]);
+        .in("status", ["Planned", "Upcoming", "Ongoing"]);
 
       if (!evError && todayEvents) {
         const booked = new Set<string>();
