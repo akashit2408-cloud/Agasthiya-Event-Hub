@@ -73,10 +73,10 @@ export default function EventDetailsPage() {
     let finalMapLink = '';
     if (event.map_link) {
       if (event.map_link.includes('http')) {
-        finalMapLink = `Map: ${event.map_link.replace(/^https?:\/\//, '')}\n`;
+        finalMapLink = `Map: ${event.map_link.trim()}\n`;
       } else {
         const cleanQuery = encodeURIComponent(event.map_link).replace(/%20/g, '+');
-        finalMapLink = `Map: www.google.com/maps/search/?api=1&query=${cleanQuery}\n`;
+        finalMapLink = `Map: https://www.google.com/maps/search/?api=1&query=${cleanQuery}\n`;
       }
     }
 
@@ -353,7 +353,7 @@ ${previewUrl ? `📎 *View Invitation:*\n${previewUrl}\n\n` : ''}*AE | Agasthiya
                 href={(() => {
                   const link = event.map_link.trim();
                   if (link.startsWith('http://') || link.startsWith('https://')) return link;
-                  if (link.includes('maps.app.goo.gl') || link.includes('google.com') || link.includes('goo.gl/maps')) return `https://${link}`;
+                  if (link.includes('maps.app.goo.gl') || link.includes('google.com') || link.includes('goo.gl/maps') || link.includes('share.google')) return `https://${link}`;
                   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(link)}`;
                 })()}
                 target="_blank" 

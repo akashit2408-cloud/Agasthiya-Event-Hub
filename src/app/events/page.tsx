@@ -369,10 +369,10 @@ function EventCard({ event, onRequestDelete }: any) {
     let finalMapLink = '';
     if (event.map_link) {
       if (event.map_link.includes('http')) {
-        finalMapLink = `Map: ${event.map_link.replace(/^https?:\/\//, '')}\n`;
+        finalMapLink = `Map: ${event.map_link.trim()}\n`;
       } else {
         const cleanQuery = encodeURIComponent(event.map_link).replace(/%20/g, '+');
-        finalMapLink = `Map: www.google.com/maps/search/?api=1&query=${cleanQuery}\n`;
+        finalMapLink = `Map: https://www.google.com/maps/search/?api=1&query=${cleanQuery}\n`;
       }
     }
 
