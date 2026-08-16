@@ -374,6 +374,9 @@ function EventCard({ event, onRequestDelete }: any) {
         const cleanQuery = encodeURIComponent(event.map_link).replace(/%20/g, '+');
         finalMapLink = `Map: https://www.google.com/maps/search/?api=1&query=${cleanQuery}\n`;
       }
+    } else if (event.location) {
+      const cleanQuery = encodeURIComponent(event.location).replace(/%20/g, '+');
+      finalMapLink = `Map: https://www.google.com/maps/search/?api=1&query=${cleanQuery}\n`;
     }
 
     const isRental = event.event_category?.toLowerCase() === 'rental event' || event.event_category?.toLowerCase() === 'rental' || event.event_type?.toLowerCase() === 'rental';
