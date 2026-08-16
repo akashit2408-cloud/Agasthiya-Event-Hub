@@ -14,12 +14,29 @@ export default function SetupsPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [newSetup, setNewSetup] = useState<any>({ name: "", category: "Setup", quantity: 1, status: "Available", id: null });
   const [isSaving, setIsSaving] = useState(false);
+  const [bookedSetupIds, setBookedSetupIds] = useState<Set<string>>(new Set());
 
   const fetchSetups = async () => {
     try {
       const { data, error } = await supabase.from("setups").select("*").order("name");
       if (error) throw error;
       setSetups(data || []);
+
+      // Fetch today's events to find dynamically booked setups
+      const today = new Date().toLocaleDateString("en-CA");
+      const { data: todayEvents, error: evError } = await supabase
+        .from("events")
+        .select("id, event_setups(setup_id)")
+        .eq("event_date", today)
+        .in("status", ["Upcoming", "Ongoing"]);
+
+      if (!evError && todayEvents) {
+        const booked = new Set<string>();
+        todayEvents.forEach(ev => {
+          (ev.event_setups || []).forEach((s: any) => booked.add(s.setup_id));
+        });
+        setBookedSetupIds(booked);
+      }
     } catch (err) {
       console.error("Error fetching setups:", err);
       setSetups([]);
@@ -62,8 +79,11 @@ export default function SetupsPage() {
   };
 
   const filteredSetups = setups.filter((setup) => {
+    const isActuallyBooked = bookedSetupIds.has(setup.id);
+    const effectiveStatus = isActuallyBooked ? "Booked" : (setup.status || "Available");
+
     const matchesCategory = (setup.category || "Setup") === activeCategory;
-    const matchesStatus = activeTab === "All" || (setup.status || "").toLowerCase() === activeTab.toLowerCase();
+    const matchesStatus = activeTab === "All" || effectiveStatus.toLowerCase() === activeTab.toLowerCase();
     const matchesSearch = setup.name.toLowerCase().includes(searchQuery.trim().toLowerCase());
     return matchesCategory && matchesStatus && matchesSearch;
   });
@@ -131,12 +151,18 @@ export default function SetupsPage() {
         {loading ? (
           <p className="py-10 text-center text-sm font-medium text-gray-500">Loading setups...</p>
         ) : (
-          filteredSetups.length > 0 ? (
-            filteredSetups.map((setup, index) => <SetupCard key={setup.id || index} setup={setup} onEdit={() => openEditModal(setup)} />)
+          filteredSetups.length === 0 ? (
+            <div className="py-20 text-center">
+              <Layers className="mx-auto text-gray-200 mb-4" size={48} />
+              <p className="text-gray-400 font-bold">No {activeCategory.toLowerCase()}s found.</p>
+            </div>
           ) : (
-            <p className="py-10 text-center text-sm font-medium text-gray-500">
-              No {activeCategory === "Setup" ? "setups" : "equipment"} found.
-            </p>
+            filteredSetups.map((setup) => {
+              const effectiveStatus = bookedSetupIds.has(setup.id) ? "Booked" : (setup.status || "Available");
+              return (
+                <SetupCard key={setup.id} setup={{...setup, status: effectiveStatus}} onEdit={() => openEditModal(setup)} />
+              );
+            })
           )
         )}
       </div>

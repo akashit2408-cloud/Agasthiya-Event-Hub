@@ -26,6 +26,7 @@ export default function EditEventPage() {
   const [saving, setSaving] = useState(false);
   const [eventDate, setEventDate] = useState("");
   const [assignedStaffIds, setAssignedStaffIds] = useState<Set<string>>(new Set());
+  const [assignedSetupIds, setAssignedSetupIds] = useState<Set<string>>(new Set());
   const [invitationImage, setInvitationImage] = useState<string | null>(null);
   const [remark, setRemark] = useState("");
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -147,22 +148,27 @@ export default function EditEventPage() {
   }, [params.id]);
 
   useEffect(() => {
-    if (!eventDate || !params.id) {
+    if (!eventDate) {
       setAssignedStaffIds(new Set());
+      setAssignedSetupIds(new Set());
       return;
     }
     async function fetchAssignedStaff() {
       const { data: eventsOnDate } = await supabase
         .from("events")
-        .select("id, event_staff(staff_id)")
+        .select("id, event_staff(staff_id), event_setups(setup_id)")
         .eq("event_date", eventDate)
-        .neq("id", params.id);
+        .neq("id", params.id)
+        .in("status", ["Upcoming", "Ongoing"]);
 
       const assigned = new Set<string>();
+      const assignedSetups = new Set<string>();
       (eventsOnDate || []).forEach(ev => {
         (ev.event_staff || []).forEach((s: any) => assigned.add(s.staff_id));
+        (ev.event_setups || []).forEach((s: any) => assignedSetups.add(s.setup_id));
       });
       setAssignedStaffIds(assigned);
+      setAssignedSetupIds(assignedSetups);
     }
     fetchAssignedStaff();
   }, [eventDate, params.id]);
@@ -470,7 +476,9 @@ export default function EditEventPage() {
               );
             })}
           </div>
-          {setups.filter((setup) => (setup.category || "Setup") === resourceCategory).map((setup) => (
+          {setups.filter((setup) => (setup.category || "Setup") === resourceCategory).map((setup) => {
+            const isBooked = assignedSetupIds.has(setup.id);
+            return (
             <div key={setup.id} className="w-full flex items-center justify-between p-3 bg-card border border-gray-50 rounded-2xl">
               <button
                 type="button"
@@ -487,11 +495,16 @@ export default function EditEventPage() {
                 }}
                 className="flex-1 flex items-center gap-3 text-left"
               >
-                <div className={cn("w-5 h-5 rounded flex items-center justify-center transition-colors", selectedSetups[setup.id] ? "bg-primary" : "border-2 border-gray-200")}>
+                <div className={cn("w-5 h-5 rounded flex items-center justify-center transition-colors flex-shrink-0", selectedSetups[setup.id] ? "bg-primary" : "border-2 border-gray-200")}>
                   {selectedSetups[setup.id] && <div className="w-2 h-2 bg-white rounded-sm" />}
                 </div>
-                <div>
+                <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between pr-2 gap-1 sm:gap-2">
                   <p className="text-xs font-bold text-gray-900">{setup.name}</p>
+                  {isBooked && (
+                    <span className="inline-block px-2 py-0.5 rounded bg-red-100 text-red-600 text-[9px] font-black uppercase tracking-wider flex-shrink-0 self-start sm:self-auto">
+                      Booked
+                    </span>
+                  )}
                 </div>
               </button>
 
@@ -503,7 +516,7 @@ export default function EditEventPage() {
                 </div>
               )}
             </div>
-          ))}
+          )})}
           {setups.filter((setup) => (setup.category || "Setup") === resourceCategory).length === 0 && (
             <p className="py-6 text-center text-xs font-medium text-gray-500">
               No {resourceCategory === "Setup" ? "setups" : "equipment"} available.
