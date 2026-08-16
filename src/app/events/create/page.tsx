@@ -4,7 +4,7 @@ export const dynamic = "force-dynamic";
 
 import { Suspense, useEffect, useState, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ChevronLeft, Calendar, MapPin, Phone, User, Link as LinkIcon, Layers, Camera, X, ImageIcon, MessageSquare, Truck } from "lucide-react";
+import { ChevronLeft, Calendar, MapPin, Phone, User, Link as LinkIcon, Layers, Camera, X, ImageIcon, MessageSquare, Truck, AlertCircle } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 
@@ -33,6 +33,7 @@ function CreateEventFormContent() {
   const [extractionError, setExtractionError] = useState("");
   const [remark, setRemark] = useState("");
   const [invitationImage, setInvitationImage] = useState<string | null>(null);
+  const [validationError, setValidationError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -210,12 +211,12 @@ function CreateEventFormContent() {
     event.preventDefault();
 
     if (Object.keys(selectedSetups).length === 0) {
-      alert("Please select at least one setup requirement.");
+      setValidationError("Please select at least one setup requirement.");
       return;
     }
 
     if (selectedStaff.length === 0) {
-      alert("Please assign at least one crew member.");
+      setValidationError("Please assign at least one crew member.");
       return;
     }
 
@@ -625,10 +626,29 @@ function CreateEventFormContent() {
           )})}
         </div>
 
-        <button disabled={saving} className="w-full py-4 bg-primary text-white rounded-2xl font-bold mt-4 shadow-lg active:scale-95 transition-transform disabled:opacity-60">
-          {saving ? "Saving..." : "Confirm Event"}
+        <button type="submit" disabled={saving} className="w-full bg-primary text-white font-bold py-4 rounded-2xl active:scale-95 transition-transform disabled:opacity-50">
+          {saving ? "Saving Event..." : "Confirm Event"}
         </button>
       </form>
+
+      {validationError && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/20 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setValidationError(null)}>
+          <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-xl animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
+            <div className="flex flex-col items-center text-center space-y-4">
+              <div className="w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center">
+                <AlertCircle size={24} />
+              </div>
+              <div>
+                <h3 className="font-bold text-gray-900 text-lg">Action Required</h3>
+                <p className="text-sm text-gray-500 font-medium mt-1">{validationError}</p>
+              </div>
+              <button onClick={() => setValidationError(null)} className="w-full bg-gray-900 hover:bg-gray-800 text-white font-bold py-3 rounded-2xl active:scale-95 transition-all shadow-sm">
+                Got it
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
